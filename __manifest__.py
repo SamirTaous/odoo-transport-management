@@ -1,5 +1,3 @@
-# In: /opt/odoo-16/custom_addons/transport_management/__manifest__.py
-
 {
     'name': "Transport Management",
     'version': '16.0.1.0.0',
@@ -22,6 +20,11 @@
         'views/transport_mission_views.xml',
         'views/menus.xml',
     ],
+    'assets': {
+        'web.assets_frontend': [
+            'transport_management/static/src/scss/styles.scss',
+        ],
+    },
     'installable': True,
     'application': True,
     'license': 'LGPL-3',

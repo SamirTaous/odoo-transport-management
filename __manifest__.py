@@ -18,6 +18,7 @@
         # 2. Data (Sequences, etc.)
         'data/sequence_data.xml',
         # 3. Views (UI)
+        'views/transport_vehicle_views.xml',
         'views/transport_mission_views.xml',
         'views/menus.xml',
     ],

@@ -14,4 +14,12 @@
         parent="menu_transport_root"
         action="action_transport_mission"
         sequence="10"/>
+
+    <!-- Menu Item for Vehicles -->
+    <menuitem
+        id="menu_transport_vehicle"
+        name="Vehicles"
+        parent="menu_transport_root"
+        action="action_transport_vehicle"
+        sequence="20"/>
 </odoo>

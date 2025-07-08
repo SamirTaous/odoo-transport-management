@@ -1,0 +1,60 @@
+<!-- In: /home/samirtaous/transport_management/views/transport_vehicle_views.xml -->
+
+<odoo>
+    <!-- Tree (List) View for Transport Vehicles -->
+    <record id="view_transport_vehicle_tree" model="ir.ui.view">
+        <field name="name">transport.vehicle.tree</field>
+        <field name="model">transport.vehicle</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="license_plate"/>
+                <field name="model_id"/>
+                <field name="driver_id"/>
+                <field name="fuel_capacity"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View for Transport Vehicles -->
+    <record id="view_transport_vehicle_form" model="ir.ui.view">
+        <field name="name">transport.vehicle.form</field>
+        <field name="model">transport.vehicle</field>
+        <field name="arch" type="xml">
+            <form string="Vehicle">
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="model_id"/>
+                            <field name="license_plate"/>
+                        </group>
+                        <group>
+                            <field name="fuel_capacity"/>
+                            <field name="driver_id"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Window Action for Transport Vehicles -->
+    <record id="action_transport_vehicle" model="ir.actions.act_window">
+        <field name="name">Vehicles</field>
+        <field name="res_model">transport.vehicle</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new vehicle for your fleet!
+            </p>
+        </field>
+    </record>
+
+</odoo>

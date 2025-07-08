@@ -13,7 +13,7 @@ class TransportMission(models.Model):
     source_location = fields.Char(string='Source Location', tracking=True)
     destination_ids = fields.One2many('transport.destination', 'mission_id', string='Destinations')
     driver_id = fields.Many2one('res.partner', string='Driver', tracking=True, domain=[('is_company', '=', False)])
-    vehicle_id = fields.Many2one('fleet.vehicle', string='Vehicle', tracking=True)
+    vehicle_id = fields.Many2one('transport.vehicle', string='Vehicle', tracking=True)
     state = fields.Selection([
         ('draft', 'Draft'),
         ('confirmed', 'Confirmed'),

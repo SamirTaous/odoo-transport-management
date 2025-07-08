@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_transport_mission,transport.mission access,model_transport_mission,base.group_user,1,1,1,1
 access_transport_destination,transport.destination access,model_transport_destination,base.group_user,1,1,1,1
+access_transport_vehicle,transport.vehicle access,model_transport_vehicle,base.group_user,1,1,1,1

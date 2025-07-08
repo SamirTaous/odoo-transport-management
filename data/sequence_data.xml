@@ -1,0 +1,14 @@
+<!-- In: /opt/odoo-16/custom_addons/transport_management/data/sequence_data.xml -->
+
+<odoo>
+    <data noupdate="1">
+        <!-- Sequence for Transport Missions -->
+        <record id="seq_transport_mission" model="ir.sequence">
+            <field name="name">Transport Mission Sequence</field>
+            <field name="code">transport.mission.sequence</field>
+            <field name="prefix">TM/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

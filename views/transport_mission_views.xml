@@ -1,0 +1,77 @@
+<!-- In: /opt/odoo-16/custom_addons/transport_management/views/transport_mission_views.xml -->
+
+<odoo>
+    <!-- Form View -->
+    <record id="view_transport_mission_form" model="ir.ui.view">
+        <field name="name">transport.mission.form</field>
+        <field name="model">transport.mission</field>
+        <field name="arch" type="xml">
+            <form string="Transport Mission">
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary" states="draft"/>
+                    <button name="action_start_mission" string="Start Mission" type="object" class="btn-primary" states="confirmed"/>
+                    <button name="action_done" string="Mark as Done" type="object" class="btn-primary" states="in_progress"/>
+                    <button name="action_cancel" string="Cancel" type="object" states="draft,confirmed,in_progress"/>
+                    <button name="action_reset_to_draft" string="Reset to Draft" type="object" states="cancelled"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="mission_date"/>
+                            <field name="driver_id"/>
+                            <field name="vehicle_id"/>
+                        </group>
+                        <group>
+                            <field name="source_location"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Destinations" name="destinations">
+                            <field name="destination_ids">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="location"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree/List View -->
+    <record id="view_transport_mission_tree" model="ir.ui.view">
+        <field name="name">transport.mission.tree</field>
+        <field name="model">transport.mission</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="mission_date"/>
+                <field name="driver_id"/>
+                <field name="vehicle_id"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state in ('confirmed', 'in_progress')" decoration-muted="state == 'cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="action_transport_mission" model="ir.actions.act_window">
+        <field name="name">Transport Missions</field>
+        <field name="res_model">transport.mission</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create a new transport mission!</p>
+        </field>
+    </record>
+</odoo>

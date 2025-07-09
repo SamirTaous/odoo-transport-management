@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="transport_management.MapFieldWidget" owl="1">
+        <div>
+            <!-- The input box for the address -->
+            <input type="text"
+                t-att-id="props.id"
+                class="o_input"
+                t-att-readonly="props.readonly"
+                t-att-value="state.locationText"
+                t-on-change="onInputChange"
+                t-on-blur="onInputBlur"
+                placeholder="Click map to select or type address"
+            />
+            
+            <!-- The map container -->
+            <div t-ref="map" style="height: 400px; width: 100%; margin-top: 10px; border-radius: 5px;"/>
+        </div>
+    </t>
+
+</templates>

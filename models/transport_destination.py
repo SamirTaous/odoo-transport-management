@@ -8,5 +8,11 @@ class TransportDestination(models.Model):
 
     mission_id = fields.Many2one('transport.mission', string='Mission', required=True, ondelete='cascade')
     sequence = fields.Integer(string='Sequence', default=10)
-    location = fields.Char(string='Destination Point', required=True)
+    
+    # The 'location' field is now the human-readable address, often set by the map
+    location = fields.Char(string='Destination Address', required=True)
     is_completed = fields.Boolean(string="Completed", default=False)
+
+    # --- ADD THESE FIELDS ---
+    latitude = fields.Float(string='Latitude', digits=(10, 7))
+    longitude = fields.Float(string='Longitude', digits=(10, 7))

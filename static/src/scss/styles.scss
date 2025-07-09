@@ -1,75 +1,120 @@
 /*
-* Transport Management Custom Styles v2
+* Transport Management Custom Styles
 */
 
-$tm-primary-color: #4a5d87;
+// === 1. Variables ===
+$tm-primary-color: #4a5d87; // A more refined, desaturated blue
 $tm-secondary-color: #6c757d;
 $tm-bg-light: #f8f9fa;
-$tm-border-color: #e9ecef;
-$tm-card-shadow: 0 2px 4px rgba(0,0,0,0.05);
-$tm-card-hover-shadow: 0 5px 15px rgba(0,0,0,0.1);
+$tm-border-color: #dee2e6;
+$tm-card-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+$tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 
-// State Colors
-$tm-color-done: #28a745;
-$tm-color-progress: #0d6efd;
-$tm-color-cancelled: #6c757d;
+// === 2. Kanban Card Styling ===
+.o_kanban_view.o_transport_management {
+    .o_kanban_record {
+        // Use our custom styling instead of the default
+        &.tm-kanban-card {
+            border: 1px solid $tm-border-color;
+            border-radius: 8px;
+            box-shadow: $tm-card-shadow;
+            transition: all 0.2s ease-in-out;
+            padding: 0; // Remove default padding
+            display: flex;
+            flex-direction: column;
 
-// Kanban Card Styling
-.o_kanban_view.o_transport_management .o_kanban_record.tm-kanban-card {
-    border: 1px solid $tm-border-color;
-    border-left-width: 4px;
-    border-radius: 6px;
-    box-shadow: $tm-card-shadow;
-    transition: all 0.2s ease-in-out;
-    padding: 0;
+            &:hover {
+                box-shadow: $tm-card-hover-shadow;
+                transform: translateY(-2px);
+            }
 
-    &:hover {
-        box-shadow: $tm-card-hover-shadow;
-        transform: translateY(-2px);
-    }
+            .tm_kanban_header {
+                padding: 12px 16px;
+                border-bottom: 1px solid $tm-border-color;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
 
-    // Color-coded borders based on state
-    &.tm-card-state-done      { border-left-color: $tm-color-done; }
-    &.tm-card-state-in_progress { border-left-color: $tm-color-progress; }
-    &.tm-card-state-confirmed { border-left-color: darken($tm-color-progress, 10%); }
-    &.tm-card-state-cancelled { border-left-color: $tm-color-cancelled; }
+                h6 {
+                    margin: 0;
+                    font-weight: 600;
+                    color: $tm-primary-color;
+                }
+            }
 
-    .tm_kanban_header {
-        padding: 12px 16px;
-        border-bottom: 1px solid $tm-border-color;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+            .tm_kanban_body {
+                padding: 16px;
+                font-size: 0.9rem;
+                flex-grow: 1;
 
-        h6 { margin: 0; font-weight: 600; color: $tm-primary-color; }
-    }
-
-    .tm_kanban_body {
-        padding: 16px;
-        font-size: 0.9em;
-
-        .tm_kanban_row {
-            display: flex; align-items: center; margin-bottom: 8px;
-            > i { margin-right: 10px; color: $tm-secondary-color; width: 16px; text-align: center;}
+                .tm_kanban_row {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 8px;
+                    color: #555;
+                    
+                    > i {
+                        margin-right: 10px;
+                        color: $tm-secondary-color;
+                        width: 16px; // Align icons
+                    }
+                }
+            }
         }
     }
-    .o_priority { margin-top: 8px; }
 }
 
-// Form View Styling
-.tm_form_sheet {
-    .tm_progress_bar {
-        position: relative;
-        height: 12px;
-        background-color: $tm-bg-light;
-        border: 1px solid $tm-border-color;
-        border-radius: 6px;
-        overflow: hidden;
-        margin-top: 4px;
-        
-        div {
-            background-color: $tm-color-done;
-            height: 100%;
+
+// === 3. Form View Styling ===
+.o_form_view .tm_form_sheet {
+    background-color: #FFFFFF;
+
+    // Title area (e.g., "TM/00007" and its status)
+    .oe_title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+
+        h1 {
+            color: $tm-primary-color;
+            font-weight: 600;
+        }
+
+        .badge {
+            font-size: 1em;
+            padding: 0.5em 0.8em;
+        }
+    }
+
+    // "Stat Panel" for key metrics
+    .tm-stat-panel {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+
+        .tm-stat-box {
+            background-color: $tm-bg-light;
+            border: 1px solid $tm-border-color;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+
+            label {
+                display: block;
+                font-weight: 500;
+                color: $tm-secondary-color;
+                margin-bottom: 8px;
+                text-transform: uppercase;
+                font-size: 0.75rem;
+            }
+
+            .o_field_widget {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: $tm-primary-color;
+            }
         }
     }
 }

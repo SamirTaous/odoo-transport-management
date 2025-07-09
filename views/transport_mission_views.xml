@@ -1,4 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
+    <!--
+    ================================================================
+    NEW: FORM VIEW FOR TRANSPORT DESTINATION (WITH MAP WIDGET)
+    This view will open in a modal when adding/editing a destination.
+    ================================================================
+    -->
+    <record id="view_transport_destination_form" model="ir.ui.view">
+        <field name="name">transport.destination.form</field>
+        <field name="model">transport.destination</field>
+        <field name="arch" type="xml">
+            <form string="Destination">
+                <sheet>
+                    <group>
+                        <!-- The location field now uses our custom widget -->
+                        <field name="location" widget="map_selector"/>
+
+                        <!-- The coordinate fields are hidden but present for the widget to work -->
+                        <field name="latitude" invisible="1"/>
+                        <field name="longitude" invisible="1"/>
+                    </group>
+                    <group>
+                        <field name="is_completed" string="Mark as Completed"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <!--
+    ================================================================
+    TRANSPORT MISSION VIEWS
+    ================================================================
+    -->
+
     <!-- KANBAN VIEW (Impressive Version) -->
     <record id="view_transport_mission_kanban" model="ir.ui.view">
         <field name="name">transport.mission.kanban</field>
@@ -57,7 +94,7 @@
         </field>
     </record>
 
-    <!-- FORM VIEW (Professional Version) -->
+    <!-- FORM VIEW (Professional Version - MODIFIED FOR MAP WIDGET) -->
     <record id="view_transport_mission_form" model="ir.ui.view">
         <field name="name">transport.mission.form</field>
         <field name="model">transport.mission</field>
@@ -91,12 +128,17 @@
                         <page string="Destinations" name="destinations">
                             <label for="destination_progress"/>
                             <field name="destination_progress" widget="progressbar" nolabel="1"/>
+                            
+                            <!-- This One2many now opens a modal with our map widget -->
                             <field name="destination_ids" class="mt-2">
+                                <!-- The tree view is still defined for the list of destinations -->
                                 <tree editable="bottom">
                                     <field name="sequence" widget="handle"/>
-                                    <field name="location"/>
+                                    <!-- This field is now readonly to encourage using the form for editing -->
+                                    <field name="location" readonly="1"/>
                                     <field name="is_completed" string="Done?"/>
                                 </tree>
+                                <!-- The form view is implicitly picked up by Odoo from the new record above -->
                             </field>
                         </page>
                         <page string="Operational Notes" name="notes">
@@ -113,10 +155,11 @@
         </field>
     </record>
     
-    <!-- Action Window - No change needed, but included for completeness -->
+    <!-- Action Window - No change needed -->
     <record id="action_transport_mission" model="ir.actions.act_window">
         <field name="name">Transport Missions</field>
         <field name="res_model">transport.mission</field>
         <field name="view_mode">kanban,tree,form</field>
     </record>
+
 </odoo>

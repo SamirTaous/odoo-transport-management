@@ -22,7 +22,17 @@
     ],
     'assets': {
         'web.assets_backend': [
+
+            # Stylesheet File
             'transport_management/static/src/scss/styles.scss',
+
+            # Leaflet Library
+            'transport_management/static/lib/leaflet/leaflet.css',
+            'transport_management/static/lib/leaflet/leaflet.js',
+            
+            # Map Widget Files
+            'transport_management/static/src/js/map_field_widget.js',
+            'transport_management/static/src/xml/map_field_widget.xml',
         ],
     },
     'installable': True,

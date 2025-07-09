@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- FORM VIEW FOR TRANSPORT DESTINATION (This will open in a modal) -->
+
+    <!--
+    ================================================================
+    MODIFIED: FORM VIEW FOR TRANSPORT DESTINATION (Opens in a modal)
+    We add options to tell the generic widget which latitude/longitude
+    fields it should update on the transport.destination model.
+    ================================================================
+    -->
     <record id="view_transport_destination_form" model="ir.ui.view">
         <field name="name">transport.destination.form</field>
         <field name="model">transport.destination</field>
@@ -8,9 +15,9 @@
             <form string="Destination">
                 <sheet>
                     <group>
-                        <!-- The location field now uses our custom widget -->
-                        <field name="location" widget="map_selector"/>
-                        <!-- The coordinate fields are hidden but present for the widget to work -->
+                        <!-- MODIFIED: Added options to make the widget reusable -->
+                        <field name="location" widget="map_selector" options="{'latitude_field': 'latitude', 'longitude_field': 'longitude'}"/>
+                        <!-- These fields are hidden but necessary for the widget to store data -->
                         <field name="latitude" invisible="1"/>
                         <field name="longitude" invisible="1"/>
                     </group>
@@ -22,7 +29,15 @@
         </field>
     </record>
 
-    <!-- FORM VIEW FOR TRANSPORT MISSION (MODIFIED TO FIX THE ISSUE) -->
+
+    <!--
+    ================================================================
+    MODIFIED: FORM VIEW FOR TRANSPORT MISSION
+    - The 'source_location' field now uses the map widget.
+    - Added hidden fields 'source_latitude' and 'source_longitude'.
+    - Added the 'total_distance_km' field to display the calculated distance.
+    ================================================================
+    -->
     <record id="view_transport_mission_form" model="ir.ui.view">
         <field name="name">transport.mission.form</field>
         <field name="model">transport.mission</field>
@@ -45,20 +60,29 @@
                         <group>
                             <field name="mission_date"/>
                             <field name="driver_id" widget="many2one_avatar" options="{'no_open': True}"/>
+                            <!-- NEW: Display the calculated total mission distance -->
+                            <label for="total_distance_km"/>
+                            <div class="o_row">
+                                <field name="total_distance_km" widget="float" readonly="1"/>
+                                <span>km</span>
+                            </div>
                         </group>
                         <group>
                             <field name="vehicle_id" options="{'no_open': True}"/>
-                            <field name="source_location"/>
+                            <!-- MODIFIED: Use the map widget for the source location -->
+                            <field name="source_location" widget="map_selector" options="{'latitude_field': 'source_latitude', 'longitude_field': 'source_longitude'}"/>
+                            <!-- MODIFIED: Fields are now invisible -->
+                            <field name="source_latitude" invisible="1"/>
+                            <field name="source_longitude" invisible="1"/>
                         </group>
                     </group>
+
                     <notebook>
                         <page string="Destinations" name="destinations">
                             <label for="destination_progress"/>
                             <field name="destination_progress" widget="progressbar" nolabel="1"/>
-
-                            <!-- *** CORE FIX HERE *** -->
-                            <!-- Removed 'editable="bottom"' from the tree view. -->
-                            <!-- Now, clicking "Add a line" will open the 'view_transport_destination_form' in a modal. -->
+                            
+                            <!-- This part now works with the updated destination form -->
                             <field name="destination_ids" class="mt-2">
                                 <tree>
                                     <field name="sequence" widget="handle"/>
@@ -80,8 +104,15 @@
             </form>
         </field>
     </record>
-
-    <!-- KANBAN VIEW (No changes) -->
+    
+    <!--
+    ================================================================
+    UNCHANGED VIEWS
+    These views did not require any modification.
+    ================================================================
+    -->
+    
+    <!-- KANBAN VIEW -->
     <record id="view_transport_mission_kanban" model="ir.ui.view">
         <field name="name">transport.mission.kanban</field>
         <field name="model">transport.mission</field>
@@ -113,7 +144,7 @@
         </field>
     </record>
 
-    <!-- TREE VIEW (No changes) -->
+    <!-- TREE VIEW -->
     <record id="view_transport_mission_tree" model="ir.ui.view">
         <field name="name">transport.mission.tree</field>
         <field name="model">transport.mission</field>
@@ -124,17 +155,18 @@
                 <field name="driver_id" widget="many2one_avatar"/>
                 <field name="vehicle_id"/>
                 <field name="source_location"/>
+                <field name="total_distance_km" sum="Total Distance"/>
                 <field name="priority" widget="priority"/>
                 <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state in ('confirmed', 'in_progress')"/>
             </tree>
         </field>
     </record>
-
-    <!-- ACTION WINDOW (No changes) -->
+    
+    <!-- ACTION WINDOW -->
     <record id="action_transport_mission" model="ir.actions.act_window">
         <field name="name">Transport Missions</field>
         <field name="res_model">transport.mission</field>
         <field name="view_mode">kanban,tree,form</field>
     </record>
-</odoo>
 
+</odoo>

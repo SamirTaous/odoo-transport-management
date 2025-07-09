@@ -1,15 +1,41 @@
 # In: models/transport_mission.py
 from odoo import models, fields, api, _
+from math import radians, sin, cos, sqrt, atan2
+
+# --- HELPER FUNCTION ---
+def _haversine_distance(lat1, lon1, lat2, lon2):
+    """
+    Calculate the great-circle distance between two points
+    on the earth (specified in decimal degrees).
+    Returns distance in kilometers.
+    """
+    # Convert decimal degrees to radians
+    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+
+    # Haversine formula
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    r = 6371  # Radius of earth in kilometers.
+    return c * r
+
 
 class TransportMission(models.Model):
     _name = 'transport.mission'
     _description = 'Transport Mission'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'mission_date desc, priority desc, name desc' # Updated default order
+    _order = 'mission_date desc, priority desc, name desc'
 
     name = fields.Char(string='Reference', required=True, copy=False, readonly=True, default=lambda self: _('New'))
     mission_date = fields.Date(string='Date', required=True, tracking=True, default=fields.Date.context_today)
+    
+    # --- SOURCE FIELDS ---
     source_location = fields.Char(string='Source Location', tracking=True)
+    source_latitude = fields.Float(string='Source Latitude', digits=(10, 7))
+    source_longitude = fields.Float(string='Source Longitude', digits=(10, 7))
+    
+    # --- UNCHANGED FIELDS ---
     destination_ids = fields.One2many('transport.destination', 'mission_id', string='Destinations')
     driver_id = fields.Many2one('res.partner', string='Driver', tracking=True, domain=[('is_company', '=', False)])
     vehicle_id = fields.Many2one('transport.vehicle', string='Vehicle', tracking=True)
@@ -22,20 +48,43 @@ class TransportMission(models.Model):
     ], default='draft', string='Status', tracking=True)
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
     notes = fields.Text(string='Internal Notes', tracking=True)
+    priority = fields.Selection([('0', 'Normal'), ('1', 'High')], string='Priority', default='0')
+    destination_progress = fields.Float(string="Destination Progress", compute='_compute_destination_progress', store=True, help="Progress of completed destinations for this mission.")
 
-    # --- NEW & IMPROVED FIELDS ---
-    priority = fields.Selection([
-        ('0', 'Normal'),
-        ('1', 'High')
-    ], string='Priority', default='0')
-    
-    destination_progress = fields.Float(
-        string="Destination Progress", 
-        compute='_compute_destination_progress',
+    # --- DISTANCE FIELD ---
+    total_distance_km = fields.Float(
+        string="Total Distance (km)",
+        compute='_compute_total_distance',
         store=True,
-        help="Progress of completed destinations for this mission."
+        help="Estimated total travel distance for the mission."
     )
 
+    # --- REMOVED THE ONCHANGE METHOD ---
+    # The _onchange_source_location_coords method has been deleted from here.
+
+    @api.depends(
+        'source_latitude', 'source_longitude',
+        'destination_ids.latitude', 'destination_ids.longitude', 'destination_ids.sequence'
+    )
+    def _compute_total_distance(self):
+        for mission in self:
+            distance = 0.0
+            if mission.source_latitude and mission.source_longitude:
+                points = [(mission.source_latitude, mission.source_longitude)]
+                sorted_destinations = mission.destination_ids.sorted('sequence')
+                
+                for dest in sorted_destinations:
+                    if dest.latitude and dest.longitude:
+                        points.append((dest.latitude, dest.longitude))
+
+                if len(points) > 1:
+                    for i in range(len(points) - 1):
+                        p1 = points[i]
+                        p2 = points[i+1]
+                        distance += _haversine_distance(p1[0], p1[1], p2[0], p2[1])
+            
+            mission.total_distance_km = distance
+            
     @api.depends('destination_ids.is_completed')
     def _compute_destination_progress(self):
         for mission in self:
@@ -46,7 +95,6 @@ class TransportMission(models.Model):
                 completed_count = len(mission.destination_ids.filtered(lambda d: d.is_completed))
                 mission.destination_progress = (completed_count / total_destinations) * 100
 
-    # Odoo sequence creation remains the same
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -54,7 +102,6 @@ class TransportMission(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code('transport.mission.sequence') or _('New')
         return super().create(vals_list)
 
-    # State transition methods remain the same
     def action_confirm(self):
         self.write({'state': 'confirmed'})
     def action_start_mission(self):

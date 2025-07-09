@@ -10,20 +10,24 @@ export class MapFieldWidget extends Component {
         this.mapRef = useRef("map");
         this.map = null;
         this.marker = null;
+
+        // Get lat/lon field names from options passed in the XML
+        this.latField = this.props.options?.latitude_field || 'latitude';
+        this.lonField = this.props.options?.longitude_field || 'longitude';
+
         this.state = useState({
             locationText: this.props.record.data[this.props.name] || ""
         });
 
         onMounted(() => {
-            // Defer initialization to ensure the DOM element is fully rendered, especially in modals
             setTimeout(this.initializeMap.bind(this), 0);
         });
 
         onWillUpdateProps((nextProps) => {
             this.state.locationText = nextProps.record.data[nextProps.name] || "";
             if (this.map && this.marker) {
-                const lat = nextProps.record.data.latitude;
-                const lon = nextProps.record.data.longitude;
+                const lat = nextProps.record.data[this.latField];
+                const lon = nextProps.record.data[this.lonField];
                 if (lat && lon) {
                     const newLatLng = L.latLng(lat, lon);
                     if (!this.marker.getLatLng().equals(newLatLng)) {
@@ -35,7 +39,6 @@ export class MapFieldWidget extends Component {
         });
 
         onWillUnmount(() => {
-            // Clean up the map instance to prevent memory leaks when the component is destroyed
             if (this.map) {
                 this.map.remove();
                 this.map = null;
@@ -44,14 +47,11 @@ export class MapFieldWidget extends Component {
     }
 
     initializeMap() {
-        // Guard: Do not initialize if map already exists or the element isn't there
-        if (this.map || !this.mapRef.el) {
-            return;
-        }
+        if (this.map || !this.mapRef.el) return;
 
-        const lat = this.props.record.data.latitude || 51.505; // Default to London
-        const lon = this.props.record.data.longitude || -0.09; // if no coords
-        const zoom = (this.props.record.data.latitude && this.props.record.data.longitude) ? 13 : 7;
+        const lat = this.props.record.data[this.latField] || 51.505;
+        const lon = this.props.record.data[this.lonField] || -0.09;
+        const zoom = (this.props.record.data[this.latField] && this.props.record.data[this.lonField]) ? 13 : 7;
 
         this.map = L.map(this.mapRef.el).setView([lat, lon], zoom);
 
@@ -78,14 +78,20 @@ export class MapFieldWidget extends Component {
         
         const address = await this.reverseGeocode(lat, lng);
 
-        // This is the correct way to update the record in Odoo 16
-        await this.props.record.update({
-            latitude: lat,
-            longitude: lng,
-            [this.props.name]: address,
-        });
-
-        // The state will be updated automatically by the framework after the record update
+        // --- CORE CHANGE IS HERE ---
+        // We no longer update the lat/lon fields directly from JS.
+        // Instead, we update our main field and pass the coordinates in the context.
+        // An onchange method in Python will catch this context and do the work.
+        this.props.record.update(
+            { [this.props.name]: address },
+            {
+                // This 'context' key is a special option for the update method
+                context: {
+                    [this.latField]: lat,
+                    [this.lonField]: lng,
+                }
+            }
+        );
     }
 
     async reverseGeocode(lat, lng) {
@@ -106,19 +112,14 @@ export class MapFieldWidget extends Component {
     }
 
     onInputBlur() {
-        // Only update if the text has actually changed
         if (this.props.record.data[this.props.name] !== this.state.locationText) {
             this.props.record.update({ [this.props.name]: this.state.locationText });
         }
     }
 }
 
-// *** THIS IS THE CORRECT WAY TO DEFINE METADATA AND REGISTER THE WIDGET ***
-
-// 1. Attach static properties directly to the component class
 MapFieldWidget.template = "transport_management.MapFieldWidget";
 MapFieldWidget.components = { CharField };
 MapFieldWidget.supportedTypes = ["char"];
 
-// 2. Add the component class directly to the registry
 registry.category("fields").add("map_selector", MapFieldWidget);

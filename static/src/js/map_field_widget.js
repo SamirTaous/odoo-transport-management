@@ -1,24 +1,22 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { CharField } from "@web/views/fields/char/char_field";
 
-const { Component, onMounted, onWillUpdateProps, useRef, useState } = owl;
+const { Component, onMounted, onWillUpdateProps, onWillUnmount, useRef, useState } = owl;
 
 export class MapFieldWidget extends Component {
     setup() {
         this.mapRef = useRef("map");
         this.map = null;
         this.marker = null;
-
-        // Set up the initial state for the location text
         this.state = useState({
             locationText: this.props.record.data[this.props.name] || ""
         });
 
         onMounted(() => {
-            this.initializeMap();
+            // Defer initialization to ensure the DOM element is fully rendered, especially in modals
+            setTimeout(this.initializeMap.bind(this), 0);
         });
 
         onWillUpdateProps((nextProps) => {
@@ -28,17 +26,32 @@ export class MapFieldWidget extends Component {
                 const lon = nextProps.record.data.longitude;
                 if (lat && lon) {
                     const newLatLng = L.latLng(lat, lon);
-                    this.marker.setLatLng(newLatLng);
-                    this.map.panTo(newLatLng);
+                    if (!this.marker.getLatLng().equals(newLatLng)) {
+                        this.marker.setLatLng(newLatLng);
+                        this.map.panTo(newLatLng);
+                    }
                 }
+            }
+        });
+
+        onWillUnmount(() => {
+            // Clean up the map instance to prevent memory leaks when the component is destroyed
+            if (this.map) {
+                this.map.remove();
+                this.map = null;
             }
         });
     }
 
     initializeMap() {
+        // Guard: Do not initialize if map already exists or the element isn't there
+        if (this.map || !this.mapRef.el) {
+            return;
+        }
+
         const lat = this.props.record.data.latitude || 51.505; // Default to London
         const lon = this.props.record.data.longitude || -0.09; // if no coords
-        const zoom = (this.props.record.data.latitude) ? 13 : 7;
+        const zoom = (this.props.record.data.latitude && this.props.record.data.longitude) ? 13 : 7;
 
         this.map = L.map(this.mapRef.el).setView([lat, lon], zoom);
 
@@ -46,40 +59,40 @@ export class MapFieldWidget extends Component {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(this.map);
 
-        this.marker = L.marker([lat, lon]).addTo(this.map);
+        this.marker = L.marker([lat, lon], { draggable: !this.props.readonly }).addTo(this.map);
         
-        // Only allow map clicks if not in readonly mode
         if (!this.props.readonly) {
-            this.map.on('click', this.onMapClick.bind(this));
+            this.map.on('click', (e) => this.updateCoordinates(e.latlng.lat, e.latlng.lng));
+            this.marker.on('dragend', (e) => {
+                const latLng = e.target.getLatLng();
+                this.updateCoordinates(latLng.lat, latLng.lng);
+            });
         }
     }
 
-    async onMapClick(e) {
-        const { lat, lng } = e.latlng;
-        this.marker.setLatLng(e.latlng);
-        this.map.panTo(e.latlng);
+    async updateCoordinates(lat, lng) {
+        if (!this.marker) return;
+        const latLng = L.latLng(lat, lng);
+        this.marker.setLatLng(latLng);
+        this.map.panTo(latLng);
         
-        // Perform reverse geocoding to get the address
         const address = await this.reverseGeocode(lat, lng);
 
-        // Update the Odoo record
-        this.props.record.update({
+        // This is the correct way to update the record in Odoo 16
+        await this.props.record.update({
             latitude: lat,
             longitude: lng,
-            [this.props.name]: address, // Update the location field itself
+            [this.props.name]: address,
         });
 
-        // Update local state to immediately show the new address
-        this.state.locationText = address;
+        // The state will be updated automatically by the framework after the record update
     }
 
     async reverseGeocode(lat, lng) {
-        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
         try {
             const response = await fetch(url);
-            if (!response.ok) {
-                return "Could not fetch address";
-            }
+            if (!response.ok) return "Could not fetch address";
             const data = await response.json();
             return data.display_name || "Unknown Location";
         } catch (error) {
@@ -89,21 +102,23 @@ export class MapFieldWidget extends Component {
     }
 
     onInputChange(ev) {
-        // This allows manual typing in the address box
         this.state.locationText = ev.target.value;
     }
 
     onInputBlur() {
-        // When the user clicks away, update the record with the manually typed value
-        this.props.record.update({ [this.props.name]: this.state.locationText });
+        // Only update if the text has actually changed
+        if (this.props.record.data[this.props.name] !== this.state.locationText) {
+            this.props.record.update({ [this.props.name]: this.state.locationText });
+        }
     }
 }
 
-// Define the template for the component
-MapFieldWidget.template = "transport_management.MapFieldWidget";
+// *** THIS IS THE CORRECT WAY TO DEFINE METADATA AND REGISTER THE WIDGET ***
 
-// Add our widget to the field registry
-registry.category("fields").add("map_selector", {
-    component: MapFieldWidget,
-    supportedTypes: ["char"],
-});
+// 1. Attach static properties directly to the component class
+MapFieldWidget.template = "transport_management.MapFieldWidget";
+MapFieldWidget.components = { CharField };
+MapFieldWidget.supportedTypes = ["char"];
+
+// 2. Add the component class directly to the registry
+registry.category("fields").add("map_selector", MapFieldWidget);

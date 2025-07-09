@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <!--
-    ================================================================
-    NEW: FORM VIEW FOR TRANSPORT DESTINATION (WITH MAP WIDGET)
-    This view will open in a modal when adding/editing a destination.
-    ================================================================
-    -->
+    <!-- FORM VIEW FOR TRANSPORT DESTINATION (This will open in a modal) -->
     <record id="view_transport_destination_form" model="ir.ui.view">
         <field name="name">transport.destination.form</field>
         <field name="model">transport.destination</field>
@@ -16,7 +10,6 @@
                     <group>
                         <!-- The location field now uses our custom widget -->
                         <field name="location" widget="map_selector"/>
-
                         <!-- The coordinate fields are hidden but present for the widget to work -->
                         <field name="latitude" invisible="1"/>
                         <field name="longitude" invisible="1"/>
@@ -29,14 +22,66 @@
         </field>
     </record>
 
+    <!-- FORM VIEW FOR TRANSPORT MISSION (MODIFIED TO FIX THE ISSUE) -->
+    <record id="view_transport_mission_form" model="ir.ui.view">
+        <field name="name">transport.mission.form</field>
+        <field name="model">transport.mission</field>
+        <field name="arch" type="xml">
+            <form string="Transport Mission">
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary" data-hotkey="v" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                    <button name="action_start_mission" string="Start Mission" type="object" class="btn-primary" data-hotkey="s" attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
+                    <button name="action_done" string="Mark as Done" type="object" class="btn-primary" data-hotkey="d" attrs="{'invisible': [('state', '!=', 'in_progress')]}"/>
+                    <button name="action_cancel" string="Cancel" type="object" data-hotkey="z" attrs="{'invisible': [('state', 'not in', ('draft', 'confirmed', 'in_progress'))]}"/>
+                    <button name="action_reset_to_draft" string="Reset to Draft" type="object" data-hotkey="b" attrs="{'invisible': [('state', '!=', 'cancelled')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_progress,done"/>
+                </header>
+                <sheet class="tm_form_sheet">
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                        <field name="priority" widget="radio" options="{'horizontal': true}"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="mission_date"/>
+                            <field name="driver_id" widget="many2one_avatar" options="{'no_open': True}"/>
+                        </group>
+                        <group>
+                            <field name="vehicle_id" options="{'no_open': True}"/>
+                            <field name="source_location"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Destinations" name="destinations">
+                            <label for="destination_progress"/>
+                            <field name="destination_progress" widget="progressbar" nolabel="1"/>
 
-    <!--
-    ================================================================
-    TRANSPORT MISSION VIEWS
-    ================================================================
-    -->
+                            <!-- *** CORE FIX HERE *** -->
+                            <!-- Removed 'editable="bottom"' from the tree view. -->
+                            <!-- Now, clicking "Add a line" will open the 'view_transport_destination_form' in a modal. -->
+                            <field name="destination_ids" class="mt-2">
+                                <tree>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="location"/>
+                                    <field name="is_completed" string="Done?"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Operational Notes" name="notes">
+                            <field name="notes" placeholder="Add internal notes for the mission..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
 
-    <!-- KANBAN VIEW (Impressive Version) -->
+    <!-- KANBAN VIEW (No changes) -->
     <record id="view_transport_mission_kanban" model="ir.ui.view">
         <field name="name">transport.mission.kanban</field>
         <field name="model">transport.mission</field>
@@ -56,18 +101,9 @@
                                 <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state in ('confirmed', 'in_progress')" decoration-muted="state == 'cancelled'"/>
                             </div>
                             <div class="tm_kanban_body">
-                                <div class="tm_kanban_row">
-                                    <i class="fa fa-calendar"/>
-                                    <span><field name="mission_date"/></span>
-                                </div>
-                                <div class="tm_kanban_row">
-                                    <i class="fa fa-user"/>
-                                    <span><field name="driver_id"/></span>
-                                </div>
-                                <div class="tm_kanban_row">
-                                    <i class="fa fa-truck"/>
-                                    <span><field name="vehicle_id"/></span>
-                                </div>
+                                <div class="tm_kanban_row"><i class="fa fa-calendar me-2"/><span><field name="mission_date"/></span></div>
+                                <div class="tm_kanban_row"><i class="fa fa-user me-2"/><span><field name="driver_id"/></span></div>
+                                <div class="tm_kanban_row"><i class="fa fa-truck me-2"/><span><field name="vehicle_id"/></span></div>
                                 <field name="priority" widget="priority"/>
                             </div>
                         </div>
@@ -77,7 +113,7 @@
         </field>
     </record>
 
-    <!-- TREE VIEW (Complete Version) -->
+    <!-- TREE VIEW (No changes) -->
     <record id="view_transport_mission_tree" model="ir.ui.view">
         <field name="name">transport.mission.tree</field>
         <field name="model">transport.mission</field>
@@ -94,72 +130,11 @@
         </field>
     </record>
 
-    <!-- FORM VIEW (Professional Version - MODIFIED FOR MAP WIDGET) -->
-    <record id="view_transport_mission_form" model="ir.ui.view">
-        <field name="name">transport.mission.form</field>
-        <field name="model">transport.mission</field>
-        <field name="arch" type="xml">
-            <form string="Transport Mission">
-                <header>
-                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary" states="draft"/>
-                    <button name="action_start_mission" string="Start Mission" type="object" class="btn-primary" states="confirmed"/>
-                    <button name="action_done" string="Mark as Done" type="object" class="btn-primary" states="in_progress"/>
-                    <button name="action_cancel" string="Cancel" type="object" states="draft,confirmed,in_progress"/>
-                    <button name="action_reset_to_draft" string="Reset to Draft" type="object" states="cancelled"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_progress,done"/>
-                </header>
-                <sheet class="tm_form_sheet">
-                    <div class="oe_title">
-                        <h1><field name="name" readonly="1"/></h1>
-                        <field name="priority" widget="radio" options="{'horizontal': true}"/>
-                    </div>
-                    <group>
-                        <group>
-                            <field name="mission_date"/>
-                            <field name="driver_id" widget="many2one_avatar" options="{'no_open': True}"/>
-                        </group>
-                        <group>
-                            <field name="vehicle_id" options="{'no_open': True}"/>
-                            <field name="source_location"/>
-                        </group>
-                    </group>
-
-                    <notebook>
-                        <page string="Destinations" name="destinations">
-                            <label for="destination_progress"/>
-                            <field name="destination_progress" widget="progressbar" nolabel="1"/>
-                            
-                            <!-- This One2many now opens a modal with our map widget -->
-                            <field name="destination_ids" class="mt-2">
-                                <!-- The tree view is still defined for the list of destinations -->
-                                <tree editable="bottom">
-                                    <field name="sequence" widget="handle"/>
-                                    <!-- This field is now readonly to encourage using the form for editing -->
-                                    <field name="location" readonly="1"/>
-                                    <field name="is_completed" string="Done?"/>
-                                </tree>
-                                <!-- The form view is implicitly picked up by Odoo from the new record above -->
-                            </field>
-                        </page>
-                        <page string="Operational Notes" name="notes">
-                            <field name="notes" placeholder="Add internal notes for the mission..."/>
-                        </page>
-                    </notebook>
-                </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
-            </form>
-        </field>
-    </record>
-    
-    <!-- Action Window - No change needed -->
+    <!-- ACTION WINDOW (No changes) -->
     <record id="action_transport_mission" model="ir.actions.act_window">
         <field name="name">Transport Missions</field>
         <field name="res_model">transport.mission</field>
         <field name="view_mode">kanban,tree,form</field>
     </record>
-
 </odoo>
+

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="transport_management.MissionMapViewWidget" owl="1">
+        <div t-ref="root" class="tm-map-container">
+            <div t-ref="map" class="tm-map-element"/>
+        </div>
+    </t>
+
+</templates>

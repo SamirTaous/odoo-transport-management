@@ -1,37 +1,45 @@
-# In: /home/samirtaous/transport_management/models/transport_vehicle.py
-
 from odoo import models, fields, api
 
 class TransportVehicle(models.Model):
     _name = 'transport.vehicle'
     _description = 'Transport Vehicle'
-    _order = 'name'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    # This computed field creates a nice display name like "Volvo FH16 (TR-123-UCK)"
-    name = fields.Char(string='Name', compute='_compute_name', store=True)
-    
-    license_plate = fields.Char(string='License Plate', required=True, copy=False)
-    model_id = fields.Many2one('fleet.vehicle.model', string='Model')
-    fuel_capacity = fields.Float(string='Fuel Capacity (Liters)')
-    
-    # A vehicle is often assigned a primary driver
+    name = fields.Char(string='Name', required=True, copy=False, readonly=True, default='New')
+    active = fields.Boolean(default=True)
+    image = fields.Image(string="Image")
+    model_id = fields.Many2one('fleet.vehicle.model', string='Model', required=True)
+    license_plate = fields.Char(string='License Plate', required=True)
     driver_id = fields.Many2one('res.partner', string='Assigned Driver', domain=[('is_company', '=', False)])
+    fuel_capacity = fields.Float(string='Fuel Capacity (Liters)')
+    mission_ids = fields.One2many('transport.mission', 'vehicle_id', string='Missions')
+    mission_count = fields.Integer(string="Mission Count", compute='_compute_mission_count')
     
-    image = fields.Image(string='Image')
-    active = fields.Boolean(string='Active', default=True, help="Uncheck to archive the vehicle instead of deleting it.")
-
-    # This ensures that each license plate is unique in the database
-    _sql_constraints = [
-        ('license_plate_uniq', 'unique (license_plate)', 'A vehicle with this license plate already exists!')
-    ]
-
-    # This is a compute method. It runs when its dependencies change.
-    @api.depends('model_id.name', 'license_plate')
-    def _compute_name(self):
+    # --- ADD THIS FIELD ---
+    company_id = fields.Many2one(
+        'res.company', 
+        string='Company', 
+        default=lambda self: self.env.company
+    )
+    
+    @api.depends('mission_ids')
+    def _compute_mission_count(self):
         for vehicle in self:
-            # Creates a name like "Scania R 450 (AB-123-CD)" if a model is set,
-            # otherwise it just uses the license plate.
-            if vehicle.model_id and vehicle.license_plate:
-                vehicle.name = f"{vehicle.model_id.name} ({vehicle.license_plate})"
-            else:
-                vehicle.name = vehicle.license_plate
+            vehicle.mission_count = len(vehicle.mission_ids)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('name', 'New') == 'New':
+                vals['name'] = self.env['ir.sequence'].next_by_code('transport.vehicle.sequence') or 'New'
+        return super().create(vals_list)
+        
+    def action_view_missions(self):
+        return {
+            'name': 'Missions',
+            'type': 'ir.actions.act_window',
+            'res_model': 'transport.mission',
+            'view_mode': 'kanban,tree,form',
+            'domain': [('id', 'in', self.mission_ids.ids)],
+            'context': {'default_vehicle_id': self.id}
+        }

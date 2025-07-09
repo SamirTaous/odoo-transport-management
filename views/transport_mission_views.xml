@@ -1,7 +1,63 @@
-<!-- In: /opt/odoo-16/custom_addons/transport_management/views/transport_mission_views.xml -->
-
 <odoo>
-    <!-- Form View -->
+    <!-- KANBAN VIEW (Impressive Version) -->
+    <record id="view_transport_mission_kanban" model="ir.ui.view">
+        <field name="name">transport.mission.kanban</field>
+        <field name="model">transport.mission</field>
+        <field name="arch" type="xml">
+            <kanban class="o_transport_management" default_order="priority desc, mission_date desc">
+                <field name="name"/>
+                <field name="mission_date"/>
+                <field name="driver_id"/>
+                <field name="vehicle_id"/>
+                <field name="state"/>
+                <field name="priority"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click tm-kanban-card tm-card-state-{{record.state.raw_value}}">
+                            <div class="tm_kanban_header">
+                                <h6><field name="name"/></h6>
+                                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state in ('confirmed', 'in_progress')" decoration-muted="state == 'cancelled'"/>
+                            </div>
+                            <div class="tm_kanban_body">
+                                <div class="tm_kanban_row">
+                                    <i class="fa fa-calendar"/>
+                                    <span><field name="mission_date"/></span>
+                                </div>
+                                <div class="tm_kanban_row">
+                                    <i class="fa fa-user"/>
+                                    <span><field name="driver_id"/></span>
+                                </div>
+                                <div class="tm_kanban_row">
+                                    <i class="fa fa-truck"/>
+                                    <span><field name="vehicle_id"/></span>
+                                </div>
+                                <field name="priority" widget="priority"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- TREE VIEW (Complete Version) -->
+    <record id="view_transport_mission_tree" model="ir.ui.view">
+        <field name="name">transport.mission.tree</field>
+        <field name="model">transport.mission</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="state == 'done'" decoration-muted="state == 'cancelled'" decoration-bf="priority == '1'">
+                <field name="name"/>
+                <field name="mission_date"/>
+                <field name="driver_id" widget="many2one_avatar"/>
+                <field name="vehicle_id"/>
+                <field name="source_location"/>
+                <field name="priority" widget="priority"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state in ('confirmed', 'in_progress')"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- FORM VIEW (Professional Version) -->
     <record id="view_transport_mission_form" model="ir.ui.view">
         <field name="name">transport.mission.form</field>
         <field name="model">transport.mission</field>
@@ -15,29 +71,36 @@
                     <button name="action_reset_to_draft" string="Reset to Draft" type="object" states="cancelled"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_progress,done"/>
                 </header>
-                <sheet>
+                <sheet class="tm_form_sheet">
                     <div class="oe_title">
                         <h1><field name="name" readonly="1"/></h1>
+                        <field name="priority" widget="radio" options="{'horizontal': true}"/>
                     </div>
                     <group>
                         <group>
                             <field name="mission_date"/>
-                            <field name="driver_id"/>
-                            <field name="vehicle_id"/>
+                            <field name="driver_id" widget="many2one_avatar" options="{'no_open': True}"/>
                         </group>
                         <group>
+                            <field name="vehicle_id" options="{'no_open': True}"/>
                             <field name="source_location"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                     </group>
+
                     <notebook>
                         <page string="Destinations" name="destinations">
-                            <field name="destination_ids">
+                            <label for="destination_progress"/>
+                            <field name="destination_progress" widget="progressbar" nolabel="1"/>
+                            <field name="destination_ids" class="mt-2">
                                 <tree editable="bottom">
                                     <field name="sequence" widget="handle"/>
                                     <field name="location"/>
+                                    <field name="is_completed" string="Done?"/>
                                 </tree>
                             </field>
+                        </page>
+                        <page string="Operational Notes" name="notes">
+                            <field name="notes" placeholder="Add internal notes for the mission..."/>
                         </page>
                     </notebook>
                 </sheet>
@@ -49,29 +112,11 @@
             </form>
         </field>
     </record>
-
-    <!-- Tree/List View -->
-    <record id="view_transport_mission_tree" model="ir.ui.view">
-        <field name="name">transport.mission.tree</field>
-        <field name="model">transport.mission</field>
-        <field name="arch" type="xml">
-            <tree>
-                <field name="name"/>
-                <field name="mission_date"/>
-                <field name="driver_id"/>
-                <field name="vehicle_id"/>
-                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state in ('confirmed', 'in_progress')" decoration-muted="state == 'cancelled'"/>
-            </tree>
-        </field>
-    </record>
-
-    <!-- Window Action -->
+    
+    <!-- Action Window - No change needed, but included for completeness -->
     <record id="action_transport_mission" model="ir.actions.act_window">
         <field name="name">Transport Missions</field>
         <field name="res_model">transport.mission</field>
-        <field name="view_mode">tree,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">Create a new transport mission!</p>
-        </field>
+        <field name="view_mode">kanban,tree,form</field>
     </record>
 </odoo>

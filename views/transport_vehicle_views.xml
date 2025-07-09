@@ -1,60 +1,98 @@
-<!-- In: /home/samirtaous/transport_management/views/transport_vehicle_views.xml -->
-
 <odoo>
-    <!-- Tree (List) View for Transport Vehicles -->
-    <record id="view_transport_vehicle_tree" model="ir.ui.view">
-        <field name="name">transport.vehicle.tree</field>
-        <field name="model">transport.vehicle</field>
-        <field name="arch" type="xml">
-            <tree>
-                <field name="name"/>
-                <field name="license_plate"/>
-                <field name="model_id"/>
-                <field name="driver_id"/>
-                <field name="fuel_capacity"/>
-            </tree>
-        </field>
-    </record>
-
-    <!-- Form View for Transport Vehicles -->
+    <!-- FORM VIEW (With Smart Button) -->
     <record id="view_transport_vehicle_form" model="ir.ui.view">
         <field name="name">transport.vehicle.form</field>
         <field name="model">transport.vehicle</field>
         <field name="arch" type="xml">
             <form string="Vehicle">
                 <sheet>
+                    <!-- Smart Button -->
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_missions" icon="fa-truck">
+                            <field string="Missions" name="mission_count" widget="statinfo"/>
+                        </button>
+                    </div>
+
                     <field name="image" widget="image" class="oe_avatar"/>
                     <div class="oe_title">
-                        <h1>
-                            <field name="name" readonly="1"/>
-                        </h1>
+                        <h1><field name="name" readonly="1"/></h1>
+                        <h2><field name="model_id"/></h2>
+                        <field name="license_plate" placeholder="License Plate"/>
                     </div>
                     <group>
                         <group>
-                            <field name="model_id"/>
-                            <field name="license_plate"/>
+                            <field name="driver_id" widget="many2one_avatar"/>
+                            <field name="fuel_capacity"/>
                         </group>
                         <group>
-                            <field name="fuel_capacity"/>
-                            <field name="driver_id"/>
-                            <field name="active"/>
+                            <field name="active" widget="boolean_toggle"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                     </group>
                 </sheet>
+                 <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
             </form>
         </field>
     </record>
 
-    <!-- Window Action for Transport Vehicles -->
+    <!-- Other vehicle views (Kanban, Tree, Action) from last time remain good -->
+    <record id="view_transport_vehicle_kanban" model="ir.ui.view">
+        <field name="name">transport.vehicle.kanban</field>
+        <field name="model">transport.vehicle</field>
+        <field name="arch" type="xml">
+            <kanban class="o_transport_management">
+                <field name="name"/>
+                <field name="image"/>
+                <field name="license_plate"/>
+                <field name="driver_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click tm-kanban-card">
+                            <div class="o_kanban_image">
+                                <field name="image" widget="image" class="oe_avatar"/>
+                            </div>
+                            <div class="tm_kanban_body">
+                                <strong><field name="name"/></strong>
+                                <div class="text-muted"><field name="license_plate"/></div>
+                                <div t-if="record.driver_id.value">
+                                    <hr class="mt-2 mb-2"/>
+                                    <div class="tm_kanban_row">
+                                        <i class="fa fa-user"/>
+                                        <span><field name="driver_id"/></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_transport_vehicle_tree" model="ir.ui.view">
+        <field name="name">transport.vehicle.tree</field>
+        <field name="model">transport.vehicle</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="image" widget="image" class="oe_avatar"/>
+                <field name="name"/>
+                <field name="license_plate"/>
+                <field name="model_id"/>
+                <field name="driver_id" widget="many2one_avatar"/>
+                <field name="fuel_capacity"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
     <record id="action_transport_vehicle" model="ir.actions.act_window">
         <field name="name">Vehicles</field>
         <field name="res_model">transport.vehicle</field>
-        <field name="view_mode">tree,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Create a new vehicle for your fleet!
-            </p>
-        </field>
+        <field name="view_mode">kanban,tree,form</field>
     </record>
 
 </odoo>

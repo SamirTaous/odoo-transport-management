@@ -21,7 +21,7 @@
         'views/menus.xml',
     ],
     'assets': {
-        'web.assets_frontend': [
+        'web.assets_backend': [
             'transport_management/static/src/scss/styles.scss',
         ],
     },

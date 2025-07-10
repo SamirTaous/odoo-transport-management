@@ -7,13 +7,39 @@ const { Component, onMounted, onWillUpdateProps, onWillUnmount, useRef, useState
 
 export class MapFieldWidget extends Component {
     setup() {
+        // ====================================================================
+        // --- NEW DEBUGGING BLOCK ---
+        // This will show us exactly what the widget is receiving from the XML.
+        console.log("--- MapFieldWidget Debugging ---");
+        console.log("1. Raw this.props.options:", this.props.options);
+        console.log("2. Type of this.props.options:", typeof this.props.options);
+        // ====================================================================
+
         this.mapRef = useRef("map");
         this.map = null;
         this.marker = null;
 
-        // Get lat/lon field names from options passed in the XML
-        this.latField = this.props.options?.latitude_field || 'latitude';
-        this.lonField = this.props.options?.longitude_field || 'longitude';
+        let parsedOptions = {};
+        if (this.props.options && typeof this.props.options === 'string') {
+            try {
+                // The correct way, assuming XML has double quotes: options='{"key": "value"}'
+                parsedOptions = JSON.parse(this.props.options);
+                console.log("3. SUCCESS: Parsed options object:", parsedOptions);
+            } catch (e) {
+                console.error("4. FAILED: JSON.parse failed. This usually means your XML options attribute uses single quotes instead of double quotes.", e);
+            }
+        }
+
+        this.latField = parsedOptions.latitude_field || 'latitude';
+        this.lonField = parsedOptions.longitude_field || 'longitude';
+
+        // ====================================================================
+        // --- NEW DEBUGGING BLOCK ---
+        console.log("5. Final 'latField' being used:", this.latField);
+        console.log("6. Final 'lonField' being used:", this.lonField);
+        console.log("--- End of Widget Setup Log ---");
+        // ====================================================================
+
 
         this.state = useState({
             locationText: this.props.record.data[this.props.name] || ""
@@ -23,6 +49,7 @@ export class MapFieldWidget extends Component {
             setTimeout(this.initializeMap.bind(this), 0);
         });
 
+        // ... THE REST OF YOUR WIDGET CODE IS UNCHANGED ...
         onWillUpdateProps((nextProps) => {
             this.state.locationText = nextProps.record.data[nextProps.name] || "";
             if (this.map && this.marker) {
@@ -46,6 +73,7 @@ export class MapFieldWidget extends Component {
         });
     }
 
+    // ... initializeMap, updateCoordinates, etc. remain the same ...
     initializeMap() {
         if (this.map || !this.mapRef.el) return;
 
@@ -78,20 +106,17 @@ export class MapFieldWidget extends Component {
         
         const address = await this.reverseGeocode(lat, lng);
 
-        // --- CORE CHANGE IS HERE ---
-        // We no longer update the lat/lon fields directly from JS.
-        // Instead, we update our main field and pass the coordinates in the context.
-        // An onchange method in Python will catch this context and do the work.
         this.props.record.update(
             { [this.props.name]: address },
             {
-                // This 'context' key is a special option for the update method
                 context: {
                     [this.latField]: lat,
                     [this.lonField]: lng,
                 }
             }
         );
+        // This is the original log message
+        console.log(`Updated coordinates. Latitude field: '${this.latField}', Longitude field: '${this.lonField}'`);
     }
 
     async reverseGeocode(lat, lng) {

@@ -59,8 +59,23 @@ class TransportMission(models.Model):
         help="Estimated total travel distance for the mission."
     )
 
-    # --- REMOVED THE ONCHANGE METHOD ---
-    # The _onchange_source_location_coords method has been deleted from here.
+    # --- NEW ONCHANGE METHOD ---
+    @api.onchange('source_location')
+    def _onchange_source_location_update_coords(self):
+        """
+        This method is triggered when the 'source_location' field changes.
+        The JS widget passes lat/lon in the context.
+        """
+        context = self.env.context
+        
+        # We check for 'source_latitude' and 'source_longitude' in the context
+        # because those are the keys we defined in the XML options for this field.
+        new_lat = context.get('source_latitude')
+        new_lon = context.get('source_longitude')
+
+        if new_lat is not None and new_lon is not None:
+            self.source_latitude = new_lat
+            self.source_longitude = new_lon
 
     @api.depends(
         'source_latitude', 'source_longitude',

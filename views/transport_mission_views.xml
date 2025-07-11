@@ -26,7 +26,7 @@
 
     <!--
     ================================================================
-    FORM VIEW FOR TRANSPORT MISSION (*** MODIFIED ***)
+    FORM VIEW FOR TRANSPORT MISSION (*** CORRECTED ***)
     ================================================================
     -->
     <record id="view_transport_mission_form" model="ir.ui.view">
@@ -59,9 +59,22 @@
                     <field name="source_location"/>
                     <field name="source_latitude"/>
                     <field name="source_longitude"/>
+                    
+                    <!--
+                        [THE FIX]
+                        This is the critical change. We must declare all the fields that the
+                        JavaScript widget will write to (location, latitude, longitude, sequence)
+                        within this <field> tag.
+                    -->
                     <field name="destination_ids">
-                        <tree><field name="sequence"/></tree>
+                        <tree>
+                            <field name="sequence"/>
+                            <field name="location"/>
+                            <field name="latitude"/>
+                            <field name="longitude"/>
+                        </tree>
                     </field>
+                    
                     <field name="destination_progress"/>
                     <field name="total_distance_km"/>
                 </div>

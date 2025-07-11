@@ -83,6 +83,7 @@ export class MissionMapPlannerWidget extends Component {
             this.map.on("contextmenu", (e) => {
                 console.log("Right click at:", e.latlng);
                 e.originalEvent.preventDefault();
+                 e.originalEvent.stopPropagation();
                 this.addDestination(e.latlng.lat, e.latlng.lng);
             });
 
@@ -287,37 +288,36 @@ export class MissionMapPlannerWidget extends Component {
         }
     }
 
-    async addDestination(lat, lng) {
+        async addDestination(lat, lng) {
         try {
+            // [THE FIX]
+            // We must call addNew() with a position argument.
+            // We can get the current number of records and use that as the index
+            // to add the new line at the end of the list.
+            const list = this.props.record.data.destination_ids;
+            const newRecord = await list.addNew(
+                {
+                    position: "bottom"
+                }
+            );
+            
+            // Now that we have the new (empty) record, we can update it.
             const address = await this.reverseGeocode(lat, lng);
-            const newSequence = (this.state.destinations.length > 0) ? 
-                Math.max(...this.state.destinations.map(d => d.sequence)) + 1 : 1;
-            
-            console.log("Adding destination:", { address, lat, lng, sequence: newSequence });
-            
-            // Get current destination_ids or initialize as empty array
-            const currentDestinations = this.props.record.data.destination_ids || [];
-            
-            await this.props.record.update({
-                destination_ids: [
-                    [0, 0, { 
-                        location: address, 
-                        latitude: lat, 
-                        longitude: lng, 
-                        sequence: newSequence 
-                    }]
-                ]
+            const newSequence = (this.state.destinations.length > 0)
+                ? Math.max(0, ...this.state.destinations.map(d => d.sequence)) + 1 : 1;
+
+            console.log("Updating new record with data:", { address, lat, lng, sequence: newSequence });
+
+            // Call .update() on the new record itself.
+            await newRecord.update({
+                location: address,
+                latitude: lat,
+                longitude: lng,
+                sequence: newSequence,
             });
-            
+
             this.notification.add(`Destination ${newSequence} added`, { type: "success" });
-            
-            // Force re-sync after a short delay to ensure the record is updated
-            setTimeout(() => {
-                this.syncStateFromRecord(this.props.record);
-                this.updateMarkers();
-                this.drawRoute();
-            }, 100);
-            
+
         } catch (error) {
             console.error('Error adding destination:', error);
             this.notification.add("Failed to add destination", { type: "danger" });

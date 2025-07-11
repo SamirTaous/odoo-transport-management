@@ -2,26 +2,51 @@
 
 /** @odoo-module **/
 import { registry } from "@web/core/registry"
-import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl"
-const { L } = window // Access Leaflet from global scope
+import { useService } from "@web/core/utils/hooks"
+import { Component, onMounted, onWillUnmount, onWillUpdateProps, useRef, useState } from "odoo/owl"
+import L from "leaflet"
+
+// Helper to calculate distance
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371 // Earth's radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLon = ((lon2 - lon1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c
+}
 
 export class MissionMapPlannerWidget extends Component {
   setup() {
-    this.mapRef = useRef("map")
+    this.mapContainer = useRef("mapContainer")
+    this.notification = useService("notification")
+    this.orm = useService("orm")
+
     this.map = null
     this.sourceMarker = null
-    this.destinationMarkers = []
+    this.destinationMarkers = {}
     this.routeLayer = null
 
     this.state = useState({
-      sourceLocation: "",
+      source: null,
       destinations: [],
       totalDistance: 0,
     })
 
-    // All hooks must be called in the exact same order in every component render
     onMounted(() => {
-      setTimeout(this.initializeMap.bind(this), 100)
+      console.log("MissionMapPlannerWidget mounted")
+      setTimeout(() => this.initializeMap(), 100)
+    })
+
+    onWillUpdateProps(async (nextProps) => {
+      console.log("Props updating, syncing state...")
+      this.syncStateFromRecord(nextProps.record)
+      setTimeout(() => {
+        this.updateMarkers()
+        this.drawRoute()
+      }, 50)
     })
 
     onWillUnmount(() => {
@@ -30,438 +55,409 @@ export class MissionMapPlannerWidget extends Component {
         this.map = null
       }
     })
+
+    // Initial sync
+    this.syncStateFromRecord(this.props.record)
   }
 
-  initializeMap() {
-    if (this.map || !this.mapRef.el) return
+  async initializeMap() {
+    if (this.map || !this.mapContainer.el) return
 
-    // Check if Leaflet is available
     if (typeof L === "undefined") {
-      console.error("Leaflet library not found. Please include Leaflet CSS and JS files.")
+      this.notification.add("Leaflet library not found. Please ensure Leaflet is loaded.", { type: "danger" })
       return
     }
 
-    // Initialize map centered on UK
-    this.map = L.map(this.mapRef.el, {
-      zoomControl: true,
-      scrollWheelZoom: true,
-    }).setView([54.5, -2.0], 6)
+    try {
+      this.map = L.map(this.mapContainer.el).setView([54.5, -2.0], 6)
 
-    // Add tile layer
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap contributors",
-      maxZoom: 18,
-    }).addTo(this.map)
+      // Add tile layer
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+        maxZoom: 19,
+      }).addTo(this.map)
 
-    // Add custom controls
-    this.addMapControls()
+      // Left click to set source location
+      this.map.on("click", (e) => {
+        console.log("Map clicked at:", e.latlng)
+        this.setSourceLocation(e.latlng.lat, e.latlng.lng)
+      })
 
-    // Set up event handlers
-    this.setupMapEvents()
+      // Right click to add destination
+      this.map.on("contextmenu", (e) => {
+        console.log("Right click at:", e.latlng)
+        e.originalEvent.preventDefault()
+        this.addDestination(e.latlng.lat, e.latlng.lng)
+      })
 
-    // Load existing data if available
-    this.loadExistingData()
-  }
+      // Initial setup
+      setTimeout(() => {
+        this.updateMarkers()
+        this.drawRoute()
+        this.fitMapToMarkers()
+      }, 100)
 
-  addMapControls() {
-    // Custom control for map legend
-    const legendControl = L.control({ position: "topright" })
-    legendControl.onAdd = () => {
-      const div = L.DomUtil.create("div", "tm-map-legend")
-      div.innerHTML = `
-                <div class="tm-legend-item">
-                    <i class="fa fa-map-marker-alt" style="color: #007bff;"></i>
-                    <span>Source</span>
-                </div>
-                <div class="tm-legend-item">
-                    <i class="fa fa-map-marker-alt" style="color: #dc3545;"></i>
-                    <span>Destinations</span>
-                </div>
-            `
-      return div
+      console.log("Map initialized successfully")
+    } catch (error) {
+      console.error("Error initializing map:", error)
+      this.notification.add("Failed to initialize map. Please refresh the page.", { type: "danger" })
     }
-    legendControl.addTo(this.map)
   }
 
-  setupMapEvents() {
-    // Left click to set source
-    this.map.on("click", (e) => {
-      this.setSourceLocation(e.latlng.lat, e.latlng.lng)
-    })
+  syncStateFromRecord(record) {
+    console.log("Syncing state from record:", record.data)
 
-    // Right click to add destination
-    this.map.on("contextmenu", (e) => {
-      e.originalEvent.preventDefault()
-      this.addDestination(e.latlng.lat, e.latlng.lng)
-    })
+    const { source_location, source_latitude, source_longitude } = record.data
 
-    // Set up control button events using event delegation
-    setTimeout(() => {
-      const clearBtn = document.getElementById("clear_all_markers")
-      const optimizeBtn = document.getElementById("optimize_route")
-
-      if (clearBtn) {
-        clearBtn.addEventListener("click", () => this.clearAllMarkers())
+    if (source_latitude && source_longitude) {
+      this.state.source = {
+        location: source_location || `${source_latitude.toFixed(4)}, ${source_longitude.toFixed(4)}`,
+        latitude: source_latitude,
+        longitude: source_longitude,
       }
-      if (optimizeBtn) {
-        optimizeBtn.addEventListener("click", () => this.optimizeRoute())
+    } else {
+      this.state.source = null
+    }
+
+    // Handle destinations - check if destination_ids exists and has records
+    const destinationIds = record.data.destination_ids
+    if (destinationIds && destinationIds.records) {
+      this.state.destinations = destinationIds.records
+        .map((rec) => ({
+          id: rec.resId,
+          localId: rec.id,
+          location: rec.data.location || `${rec.data.latitude?.toFixed(4)}, ${rec.data.longitude?.toFixed(4)}`,
+          latitude: rec.data.latitude,
+          longitude: rec.data.longitude,
+          sequence: rec.data.sequence || 1,
+        }))
+        .filter((dest) => dest.latitude && dest.longitude)
+        .sort((a, b) => a.sequence - b.sequence)
+    } else {
+      this.state.destinations = []
+    }
+
+    console.log("State synced:", {
+      source: this.state.source,
+      destinations: this.state.destinations,
+    })
+  }
+
+  updateMarkers() {
+    if (!this.map) return
+
+    // Clear existing destination markers
+    Object.values(this.destinationMarkers).forEach((m) => this.map.removeLayer(m))
+    this.destinationMarkers = {}
+
+    // Update source marker
+    if (this.state.source) {
+      const latLng = [this.state.source.latitude, this.state.source.longitude]
+
+      if (!this.sourceMarker) {
+        this.sourceMarker = L.marker(latLng, {
+          draggable: true,
+          icon: this.createMarkerIcon("blue"),
+        }).addTo(this.map)
+
+        this.sourceMarker.bindPopup(`
+                    <div>
+                        <strong>Source Location</strong><br>${this.state.source.location}<br>
+                        <small>Lat: ${this.state.source.latitude.toFixed(4)}, Lng: ${this.state.source.longitude.toFixed(4)}</small>
+                    </div>
+                `)
+
+        this.sourceMarker.on("dragend", (e) => {
+          const newLatLng = e.target.getLatLng()
+          this.setSourceLocation(newLatLng.lat, newLatLng.lng)
+        })
+      } else {
+        this.sourceMarker.setLatLng(latLng)
+        this.sourceMarker.getPopup().setContent(`
+                    <div>
+                        <strong>Source Location</strong><br>${this.state.source.location}<br>
+                        <small>Lat: ${this.state.source.latitude.toFixed(4)}, Lng: ${this.state.source.longitude.toFixed(4)}</small>
+                    </div>
+                `)
       }
-    }, 500)
-  }
-
-  async setSourceLocation(lat, lng) {
-    // Remove existing source marker
-    if (this.sourceMarker) {
-      this.map.removeLayer(this.sourceMarker)
-    }
-
-    // Create new source marker (blue)
-    this.sourceMarker = L.marker([lat, lng], {
-      draggable: true,
-      icon: L.divIcon({
-        className: "tm-source-marker",
-        html: '<i class="fa fa-map-marker-alt" style="color: #007bff; font-size: 24px;"></i>',
-        iconSize: [24, 24],
-        iconAnchor: [12, 24],
-      }),
-    }).addTo(this.map)
-
-    // Handle marker drag
-    this.sourceMarker.on("dragend", (e) => {
-      const latLng = e.target.getLatLng()
-      this.setSourceLocation(latLng.lat, latLng.lng)
-    })
-
-    // Get address and update form
-    const address = await this.reverseGeocode(lat, lng)
-    this.state.sourceLocation = address
-
-    // Update form fields
-    this.updateSourceDisplay(address, lat, lng)
-    this.updateFormData()
-    this.calculateRoute()
-  }
-
-  async addDestination(lat, lng) {
-    const destinationIndex = this.destinationMarkers.length + 1
-
-    // Create destination marker (red)
-    const marker = L.marker([lat, lng], {
-      draggable: true,
-      icon: L.divIcon({
-        className: "tm-destination-marker",
-        html: `<div class="tm-marker-number">${destinationIndex}</div>`,
-        iconSize: [30, 30],
-        iconAnchor: [15, 30],
-      }),
-    }).addTo(this.map)
-
-    // Handle marker drag
-    marker.on("dragend", (e) => {
-      const latLng = e.target.getLatLng()
-      const index = this.destinationMarkers.indexOf(marker)
-      this.updateDestination(index, latLng.lat, latLng.lng)
-    })
-
-    // Get address
-    const address = await this.reverseGeocode(lat, lng)
-
-    // Add to destinations array
-    const destination = {
-      sequence: destinationIndex,
-      location: address,
-      latitude: lat,
-      longitude: lng,
-      marker: marker,
-      is_completed: false,
-    }
-
-    this.destinationMarkers.push(marker)
-    this.state.destinations.push(destination)
-
-    this.updateDestinationsDisplay()
-    this.updateFormData()
-    this.calculateRoute()
-  }
-
-  async updateDestination(index, lat, lng) {
-    if (index >= 0 && index < this.state.destinations.length) {
-      const address = await this.reverseGeocode(lat, lng)
-      this.state.destinations[index].location = address
-      this.state.destinations[index].latitude = lat
-      this.state.destinations[index].longitude = lng
-
-      this.updateDestinationsDisplay()
-      this.updateFormData()
-      this.calculateRoute()
-    }
-  }
-
-  removeDestination(index) {
-    if (index >= 0 && index < this.state.destinations.length) {
-      // Remove marker from map
-      this.map.removeLayer(this.destinationMarkers[index])
-
-      // Remove from arrays
-      this.destinationMarkers.splice(index, 1)
-      this.state.destinations.splice(index, 1)
-
-      // Renumber remaining destinations
-      this.renumberDestinations()
-
-      this.updateDestinationsDisplay()
-      this.updateFormData()
-      this.calculateRoute()
-    }
-  }
-
-  renumberDestinations() {
-    this.state.destinations.forEach((dest, index) => {
-      dest.sequence = index + 1
-      // Update marker number
-      const markerElement = dest.marker.getElement()
-      if (markerElement) {
-        const numberEl = markerElement.querySelector(".tm-marker-number")
-        if (numberEl) {
-          numberEl.textContent = index + 1
-        }
-      }
-    })
-  }
-
-  clearAllMarkers() {
-    // Remove source marker
-    if (this.sourceMarker) {
+    } else if (this.sourceMarker) {
       this.map.removeLayer(this.sourceMarker)
       this.sourceMarker = null
     }
 
-    // Remove all destination markers
-    this.destinationMarkers.forEach((marker) => {
-      this.map.removeLayer(marker)
-    })
+    // Update destination markers
+    this.state.destinations.forEach((dest, index) => {
+      const latLng = [dest.latitude, dest.longitude]
+      const marker = L.marker(latLng, {
+        draggable: true,
+        icon: this.createMarkerIcon("red", dest.sequence),
+      }).addTo(this.map)
 
-    // Clear route
-    if (this.routeLayer) {
-      this.map.removeLayer(this.routeLayer)
-      this.routeLayer = null
-    }
+      marker.localId = dest.localId
+      marker.bindPopup(`
+                <div>
+                    <strong>Destination ${dest.sequence}</strong><br>${dest.location}<br>
+                    <small>Lat: ${dest.latitude.toFixed(4)}, Lng: ${dest.longitude.toFixed(4)}</small>
+                </div>
+            `)
 
-    // Reset state
-    this.destinationMarkers = []
-    this.state.sourceLocation = ""
-    this.state.destinations = []
-    this.state.totalDistance = 0
-
-    // Update displays
-    this.updateSourceDisplay("", 0, 0)
-    this.updateDestinationsDisplay()
-    this.updateFormData()
-  }
-
-  optimizeRoute() {
-    if (this.state.destinations.length < 2) return
-
-    // Simple optimization: sort by distance from source
-    if (this.sourceMarker) {
-      const sourceLatLng = this.sourceMarker.getLatLng()
-
-      this.state.destinations.sort((a, b) => {
-        const distA = this.calculateDistance(sourceLatLng.lat, sourceLatLng.lng, a.latitude, a.longitude)
-        const distB = this.calculateDistance(sourceLatLng.lat, sourceLatLng.lng, b.latitude, b.longitude)
-        return distA - distB
+      marker.on("dragend", (e) => {
+        const newLatLng = e.target.getLatLng()
+        this.updateDestination(e.target.localId, newLatLng.lat, newLatLng.lng)
       })
 
-      this.renumberDestinations()
-      this.updateDestinationsDisplay()
-      this.updateFormData()
-      this.calculateRoute()
-    }
-  }
-
-  async calculateRoute() {
-    if (this.routeLayer) {
-      this.map.removeLayer(this.routeLayer)
-    }
-
-    if (!this.sourceMarker || this.state.destinations.length === 0) {
-      this.state.totalDistance = 0
-      this.updateDistanceDisplay()
-      return
-    }
-
-    // Create route line
-    const waypoints = [this.sourceMarker.getLatLng()]
-    this.state.destinations.forEach((dest) => {
-      waypoints.push(L.latLng(dest.latitude, dest.longitude))
+      this.destinationMarkers[dest.localId] = marker
     })
 
-    this.routeLayer = L.polyline(waypoints, {
-      color: "#007bff",
-      weight: 4,
-      opacity: 0.7,
-      dashArray: "10, 5",
-    }).addTo(this.map)
-
-    // Calculate total distance
-    let totalDistance = 0
-    for (let i = 0; i < waypoints.length - 1; i++) {
-      totalDistance += this.calculateDistance(
-        waypoints[i].lat,
-        waypoints[i].lng,
-        waypoints[i + 1].lat,
-        waypoints[i + 1].lng,
-      )
-    }
-
-    this.state.totalDistance = totalDistance
-    this.updateDistanceDisplay()
+    console.log("Markers updated:", {
+      source: !!this.sourceMarker,
+      destinations: Object.keys(this.destinationMarkers).length,
+    })
   }
 
-  calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371 // Earth's radius in km
-    const dLat = ((lat2 - lat1) * Math.PI) / 180
-    const dLon = ((lon2 - lon1) * Math.PI) / 180
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    return R * c
+  createMarkerIcon(color, number = null) {
+    const backgroundColor = color === "blue" ? "#007bff" : "#dc3545"
+    let html
+
+    if (number) {
+      html = `
+                <div class="tm-marker-number" style="
+                    background-color: ${backgroundColor}; 
+                    color: white;
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    font-size: 14px;
+                    border: 2px solid white;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                ">${number}</div>
+            `
+    } else {
+      html = `
+                <div style="
+                    background-color: ${backgroundColor}; 
+                    color: white;
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    font-size: 16px;
+                    border: 2px solid white;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                ">S</div>
+            `
+    }
+
+    return L.divIcon({
+      className: "tm-custom-marker",
+      html: html,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+    })
   }
 
   async reverseGeocode(lat, lng) {
     try {
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
+      if (!response.ok) throw new Error("Geocoding failed")
       const data = await response.json()
       return data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`
     } catch (error) {
-      console.error("Geocoding failed:", error)
+      console.warn("Reverse geocoding failed:", error)
       return `${lat.toFixed(4)}, ${lng.toFixed(4)}`
     }
   }
 
-  updateSourceDisplay(address, lat, lng) {
-    setTimeout(() => {
-      const sourceDisplay = document.getElementById("source_display")
-      const addressEl = document.getElementById("source_address")
-      const coordsEl = document.getElementById("source_coords")
+  async setSourceLocation(lat, lng) {
+    try {
+      const address = await this.reverseGeocode(lat, lng)
+      console.log("Setting source location:", { address, lat, lng })
 
-      if (addressEl && coordsEl) {
-        if (address) {
-          addressEl.textContent = address
-          coordsEl.textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`
-          if (sourceDisplay) {
-            sourceDisplay.classList.add("tm-location-set")
-          }
-        } else {
-          addressEl.textContent = "Click on map to set source location"
-          coordsEl.textContent = ""
-          if (sourceDisplay) {
-            sourceDisplay.classList.remove("tm-location-set")
-          }
-        }
-      }
-    }, 100)
+      await this.props.record.update({
+        source_location: address,
+        source_latitude: lat,
+        source_longitude: lng,
+      })
+
+      this.notification.add("Source location updated", { type: "success" })
+    } catch (error) {
+      console.error("Error setting source location:", error)
+      this.notification.add("Failed to set source location", { type: "danger" })
+    }
   }
 
-  updateDestinationsDisplay() {
-    setTimeout(() => {
-      const container = document.getElementById("destinations_display")
-      const countBadge = document.getElementById("destination_count")
+  async addDestination(lat, lng) {
+    try {
+      const address = await this.reverseGeocode(lat, lng)
+      const newSequence =
+        this.state.destinations.length > 0 ? Math.max(...this.state.destinations.map((d) => d.sequence)) + 1 : 1
 
-      if (!container || !countBadge) return
+      console.log("Adding destination:", { address, lat, lng, sequence: newSequence })
 
-      countBadge.textContent = this.state.destinations.length
-
-      if (this.state.destinations.length === 0) {
-        container.innerHTML = `
-                    <div class="tm_empty_destinations">
-                        <i class="fa fa-map-signs fa-2x text-muted"></i>
-                        <p>Right-click on map to add destinations</p>
-                    </div>
-                `
+      // Create new destination using ORM
+      const missionId = this.props.record.resId
+      if (!missionId) {
+        this.notification.add("Please save the mission first", { type: "warning" })
         return
       }
 
-      const destinationsHtml = this.state.destinations
-        .map(
-          (dest, index) => `
-                <div class="tm_location_item tm_destination_item">
-                    <div class="tm_destination_number">${dest.sequence}</div>
-                    <div class="tm_location_info">
-                        <span class="tm_location_address">${dest.location}</span>
-                        <small class="tm_location_coords">${dest.latitude.toFixed(4)}, ${dest.longitude.toFixed(4)}</small>
-                    </div>
-                    <div class="tm_location_actions">
-                        <button type="button" class="btn btn-sm btn-outline-danger" data-index="${index}">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `,
-        )
-        .join("")
+      await this.orm.create("transport.destination", [
+        {
+          mission_id: missionId,
+          location: address,
+          latitude: lat,
+          longitude: lng,
+          sequence: newSequence,
+        },
+      ])
 
-      container.innerHTML = destinationsHtml
+      // Reload the record to get updated destinations
+      await this.props.record.load()
 
-      // Add event listeners for delete buttons
-      container.querySelectorAll(".btn-outline-danger").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          const index = Number.parseInt(e.currentTarget.getAttribute("data-index"))
-          this.removeDestination(index)
-        })
+      this.notification.add(`Destination ${newSequence} added`, { type: "success" })
+    } catch (error) {
+      console.error("Error adding destination:", error)
+      this.notification.add("Failed to add destination", { type: "danger" })
+    }
+  }
+
+  async updateDestination(localId, lat, lng) {
+    try {
+      const address = await this.reverseGeocode(lat, lng)
+      const destToUpdate = this.state.destinations.find((d) => d.localId === localId)
+      if (!destToUpdate || !destToUpdate.id) return
+
+      console.log("Updating destination:", { localId, address, lat, lng })
+
+      await this.orm.write("transport.destination", [destToUpdate.id], {
+        location: address,
+        latitude: lat,
+        longitude: lng,
       })
-    }, 100)
-  }
 
-  updateDistanceDisplay() {
-    setTimeout(() => {
-      // Update the total distance field in the form
-      const distanceField = document.querySelector('input[name="total_distance_km"]')
-      if (distanceField) {
-        distanceField.value = this.state.totalDistance.toFixed(2)
-        // Trigger change event
-        distanceField.dispatchEvent(new Event("change"))
-      }
-    }, 100)
-  }
+      // Reload the record
+      await this.props.record.load()
 
-  updateFormData() {
-    // Update source location fields
-    if (this.props.record) {
-      const updates = {}
-
-      if (this.sourceMarker) {
-        const latLng = this.sourceMarker.getLatLng()
-        updates.source_location = this.state.sourceLocation
-        updates.source_latitude = latLng.lat
-        updates.source_longitude = latLng.lng
-      }
-
-      updates.total_distance_km = this.state.totalDistance
-
-      this.props.record.update(updates)
+      this.notification.add("Destination updated", { type: "success" })
+    } catch (error) {
+      console.error("Error updating destination:", error)
+      this.notification.add("Failed to update destination", { type: "danger" })
     }
   }
 
-  loadExistingData() {
-    if (!this.props.record) return
+  async removeDestination(index) {
+    try {
+      const destToRemove = this.state.destinations[index]
+      if (!destToRemove || !destToRemove.id) return
 
-    // Load existing source location
-    const sourceLocation = this.props.record.data.source_location
-    const sourceLat = this.props.record.data.source_latitude
-    const sourceLng = this.props.record.data.source_longitude
+      console.log("Removing destination:", destToRemove)
 
-    if (sourceLat && sourceLng) {
-      this.setSourceLocation(sourceLat, sourceLng)
+      await this.orm.unlink("transport.destination", [destToRemove.id])
+
+      // Reload the record
+      await this.props.record.load()
+
+      this.notification.add("Destination removed", { type: "success" })
+    } catch (error) {
+      console.error("Error removing destination:", error)
+      this.notification.add("Failed to remove destination", { type: "danger" })
+    }
+  }
+
+  async clearAllMarkers() {
+    if (confirm("Are you sure you want to clear all markers?")) {
+      try {
+        // Clear destinations
+        const destinationIds = this.state.destinations.map((d) => d.id).filter((id) => id)
+        if (destinationIds.length > 0) {
+          await this.orm.unlink("transport.destination", destinationIds)
+        }
+
+        // Clear source
+        await this.props.record.update({
+          source_location: false,
+          source_latitude: false,
+          source_longitude: false,
+        })
+
+        // Reload the record
+        await this.props.record.load()
+
+        this.notification.add("All markers cleared", { type: "success" })
+      } catch (error) {
+        console.error("Error clearing markers:", error)
+        this.notification.add("Failed to clear markers", { type: "danger" })
+      }
+    }
+  }
+
+  fitMapToMarkers() {
+    if (!this.map) return
+
+    if (this.state.destinations.length > 0 || this.state.source) {
+      const allMarkers = [...Object.values(this.destinationMarkers), ...(this.sourceMarker ? [this.sourceMarker] : [])]
+
+      if (allMarkers.length > 0) {
+        const bounds = new L.FeatureGroup(allMarkers).getBounds()
+        if (bounds.isValid()) {
+          this.map.fitBounds(bounds, { padding: [50, 50] })
+        }
+      }
+    }
+  }
+
+  drawRoute() {
+    if (!this.map) return
+
+    if (this.routeLayer) {
+      this.map.removeLayer(this.routeLayer)
     }
 
-    // Load existing destinations would require additional logic
-    // to sync with the destination_ids field
+    const points = []
+    if (this.state.source) {
+      points.push([this.state.source.latitude, this.state.source.longitude])
+    }
+
+    this.state.destinations.forEach((d) => points.push([d.latitude, d.longitude]))
+
+    if (points.length > 1) {
+      // Draw route line
+      this.routeLayer = L.polyline(points, {
+        color: "#007bff",
+        weight: 4,
+        opacity: 0.7,
+        dashArray: "10, 5",
+      }).addTo(this.map)
+
+      // Calculate total distance
+      let distance = 0
+      for (let i = 0; i < points.length - 1; i++) {
+        distance += haversineDistance(points[i][0], points[i][1], points[i + 1][0], points[i + 1][1])
+      }
+
+      this.state.totalDistance = distance
+
+      // Update record if distance changed
+      if (Math.abs(this.props.record.data.total_distance_km - distance) > 0.01) {
+        this.props.record.update({ total_distance_km: distance })
+      }
+    } else {
+      this.state.totalDistance = 0
+      if (this.props.record.data.total_distance_km !== 0) {
+        this.props.record.update({ total_distance_km: 0 })
+      }
+    }
   }
 }
 
 MissionMapPlannerWidget.template = "transport_management.MissionMapPlannerWidget"
-MissionMapPlannerWidget.supportedTypes = ["char"]
 
+// Register as a field widget, not view widget
 registry.category("fields").add("mission_map_planner", MissionMapPlannerWidget)

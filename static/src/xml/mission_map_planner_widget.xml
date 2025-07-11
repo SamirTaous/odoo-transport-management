@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="transport_management.MissionMapPlannerWidget" owl="1">
+        <div class="tm_main_container">
+            <!-- LEFT COLUMN: Interactive Map -->
+            <div class="tm_map_column">
+                <div class="tm_map_panel">
+                    <div class="tm_map_header">
+                        <h3><i class="fa fa-map-marker-alt me-2"/>Mission Route Planner</h3>
+                        <div class="tm_map_controls">
+                            <button type="button" class="btn btn-sm btn-outline-primary" t-on-click="clearAllMarkers">
+                                <i class="fa fa-trash me-1"/>Clear All
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- The Map Container -->
+                    <div class="tm_interactive_map" t-ref="mapContainer">
+                        <!-- Leaflet map will be rendered here by JS -->
+                    </div>
+                    
+                    <!-- Map Instructions -->
+                    <div class="tm_map_instructions">
+                        <div class="tm_instruction_item">
+                            <i class="fa fa-mouse-pointer text-primary"/>
+                            <span>Click on map to set source</span>
+                        </div>
+                        <div class="tm_instruction_item">
+                            <i class="fa fa-plus-circle text-success"/>
+                            <span>Right-click to add destinations</span>
+                        </div>
+                        <div class="tm_instruction_item">
+                            <i class="fa fa-arrows-alt text-warning"/>
+                            <span>Drag markers to adjust positions</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Mission Details -->
+            <div class="tm_details_column">
+                <!-- Mission Header -->
+                <div class="tm_mission_header">
+                    <div class="tm_title_section">
+                        <h1><t t-esc="props.record.data.name or 'New Mission'"/></h1>
+                    </div>
+                    
+                    <div class="tm_metrics_grid">
+                        <div class="tm_metric_card">
+                            <div class="tm_metric_icon"><i class="fa fa-route"/></div>
+                            <div class="tm_metric_content">
+                                <span class="tm_metric_label">Total Distance</span>
+                                <div class="tm_metric_value">
+                                    <span><t t-esc="state.totalDistance.toFixed(2)"/> km</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tm_metric_card">
+                             <div class="tm_metric_icon"><i class="fa fa-tasks"/></div>
+                             <div class="tm_metric_content">
+                                <span class="tm_metric_label">Progress</span>
+                                <div class="progress" style="height: 20px;">
+                                   <div class="progress-bar" role="progressbar" t-attf-style="width: {{props.record.data.destination_progress || 0}}%;" t-att-aria-valuenow="props.record.data.destination_progress || 0" aria-valuemin="0" aria-valuemax="100">
+                                       <t t-esc="(props.record.data.destination_progress || 0).toFixed(0)"/>%
+                                   </div>
+                               </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mission Details Form Sections -->
+                <div class="tm_details_form">
+                    <!-- Source Location Display -->
+                    <div class="tm_form_section">
+                        <h4><i class="fa fa-play-circle me-2 text-primary"/>Source Location</h4>
+                        <div class="tm_location_display">
+                            <div t-if="state.source" class="tm_location_item tm_source_item">
+                                <i class="fa fa-map-marker-alt text-primary"/>
+                                <div class="tm_location_info">
+                                    <span class="tm_location_address"><t t-esc="state.source.location"/></span>
+                                    <small class="tm_location_coords"><t t-esc="state.source.latitude.toFixed(4)"/>, <t t-esc="state.source.longitude.toFixed(4)"/></small>
+                                </div>
+                            </div>
+                            <div t-else="" class="tm_empty_destinations">
+                                <p>Click on the map to set a source.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Destinations List -->
+                    <div class="tm_form_section">
+                        <h4>
+                            <i class="fa fa-flag-checkered me-2 text-success"/>
+                            Destinations 
+                            <span class="badge badge-secondary"><t t-esc="state.destinations.length"/></span>
+                        </h4>
+                        <div class="tm_destinations_list">
+                            <t t-if="state.destinations.length > 0">
+                                <t t-foreach="state.destinations" t-as="dest" t-key="dest.localId">
+                                    <div class="tm_location_item tm_destination_item">
+                                        <div class="tm_destination_number"><t t-esc="dest.sequence"/></div>
+                                        <div class="tm_location_info">
+                                            <span class="tm_location_address"><t t-esc="dest.location"/></span>
+                                            <small class="tm_location_coords"><t t-esc="dest.latitude.toFixed(4)"/>, <t t-esc="dest.longitude.toFixed(4)"/></small>
+                                        </div>
+                                        <div class="tm_location_actions">
+                                            <button type="button" class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeDestination(dest_index)">
+                                                <i class="fa fa-trash"/>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </t>
+                            </t>
+                            <div t-else="" class="tm_empty_destinations">
+                                <i class="fa fa-map-signs fa-2x text-muted"/>
+                                <p>Right-click on map to add destinations</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

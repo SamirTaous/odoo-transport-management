@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- System Parameter for OSRM Routing Service URL -->
+        <record id="osrm_route_url" model="ir.config_parameter">
+            <field name="key">transport_management.osrm_route_url</field>
+            <field name="value">http://router.project-osrm.org/route/v1/driving/</field>
+        </record>
+    </data>
+</odoo>

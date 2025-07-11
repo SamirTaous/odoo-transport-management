@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <!--
     ================================================================
-    FORM VIEW FOR TRANSPORT DESTINATION (Opens in a modal)
+    FORM VIEW FOR TRANSPORT DESTINATION
     ================================================================
     -->
     <record id="view_transport_destination_form" model="ir.ui.view">
@@ -13,14 +12,9 @@
             <form string="Destination">
                 <sheet>
                     <group>
-                        <!-- CORRECTED: Use double quotes for valid JSON in options -->
-                        <field name="location"
-                               widget="map_selector"
-                               options='{"latitude_field": "latitude", "longitude_field": "longitude"}'/>
-                        
-                        <!-- These fields are hidden but necessary for the widget to store data -->
-                        <field name="latitude" invisible="1"/>
-                        <field name="longitude" invisible="1"/>
+                        <field name="location"/>
+                        <field name="latitude"/>
+                        <field name="longitude"/>
                     </group>
                     <group>
                         <field name="is_completed" string="Mark as Completed"/>
@@ -30,17 +24,16 @@
         </field>
     </record>
 
-
     <!--
     ================================================================
-    FORM VIEW FOR TRANSPORT MISSION
+    FORM VIEW FOR TRANSPORT MISSION (*** MODIFIED ***)
     ================================================================
     -->
     <record id="view_transport_mission_form" model="ir.ui.view">
-        <field name="name">transport.mission.form</field>
+        <field name="name">transport.mission.form.planner</field>
         <field name="model">transport.mission</field>
         <field name="arch" type="xml">
-            <form string="Transport Mission">
+            <form string="Transport Mission" class="o_form_nosheet">
                 <header>
                     <button name="action_confirm" string="Confirm" type="object" class="btn-primary" data-hotkey="v" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
                     <button name="action_start_mission" string="Start Mission" type="object" class="btn-primary" data-hotkey="s" attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
@@ -49,63 +42,56 @@
                     <button name="action_reset_to_draft" string="Reset to Draft" type="object" data-hotkey="b" attrs="{'invisible': [('state', '!=', 'cancelled')]}"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,in_progress,done"/>
                 </header>
-                <sheet class="tm_form_sheet">
-                    <div class="oe_title">
-                        <h1><field name="name" readonly="1"/></h1>
-                        <field name="priority" widget="radio" options="{'horizontal': true}"/>
+                
+                <!-- Main Widget Container -->
+                <div class="o_form_sheet_bg">
+                    <div class="tm_mission_form">
+                        <widget name="mission_map_planner"/>
                     </div>
-                    <group>
-                        <group>
-                            <field name="mission_date"/>
-                            <field name="driver_id" widget="many2one_avatar" options="{'no_open': True}"/>
-                            <label for="total_distance_km"/>
-                            <div class="o_row">
-                                <field name="total_distance_km" widget="float" readonly="1"/>
-                                <span>km</span>
-                            </div>
-                        </group>
-                        <group>
-                            <field name="vehicle_id" options="{'no_open': True}"/>
-                            
-                            <!-- CORRECTED: Use double quotes for valid JSON in options -->
-                            <field name="source_location"
-                                   widget="map_selector"
-                                   options='{"latitude_field": "source_latitude", "longitude_field": "source_longitude"}'/>
-                            
-                            <!-- Fields are now invisible -->
-                            <field name="source_latitude" invisible="1"/>
-                            <field name="source_longitude" invisible="1"/>
-                        </group>
-                    </group>
+                </div>
 
+                <!--
+                    These fields must be present in the view for the widget's JS
+                    to read and update them. We make them invisible.
+                -->
+                <div class="oe_hide">
+                    <field name="name"/>
+                    <field name="source_location"/>
+                    <field name="source_latitude"/>
+                    <field name="source_longitude"/>
+                    <field name="destination_ids">
+                        <tree><field name="sequence"/></tree>
+                    </field>
+                    <field name="destination_progress"/>
+                    <field name="total_distance_km"/>
+                </div>
+
+                <!-- Add other essential fields here in a standard sheet -->
+                <sheet>
+                    <group string="Mission Configuration">
+                         <field name="mission_date"/>
+                         <field name="driver_id" widget="many2one_avatar" options="{'no_open': True}"/>
+                         <field name="vehicle_id" options="{'no_open': True}"/>
+                         <field name="priority" widget="radio" options="{'horizontal': true}"/>
+                    </group>
                     <notebook>
-                        <page string="Destinations" name="destinations">
-                            <label for="destination_progress"/>
-                            <field name="destination_progress" widget="progressbar" nolabel="1"/>
-                            
-                            <field name="destination_ids" class="mt-2">
-                                <tree>
-                                    <field name="sequence" widget="handle"/>
-                                    <field name="location"/>
-                                    <field name="is_completed" string="Done?"/>
-                                </tree>
-                            </field>
-                        </page>
-                        <page string="Operational Notes" name="notes">
-                            <field name="notes" placeholder="Add internal notes for the mission..."/>
-                        </page>
+                         <page string="Operational Notes">
+                             <field name="notes" placeholder="Add mission notes and special instructions..."/>
+                         </page>
                     </notebook>
                 </sheet>
+
+                 <!-- Chatter
                 <div class="oe_chatter">
                     <field name="message_follower_ids"/>
                     <field name="activity_ids"/>
                     <field name="message_ids"/>
-                </div>
+                </div> -->
             </form>
         </field>
     </record>
-    
-    <!-- KANBAN VIEW -->
+
+    <!-- KANBAN, TREE, and ACTION views remain unchanged -->
     <record id="view_transport_mission_kanban" model="ir.ui.view">
         <field name="name">transport.mission.kanban</field>
         <field name="model">transport.mission</field>
@@ -137,7 +123,6 @@
         </field>
     </record>
 
-    <!-- TREE VIEW -->
     <record id="view_transport_mission_tree" model="ir.ui.view">
         <field name="name">transport.mission.tree</field>
         <field name="model">transport.mission</field>
@@ -155,11 +140,9 @@
         </field>
     </record>
     
-    <!-- ACTION WINDOW -->
     <record id="action_transport_mission" model="ir.actions.act_window">
         <field name="name">Transport Missions</field>
         <field name="res_model">transport.mission</field>
         <field name="view_mode">kanban,tree,form</field>
     </record>
-
 </odoo>

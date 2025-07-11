@@ -12,6 +12,9 @@
                             <button type="button" class="btn btn-sm btn-outline-primary" t-on-click="clearAllMarkers">
                                 <i class="fa fa-trash me-1"/>Clear All
                             </button>
+                            <button type="button" class="btn btn-sm btn-outline-info ms-2" t-on-click="fitMapToMarkers">
+                                <i class="fa fa-search me-1"/>Fit to View
+                            </button>
                         </div>
                     </div>
                     
@@ -33,6 +36,10 @@
                         <div class="tm_instruction_item">
                             <i class="fa fa-arrows-alt text-warning"/>
                             <span>Drag markers to adjust positions</span>
+                        </div>
+                        <div class="tm_instruction_item">
+                            <i class="fa fa-trash text-danger"/>
+                            <span>Click markers to delete destinations</span>
                         </div>
                     </div>
                 </div>
@@ -106,7 +113,7 @@
                                             <small class="tm_location_coords"><t t-esc="dest.latitude.toFixed(4)"/>, <t t-esc="dest.longitude.toFixed(4)"/></small>
                                         </div>
                                         <div class="tm_location_actions">
-                                            <button type="button" class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeDestination(dest_index)">
+                                            <button type="button" class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeDestinationByLocalId(dest.localId)">
                                                 <i class="fa fa-trash"/>
                                             </button>
                                         </div>
@@ -117,6 +124,31 @@
                                 <i class="fa fa-map-signs fa-2x text-muted"/>
                                 <p>Right-click on map to add destinations</p>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Route Summary -->
+                    <div class="tm_form_section" t-if="state.source and state.destinations.length > 0">
+                        <h4><i class="fa fa-list-ol me-2 text-info"/>Route Summary</h4>
+                        <div class="tm_route_summary">
+                            <div class="tm_route_step">
+                                <div class="tm_route_step_marker tm_route_start">
+                                    <i class="fa fa-play"/>
+                                </div>
+                                <div class="tm_route_step_content">
+                                    <strong>Start:</strong> <t t-esc="state.source.location"/>
+                                </div>
+                            </div>
+                            <t t-foreach="state.destinations" t-as="dest" t-key="dest.localId">
+                                <div class="tm_route_step">
+                                    <div class="tm_route_step_marker tm_route_destination">
+                                        <t t-esc="dest.sequence"/>
+                                    </div>
+                                    <div class="tm_route_step_content">
+                                        <strong>Stop <t t-esc="dest.sequence"/>:</strong> <t t-esc="dest.location"/>
+                                    </div>
+                                </div>
+                            </t>
                         </div>
                     </div>
                 </div>

@@ -187,13 +187,20 @@ export class MissionMapPlannerWidget extends Component {
             
             marker.localId = dest.localId;
             
-            marker.bindPopup(`
+            // Enhanced popup with delete button
+            const popupContent = `
                 <div>
                     <strong>Destination ${dest.sequence}</strong><br>
                     ${dest.location}<br>
-                    <small>Lat: ${dest.latitude.toFixed(4)}, Lng: ${dest.longitude.toFixed(4)}</small>
+                    <small>Lat: ${dest.latitude.toFixed(4)}, Lng: ${dest.longitude.toFixed(4)}</small><br>
+                    <button onclick="window.missionWidget.removeDestinationByLocalId('${dest.localId}')" 
+                            style="background: #dc3545; color: white; border: none; padding: 5px 10px; margin-top: 5px; border-radius: 3px; cursor: pointer;">
+                        🗑️ Delete
+                    </button>
                 </div>
-            `);
+            `;
+            
+            marker.bindPopup(popupContent);
             
             marker.on("dragend", (e) => {
                 const newLatLng = e.target.getLatLng();
@@ -202,6 +209,9 @@ export class MissionMapPlannerWidget extends Component {
             
             this.destinationMarkers[dest.localId] = marker;
         });
+
+        // Make widget accessible globally for popup button clicks
+        window.missionWidget = this;
 
         console.log("Markers updated:", {
             source: !!this.sourceMarker,
@@ -288,27 +298,17 @@ export class MissionMapPlannerWidget extends Component {
         }
     }
 
-        async addDestination(lat, lng) {
+    async addDestination(lat, lng) {
         try {
-            // [THE FIX]
-            // We must call addNew() with a position argument.
-            // We can get the current number of records and use that as the index
-            // to add the new line at the end of the list.
             const list = this.props.record.data.destination_ids;
-            const newRecord = await list.addNew(
-                {
-                    position: "bottom"
-                }
-            );
+            const newRecord = await list.addNew({ position: "bottom" });
             
-            // Now that we have the new (empty) record, we can update it.
             const address = await this.reverseGeocode(lat, lng);
             const newSequence = (this.state.destinations.length > 0)
                 ? Math.max(0, ...this.state.destinations.map(d => d.sequence)) + 1 : 1;
 
             console.log("Updating new record with data:", { address, lat, lng, sequence: newSequence });
 
-            // Call .update() on the new record itself.
             await newRecord.update({
                 location: address,
                 latitude: lat,
@@ -332,43 +332,109 @@ export class MissionMapPlannerWidget extends Component {
 
             console.log("Updating destination:", { localId, address, lat, lng });
 
-            const command = destToUpdate.id 
-                ? [1, destToUpdate.id, { location: address, latitude: lat, longitude: lng }]
-                : [1, localId, { location: address, latitude: lat, longitude: lng }];
-
-            await this.props.record.update({ destination_ids: [command] });
-            this.notification.add("Destination updated", { type: "success" });
+            // Find the record in the destination_ids list
+            const list = this.props.record.data.destination_ids;
+            const recordToUpdate = list.records.find(rec => rec.id === localId);
+            
+            if (recordToUpdate) {
+                await recordToUpdate.update({
+                    location: address,
+                    latitude: lat,
+                    longitude: lng
+                });
+                this.notification.add("Destination updated", { type: "success" });
+            }
         } catch (error) {
             console.error('Error updating destination:', error);
             this.notification.add("Failed to update destination", { type: "danger" });
         }
     }
 
-    async removeDestination(index) {
+    // FIXED: Method for removing destination by localId
+    async removeDestinationByLocalId(localId) {
         try {
-            const destToRemove = this.state.destinations[index];
-            if (!destToRemove) return;
+            console.log("Removing destination with localId:", localId);
             
-            console.log("Removing destination:", destToRemove);
+            const list = this.props.record.data.destination_ids;
+            const recordToDelete = list.records.find(rec => rec.id === localId);
             
-            const command = destToRemove.id ? [2, destToRemove.id] : [2, destToRemove.localId];
-            await this.props.record.update({ destination_ids: [command] });
-            this.notification.add("Destination removed", { type: "success" });
+            if (recordToDelete) {
+                // Check if it's a virtual record (new, unsaved record)
+                if (typeof recordToDelete.resId !== 'number' || recordToDelete.resId <= 0) {
+                    // For virtual records, use the list's removeRecord method
+                    console.log("Removing virtual record:", localId);
+                    await list.removeRecord(recordToDelete);
+                } else {
+                    // For saved records, use the normal delete method
+                    console.log("Deleting saved record:", recordToDelete.resId);
+                    await recordToDelete.delete();
+                }
+                this.notification.add("Destination removed", { type: "success" });
+            } else {
+                console.error("Record not found for localId:", localId);
+                this.notification.add("Failed to remove destination", { type: "danger" });
+            }
         } catch (error) {
             console.error('Error removing destination:', error);
             this.notification.add("Failed to remove destination", { type: "danger" });
         }
     }
 
-    clearAllMarkers() {
-        if (confirm('Are you sure you want to clear all markers?')) {
-            this.props.record.update({
-                source_location: false,
-                source_latitude: false,
-                source_longitude: false,
-                destination_ids: [[5, 0, 0]]
-            });
-            this.notification.add("All markers cleared", { type: "success" });
+    // Keep the original method for backward compatibility
+    async removeDestination(index) {
+        try {
+            const destToRemove = this.state.destinations[index];
+            if (!destToRemove) return;
+            
+            await this.removeDestinationByLocalId(destToRemove.localId);
+        } catch (error) {
+            console.error('Error removing destination:', error);
+            this.notification.add("Failed to remove destination", { type: "danger" });
+        }
+    }
+
+    // FIXED: Clear all method
+    async clearAllMarkers() {
+        try {
+            if (confirm('Are you sure you want to clear all markers?')) {
+                console.log("Clearing all markers...");
+                
+                // Clear source location
+                await this.props.record.update({
+                    source_location: false,
+                    source_latitude: false,
+                    source_longitude: false,
+                });
+                
+                // Clear all destinations - handle both virtual and saved records
+                const list = this.props.record.data.destination_ids;
+                if (list && list.records && list.records.length > 0) {
+                    // Separate virtual records from saved records
+                    const virtualRecords = list.records.filter(rec => 
+                        typeof rec.resId !== 'number' || rec.resId <= 0
+                    );
+                    const savedRecords = list.records.filter(rec => 
+                        typeof rec.resId === 'number' && rec.resId > 0
+                    );
+                    
+                    // Remove virtual records using removeRecord
+                    for (const virtualRecord of virtualRecords) {
+                        console.log("Removing virtual record:", virtualRecord.id);
+                        await list.removeRecord(virtualRecord);
+                    }
+                    
+                    // Delete saved records using delete
+                    for (const savedRecord of savedRecords) {
+                        console.log("Deleting saved record:", savedRecord.resId);
+                        await savedRecord.delete();
+                    }
+                }
+                
+                this.notification.add("All markers cleared", { type: "success" });
+            }
+        } catch (error) {
+            console.error('Error clearing markers:', error);
+            this.notification.add("Failed to clear all markers", { type: "danger" });
         }
     }
 

@@ -5,16 +5,32 @@ import { useService } from "@web/core/utils/hooks";
 
 const { Component, onMounted, onWillUnmount, onWillUpdateProps, useRef, useState } = owl;
 
-// Helper to calculate distance
-function haversineDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Earth's radius in km
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+// Helper function to calculate osrm distance 
+function decodePolyline(encoded) {
+    let index = 0, len = encoded.length;
+    let lat = 0, lng = 0;
+    let array = [];
+    while (index < len) {
+        let b, shift = 0, result = 0;
+        do {
+            b = encoded.charCodeAt(index++) - 63;
+            result |= (b & 0x1f) << shift;
+            shift += 5;
+        } while (b >= 0x20);
+        let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+        lat += dlat;
+        shift = 0;
+        result = 0;
+        do {
+            b = encoded.charCodeAt(index++) - 63;
+            result |= (b & 0x1f) << shift;
+            shift += 5;
+        } while (b >= 0x20);
+        let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+        lng += dlng;
+        array.push([lat * 1e-5, lng * 1e-5]);
+    }
+    return array;
 }
 
 export class MissionMapPlannerWidget extends Component {
@@ -455,44 +471,70 @@ export class MissionMapPlannerWidget extends Component {
         }
     }
 
-    drawRoute() {
+        // Replace the old drawRoute with this new one
+    async drawRoute() {
         if (!this.map) return;
-        
         if (this.routeLayer) {
             this.map.removeLayer(this.routeLayer);
         }
-        
+
         const points = [];
         if (this.state.source) {
-            points.push([this.state.source.latitude, this.state.source.longitude]);
+            // OSRM API expects coordinates in [longitude, latitude] format
+            points.push([this.state.source.longitude, this.state.source.latitude]);
         }
-        this.state.destinations.forEach(d => points.push([d.latitude, d.longitude]));
+        this.state.destinations.forEach(d => {
+            if(d.latitude && d.longitude) {
+                points.push([d.longitude, d.latitude]);
+            }
+        });
 
-        if (points.length > 1) {
-            // Draw route line
-            this.routeLayer = L.polyline(points, { 
-                color: '#007bff', 
-                weight: 4, 
-                opacity: 0.7,
-                dashArray: '10, 5'
-            }).addTo(this.map);
-            
-            // Calculate total distance
-            let distance = 0;
-            for (let i = 0; i < points.length - 1; i++) {
-                distance += haversineDistance(points[i][0], points[i][1], points[i+1][0], points[i+1][1]);
-            }
-            this.state.totalDistance = distance;
-            
-            // Update record if distance changed
-            if (Math.abs(this.props.record.data.total_distance_km - distance) > 0.01) {
-                this.props.record.update({ total_distance_km: distance });
-            }
-        } else {
+        if (points.length < 2) {
+            // Not enough points for a route, reset distance and exit
             this.state.totalDistance = 0;
             if (this.props.record.data.total_distance_km !== 0) {
                 this.props.record.update({ total_distance_km: 0 });
             }
+            return;
+        }
+
+        // 1. Construct the OSRM API URL
+        const coordinates = points.map(p => p.join(',')).join(';');
+        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=polyline`;
+
+        try {
+            // 2. Fetch the route from OSRM
+            const response = await fetch(osrmUrl);
+            if (!response.ok) throw new Error(`OSRM request failed: ${response.statusText}`);
+            const data = await response.json();
+
+            if (data.code !== "Ok" || !data.routes || data.routes.length === 0) {
+                throw new Error(data.message || "No route found by OSRM.");
+            }
+
+            // 3. Extract data and draw the route
+            const route = data.routes[0];
+            const routeGeometry = decodePolyline(route.geometry); // Decode the geometry
+            const routeDistance = route.distance / 1000; // Convert meters to KM
+
+            this.routeLayer = L.polyline(routeGeometry, {
+                color: '#007bff',
+                weight: 5,
+                opacity: 0.7,
+            }).addTo(this.map);
+
+            // 4. Update state and Odoo record
+            this.state.totalDistance = routeDistance;
+            if (Math.abs(this.props.record.data.total_distance_km - routeDistance) > 0.01) {
+                this.props.record.update({ total_distance_km: routeDistance });
+            }
+
+        } catch (error) {
+            console.error("Error fetching route from OSRM:", error);
+            this.notification.add("Could not calculate road route.", { type: "warning" });
+            // Fallback to a simple line if OSRM fails
+            const latLngPoints = points.map(p => [p[1], p[0]]); // Convert back to [lat, lng] for Leaflet
+            this.routeLayer = L.polyline(latLngPoints, { color: 'red', weight: 3, opacity: 0.5, dashArray: '5, 10' }).addTo(this.map);
         }
     }
 }

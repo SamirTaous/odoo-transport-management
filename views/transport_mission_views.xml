@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!--
-    ================================================================
-    FORM VIEW FOR TRANSPORT DESTINATION
-    ================================================================
-    -->
+    <!-- Form View for Transport Destination -->
     <record id="view_transport_destination_form" model="ir.ui.view">
         <field name="name">transport.destination.form</field>
         <field name="model">transport.destination</field>
@@ -24,11 +20,7 @@
         </field>
     </record>
 
-    <!--
-    ================================================================
-    FORM VIEW FOR TRANSPORT MISSION (*** CORRECTED ***)
-    ================================================================
-    -->
+    <!-- Form View for Transport Mission -->
     <record id="view_transport_mission_form" model="ir.ui.view">
         <field name="name">transport.mission.form.planner</field>
         <field name="model">transport.mission</field>
@@ -49,23 +41,11 @@
                         <widget name="mission_map_planner"/>
                     </div>
                 </div>
-
-                <!--
-                    These fields must be present in the view for the widget's JS
-                    to read and update them. We make them invisible.
-                -->
                 <div class="oe_hide">
                     <field name="name"/>
                     <field name="source_location"/>
                     <field name="source_latitude"/>
                     <field name="source_longitude"/>
-                    
-                    <!--
-                        [THE FIX]
-                        This is the critical change. We must declare all the fields that the
-                        JavaScript widget will write to (location, latitude, longitude, sequence)
-                        within this <field> tag.
-                    -->
                     <field name="destination_ids">
                         <tree>
                             <field name="sequence"/>
@@ -78,8 +58,6 @@
                     <field name="destination_progress"/>
                     <field name="total_distance_km"/>
                 </div>
-
-                <!-- Add other essential fields here in a standard sheet -->
                 <sheet>
                     <group string="Mission Configuration">
                          <field name="mission_date"/>
@@ -93,8 +71,7 @@
                          </page>
                     </notebook>
                 </sheet>
-
-                 <!-- Chatter
+                <!-- Chatter 
                 <div class="oe_chatter">
                     <field name="message_follower_ids"/>
                     <field name="activity_ids"/>
@@ -103,8 +80,6 @@
             </form>
         </field>
     </record>
-
-    <!-- KANBAN, TREE, and ACTION views remain unchanged -->
     <record id="view_transport_mission_kanban" model="ir.ui.view">
         <field name="name">transport.mission.kanban</field>
         <field name="model">transport.mission</field>
@@ -135,7 +110,6 @@
             </kanban>
         </field>
     </record>
-
     <record id="view_transport_mission_tree" model="ir.ui.view">
         <field name="name">transport.mission.tree</field>
         <field name="model">transport.mission</field>

@@ -461,3 +461,4 @@ MissionMapPlannerWidget.template = "transport_management.MissionMapPlannerWidget
 
 // Register as a field widget, not view widget
 registry.category("fields").add("mission_map_planner", MissionMapPlannerWidget)
+

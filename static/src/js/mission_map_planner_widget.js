@@ -3,7 +3,7 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
-const { Component, onMounted, onWillUnmount, onWillUpdateProps, useRef, useState } = owl;
+const { Component, onMounted, onWillUnmount, onPatched, onWillUpdateProps, useRef, useState } = owl;
 
 // Helper function to calculate osrm distance 
 function decodePolyline(encoded) {
@@ -34,13 +34,13 @@ function decodePolyline(encoded) {
 }
 
 export class MissionMapPlannerWidget extends Component {
-    setup() {
+        setup() {
         this.mapContainer = useRef("mapContainer");
         this.notification = useService("notification");
         
         this.map = null;
         this.sourceMarker = null;
-        this.destinationMarkers = {}; // Use object for easy lookup by localId
+        this.destinationMarkers = {};
         this.routeLayer = null;
 
         this.state = useState({
@@ -54,21 +54,27 @@ export class MissionMapPlannerWidget extends Component {
             this.initializeMap();
         });
 
+        // --- CHANGED: onWillUpdateProps now ONLY syncs state. No map operations here. ---
         onWillUpdateProps(async (nextProps) => {
             console.log("Props updating, syncing state...");
             this.syncStateFromRecord(nextProps.record);
+        });
+
+        // --- CHANGED: onPatched is the new, SAFE place for all map drawing. ---
+        onPatched(() => {
+            console.log("Component patched. Updating map visuals.");
             this.updateMarkers();
             this.drawRoute();
         });
 
         onWillUnmount(() => {
             if (this.map) {
+                console.log("Unmounting map component.");
                 this.map.remove();
                 this.map = null;
             }
         });
 
-        // Initial sync
         this.syncStateFromRecord(this.props.record);
     }
 
@@ -83,24 +89,28 @@ export class MissionMapPlannerWidget extends Component {
         try {
             this.map = L.map(this.mapContainer.el).setView([54.5, -2.0], 6);
             
-            // Add tile layer
             L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
                 attribution: '© OpenStreetMap contributors',
                 maxZoom: 19,
             }).addTo(this.map);
 
-            // Left click to set source location
-            this.map.on("click", (e) => {
-                console.log("Map clicked at:", e.latlng);
-                this.setSourceLocation(e.latlng.lat, e.latlng.lng);
+            this.map.on("click", (e) => this.setSourceLocation(e.latlng.lat, e.latlng.lng));
+            this.map.on("contextmenu", (e) => {
+                e.originalEvent.preventDefault();
+                e.originalEvent.stopPropagation();
+                this.addDestination(e.latlng.lat, e.latlng.lng);
             });
 
-            // Right click to add destination
-            this.map.on("contextmenu", (e) => {
-                console.log("Right click at:", e.latlng);
-                e.originalEvent.preventDefault();
-                 e.originalEvent.stopPropagation();
-                this.addDestination(e.latlng.lat, e.latlng.lng);
+            // --- CHANGED: Added robust event handler for delete buttons ---
+            this.map.on('popupopen', (e) => {
+                const deleteButton = e.popup._container.querySelector('.tm-delete-destination');
+                if (deleteButton) {
+                    deleteButton.addEventListener('click', () => {
+                        const localId = deleteButton.dataset.localId;
+                        this.removeDestinationByLocalId(localId);
+                        this.map.closePopup();
+                    });
+                }
             });
 
             this.updateMarkers();
@@ -151,13 +161,12 @@ export class MissionMapPlannerWidget extends Component {
     }
 
     updateMarkers() {
+        // --- CHANGED: Added safety guard ---
         if (!this.map) return;
 
-        // Clear existing destination markers
         Object.values(this.destinationMarkers).forEach(m => this.map.removeLayer(m));
         this.destinationMarkers = {};
 
-        // Update source marker
         if (this.state.source) {
             const latLng = [this.state.source.latitude, this.state.source.longitude];
             if (!this.sourceMarker) {
@@ -166,35 +175,26 @@ export class MissionMapPlannerWidget extends Component {
                     icon: this.createMarkerIcon('blue') 
                 }).addTo(this.map);
                 
-                this.sourceMarker.bindPopup(`
-                    <div>
-                        <strong>Source Location</strong><br>
-                        ${this.state.source.location}<br>
-                        <small>Lat: ${this.state.source.latitude.toFixed(4)}, Lng: ${this.state.source.longitude.toFixed(4)}</small>
-                    </div>
-                `);
-                
                 this.sourceMarker.on("dragend", (e) => {
                     const newLatLng = e.target.getLatLng();
                     this.setSourceLocation(newLatLng.lat, newLatLng.lng);
                 });
             } else {
                 this.sourceMarker.setLatLng(latLng);
-                this.sourceMarker.getPopup().setContent(`
-                    <div>
-                        <strong>Source Location</strong><br>
-                        ${this.state.source.location}<br>
-                        <small>Lat: ${this.state.source.latitude.toFixed(4)}, Lng: ${this.state.source.longitude.toFixed(4)}</small>
-                    </div>
-                `);
             }
+            this.sourceMarker.bindPopup(`...`).getPopup().setContent(`
+                <div>
+                    <strong>Source Location</strong><br>
+                    ${this.state.source.location}<br>
+                    <small>Lat: ${this.state.source.latitude.toFixed(4)}, Lng: ${this.state.source.longitude.toFixed(4)}</small>
+                </div>
+            `);
         } else if (this.sourceMarker) {
             this.map.removeLayer(this.sourceMarker);
             this.sourceMarker = null;
         }
 
-        // Update destination markers
-        this.state.destinations.forEach((dest, index) => {
+        this.state.destinations.forEach((dest) => {
             const latLng = [dest.latitude, dest.longitude];
             const marker = L.marker(latLng, { 
                 draggable: true, 
@@ -203,13 +203,13 @@ export class MissionMapPlannerWidget extends Component {
             
             marker.localId = dest.localId;
             
-            // Enhanced popup with delete button
+            // --- CHANGED: Popup uses a class and data-attributes instead of window hack ---
             const popupContent = `
                 <div>
                     <strong>Destination ${dest.sequence}</strong><br>
                     ${dest.location}<br>
                     <small>Lat: ${dest.latitude.toFixed(4)}, Lng: ${dest.longitude.toFixed(4)}</small><br>
-                    <button onclick="window.missionWidget.removeDestinationByLocalId('${dest.localId}')" 
+                    <button class="tm-delete-destination" data-local-id="${dest.localId}"
                             style="background: #dc3545; color: white; border: none; padding: 5px 10px; margin-top: 5px; border-radius: 3px; cursor: pointer;">
                         🗑️ Delete
                     </button>
@@ -224,14 +224,6 @@ export class MissionMapPlannerWidget extends Component {
             });
             
             this.destinationMarkers[dest.localId] = marker;
-        });
-
-        // Make widget accessible globally for popup button clicks
-        window.missionWidget = this;
-
-        console.log("Markers updated:", {
-            source: !!this.sourceMarker,
-            destinations: Object.keys(this.destinationMarkers).length
         });
     }
 
@@ -473,14 +465,15 @@ export class MissionMapPlannerWidget extends Component {
 
         // Replace the old drawRoute with this new one
     async drawRoute() {
+        // --- CHANGED: Added safety guard ---
         if (!this.map) return;
+
         if (this.routeLayer) {
             this.map.removeLayer(this.routeLayer);
         }
 
         const points = [];
         if (this.state.source) {
-            // OSRM API expects coordinates in [longitude, latitude] format
             points.push([this.state.source.longitude, this.state.source.latitude]);
         }
         this.state.destinations.forEach(d => {
@@ -490,7 +483,6 @@ export class MissionMapPlannerWidget extends Component {
         });
 
         if (points.length < 2) {
-            // Not enough points for a route, reset distance and exit
             this.state.totalDistance = 0;
             if (this.props.record.data.total_distance_km !== 0) {
                 this.props.record.update({ total_distance_km: 0 });
@@ -498,42 +490,39 @@ export class MissionMapPlannerWidget extends Component {
             return;
         }
 
-        // 1. Construct the OSRM API URL
         const coordinates = points.map(p => p.join(',')).join(';');
         const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=polyline`;
 
         try {
-            // 2. Fetch the route from OSRM
             const response = await fetch(osrmUrl);
             if (!response.ok) throw new Error(`OSRM request failed: ${response.statusText}`);
             const data = await response.json();
+
+            // --- CHANGED: Added safety guard before drawing ---
+            if (!this.map) return; 
 
             if (data.code !== "Ok" || !data.routes || data.routes.length === 0) {
                 throw new Error(data.message || "No route found by OSRM.");
             }
 
-            // 3. Extract data and draw the route
             const route = data.routes[0];
-            const routeGeometry = decodePolyline(route.geometry); // Decode the geometry
-            const routeDistance = route.distance / 1000; // Convert meters to KM
+            const routeGeometry = decodePolyline(route.geometry);
+            const routeDistance = route.distance / 1000;
 
-            this.routeLayer = L.polyline(routeGeometry, {
-                color: '#007bff',
-                weight: 5,
-                opacity: 0.7,
-            }).addTo(this.map);
+            this.routeLayer = L.polyline(routeGeometry, { color: '#007bff', weight: 5, opacity: 0.7 }).addTo(this.map);
 
-            // 4. Update state and Odoo record
             this.state.totalDistance = routeDistance;
             if (Math.abs(this.props.record.data.total_distance_km - routeDistance) > 0.01) {
                 this.props.record.update({ total_distance_km: routeDistance });
             }
-
         } catch (error) {
             console.error("Error fetching route from OSRM:", error);
             this.notification.add("Could not calculate road route.", { type: "warning" });
-            // Fallback to a simple line if OSRM fails
-            const latLngPoints = points.map(p => [p[1], p[0]]); // Convert back to [lat, lng] for Leaflet
+            
+            // --- CHANGED: Added safety guard before drawing fallback ---
+            if (!this.map) return;
+
+            const latLngPoints = points.map(p => [p[1], p[0]]);
             this.routeLayer = L.polyline(latLngPoints, { color: 'red', weight: 3, opacity: 0.5, dashArray: '5, 10' }).addTo(this.map);
         }
     }

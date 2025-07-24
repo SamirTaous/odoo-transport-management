@@ -31,6 +31,10 @@ class TransportMission(models.Model):
 
     # --- All fields are correct ---
     name = fields.Char(string='Reference', required=True, copy=False, readonly=True, default=lambda self: _('New'))
+    mission_type = fields.Selection([
+        ('pickup', 'Pickup Mission'),
+        ('delivery', 'Delivery Mission')
+    ], string='Mission Type', required=True, default='pickup', tracking=True)
     mission_date = fields.Date(string='Date', required=True, tracking=True, default=fields.Date.context_today)
     source_location = fields.Char(string='Source Location', tracking=True)
     source_latitude = fields.Float(string='Source Latitude', digits=(10, 7))

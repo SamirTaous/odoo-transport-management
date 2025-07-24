@@ -51,6 +51,14 @@
                 <div class="tm_mission_header">
                     <div class="tm_title_section">
                         <h1><t t-esc="props.record.data.name or 'New Mission'"/></h1>
+                        <div class="tm_mission_type_badge">
+                            <span t-if="props.record.data.mission_type === 'pickup'" class="badge badge-info tm_pickup_badge">
+                                <i class="fa fa-arrow-up me-1"/>Pickup Mission
+                            </span>
+                            <span t-elif="props.record.data.mission_type === 'delivery'" class="badge badge-success tm_delivery_badge">
+                                <i class="fa fa-arrow-down me-1"/>Delivery Mission
+                            </span>
+                        </div>
                     </div>
                     
                     <div class="tm_metrics_grid">

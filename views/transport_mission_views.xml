@@ -64,6 +64,7 @@
                 </div>
                 <sheet>
                     <group string="Mission Configuration">
+                         <field name="mission_type" widget="radio" options="{'horizontal': true}"/>
                          <field name="mission_date"/>
                          <field name="driver_id" widget="many2one_avatar" options="{'no_open': True}"/>
                          <field name="vehicle_id" options="{'no_open': True}"/>

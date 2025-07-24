@@ -573,6 +573,7 @@ export class MissionMapPlannerWidget extends Component {
 
         // If not enough points for a route, ensure distance is zero and exit
         if (points.length < 2) {
+            this.state.totalDistance = 0;
             if (this.props.record.data.total_distance_km !== 0) {
                 this.props.record.update({ total_distance_km: 0 });
             }
@@ -599,15 +600,14 @@ export class MissionMapPlannerWidget extends Component {
             const routeGeometry = decodePolyline(route.geometry);
             const routeDistance = route.distance / 1000;
 
-            // Clear route again before adding new one (extra safety)
-            this.clearRoute();
-
             this.routeLayer = L.polyline(routeGeometry, {
                 color: '#007bff',
                 weight: 5,
                 opacity: 0.7
             }).addTo(this.map);
 
+            // Update both the record and the state for UI display
+            this.state.totalDistance = routeDistance;
             if (Math.abs(this.props.record.data.total_distance_km - routeDistance) > 0.01) {
                 this.props.record.update({ total_distance_km: routeDistance });
             }
@@ -624,7 +624,7 @@ export class MissionMapPlannerWidget extends Component {
             this.routeLayer = L.polyline(latLngPoints, {
                 color: 'red',
                 weight: 3,
-                opacity: 0.5,
+                opacity: 0.5, 
                 dashArray: '5, 10'
             }).addTo(this.map);
         }

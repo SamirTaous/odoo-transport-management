@@ -34,14 +34,15 @@ function decodePolyline(encoded) {
 }
 
 export class MissionMapPlannerWidget extends Component {
-        setup() {
+    setup() {
         this.mapContainer = useRef("mapContainer");
         this.notification = useService("notification");
-        
+
         this.map = null;
         this.sourceMarker = null;
         this.destinationMarkers = {};
         this.routeLayer = null;
+        this.routeUpdateTimeout = null;
 
         this.state = useState({
             source: null,
@@ -63,8 +64,12 @@ export class MissionMapPlannerWidget extends Component {
         // --- CHANGED: onPatched is the new, SAFE place for all map drawing. ---
         onPatched(() => {
             console.log("Component patched. Updating map visuals.");
-            this.updateMarkers();
-            this.drawRoute();
+            try {
+                this.updateMarkers();
+                this.drawRoute();
+            } catch (error) {
+                console.error("Error in onPatched:", error);
+            }
         });
 
         onWillUnmount(() => {
@@ -88,7 +93,7 @@ export class MissionMapPlannerWidget extends Component {
 
         try {
             this.map = L.map(this.mapContainer.el).setView([54.5, -2.0], 6);
-            
+
             L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
                 attribution: '© OpenStreetMap contributors',
                 maxZoom: 19,
@@ -126,30 +131,33 @@ export class MissionMapPlannerWidget extends Component {
 
     syncStateFromRecord(record) {
         console.log("Syncing state from record:", record.data);
-        
+
         const { source_location, source_latitude, source_longitude } = record.data;
         if (source_latitude && source_longitude) {
-            this.state.source = { 
-                location: source_location || `${source_latitude.toFixed(4)}, ${source_longitude.toFixed(4)}`, 
-                latitude: source_latitude, 
-                longitude: source_longitude 
+            this.state.source = {
+                location: source_location || `${source_latitude.toFixed(4)}, ${source_longitude.toFixed(4)}`,
+                latitude: source_latitude,
+                longitude: source_longitude
             };
         } else {
             this.state.source = null;
         }
-        
+
         // Handle destinations - check if destination_ids exists and has records
         const destinationIds = record.data.destination_ids;
-        if (destinationIds && destinationIds.records) {
-            this.state.destinations = destinationIds.records.map(rec => ({
-                id: rec.resId,
-                localId: rec.id,
-                location: rec.data.location || `${rec.data.latitude?.toFixed(4)}, ${rec.data.longitude?.toFixed(4)}`,
-                latitude: rec.data.latitude,
-                longitude: rec.data.longitude,
-                sequence: rec.data.sequence || 1
-            })).filter(dest => dest.latitude && dest.longitude)
-              .sort((a, b) => a.sequence - b.sequence);
+        if (destinationIds && destinationIds.records && Array.isArray(destinationIds.records)) {
+            this.state.destinations = destinationIds.records
+                .filter(rec => rec && rec.data && rec.id) // Filter out undefined/null records
+                .map(rec => ({
+                    id: rec.resId,
+                    localId: rec.id,
+                    location: rec.data.location || `${rec.data.latitude?.toFixed(4)}, ${rec.data.longitude?.toFixed(4)}`,
+                    latitude: rec.data.latitude,
+                    longitude: rec.data.longitude,
+                    sequence: rec.data.sequence || 1
+                }))
+                .filter(dest => dest.latitude && dest.longitude)
+                .sort((a, b) => a.sequence - b.sequence);
         } else {
             this.state.destinations = [];
         }
@@ -170,14 +178,14 @@ export class MissionMapPlannerWidget extends Component {
         if (this.state.source) {
             const latLng = [this.state.source.latitude, this.state.source.longitude];
             if (!this.sourceMarker) {
-                this.sourceMarker = L.marker(latLng, { 
-                    draggable: true, 
-                    icon: this.createMarkerIcon('blue') 
+                this.sourceMarker = L.marker(latLng, {
+                    draggable: true,
+                    icon: this.createMarkerIcon('blue')
                 }).addTo(this.map);
-                
-                this.sourceMarker.on("dragend", (e) => {
+
+                this.sourceMarker.on("dragend", async (e) => {
                     const newLatLng = e.target.getLatLng();
-                    this.setSourceLocation(newLatLng.lat, newLatLng.lng);
+                    await this.setSourceLocation(newLatLng.lat, newLatLng.lng);
                 });
             } else {
                 this.sourceMarker.setLatLng(latLng);
@@ -196,13 +204,13 @@ export class MissionMapPlannerWidget extends Component {
 
         this.state.destinations.forEach((dest) => {
             const latLng = [dest.latitude, dest.longitude];
-            const marker = L.marker(latLng, { 
-                draggable: true, 
-                icon: this.createMarkerIcon('red', dest.sequence) 
+            const marker = L.marker(latLng, {
+                draggable: true,
+                icon: this.createMarkerIcon('red', dest.sequence)
             }).addTo(this.map);
-            
+
             marker.localId = dest.localId;
-            
+
             // --- CHANGED: Popup uses a class and data-attributes instead of window hack ---
             const popupContent = `
                 <div>
@@ -215,22 +223,21 @@ export class MissionMapPlannerWidget extends Component {
                     </button>
                 </div>
             `;
-            
+
             marker.bindPopup(popupContent);
-            
-            marker.on("dragend", (e) => {
+
+            marker.on("dragend", async (e) => {
                 const newLatLng = e.target.getLatLng();
-                this.updateDestination(e.target.localId, newLatLng.lat, newLatLng.lng);
+                await this.updateDestination(e.target.localId, newLatLng.lat, newLatLng.lng);
             });
-            
+
             this.destinationMarkers[dest.localId] = marker;
         });
     }
 
     createMarkerIcon(color, number = null) {
-        const faColor = color === 'blue' ? '#007bff' : '#dc3545';
         const backgroundColor = color === 'blue' ? '#007bff' : '#dc3545';
-        
+
         let html;
         if (number) {
             html = `
@@ -267,12 +274,12 @@ export class MissionMapPlannerWidget extends Component {
                 ">S</div>
             `;
         }
-        
-        return L.divIcon({ 
-            className: 'tm-custom-marker', 
-            html: html, 
-            iconSize: [30, 30], 
-            iconAnchor: [15, 15] 
+
+        return L.divIcon({
+            className: 'tm-custom-marker',
+            html: html,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
         });
     }
 
@@ -292,13 +299,13 @@ export class MissionMapPlannerWidget extends Component {
         try {
             const address = await this.reverseGeocode(lat, lng);
             console.log("Setting source location:", { address, lat, lng });
-            
+
             await this.props.record.update({
                 source_location: address,
                 source_latitude: lat,
                 source_longitude: lng,
             });
-            
+
             this.notification.add("Source location updated", { type: "success" });
         } catch (error) {
             console.error('Error setting source location:', error);
@@ -310,7 +317,7 @@ export class MissionMapPlannerWidget extends Component {
         try {
             const list = this.props.record.data.destination_ids;
             const newRecord = await list.addNew({ position: "bottom" });
-            
+
             const address = await this.reverseGeocode(lat, lng);
             const newSequence = (this.state.destinations.length > 0)
                 ? Math.max(0, ...this.state.destinations.map(d => d.sequence)) + 1 : 1;
@@ -335,22 +342,21 @@ export class MissionMapPlannerWidget extends Component {
     async updateDestination(localId, lat, lng) {
         try {
             const address = await this.reverseGeocode(lat, lng);
-            const destToUpdate = this.state.destinations.find(d => d.localId === localId);
-            if (!destToUpdate) return;
+            const recordToUpdate = this.props.record.data.destination_ids.records.find(rec => rec.id === localId);
 
-            console.log("Updating destination:", { localId, address, lat, lng });
-
-            // Find the record in the destination_ids list
-            const list = this.props.record.data.destination_ids;
-            const recordToUpdate = list.records.find(rec => rec.id === localId);
-            
             if (recordToUpdate) {
                 await recordToUpdate.update({
                     location: address,
                     latitude: lat,
                     longitude: lng
                 });
+
                 this.notification.add("Destination updated", { type: "success" });
+
+                // --- THIS IS THE CRITICAL FIX ---
+                // Manually trigger a redraw of the route after the drag operation completes.
+                await this.drawRoute();
+                // -----------------------------
             }
         } catch (error) {
             console.error('Error updating destination:', error);
@@ -362,10 +368,15 @@ export class MissionMapPlannerWidget extends Component {
     async removeDestinationByLocalId(localId) {
         try {
             console.log("Removing destination with localId:", localId);
-            
+
             const list = this.props.record.data.destination_ids;
-            const recordToDelete = list.records.find(rec => rec.id === localId);
-            
+            if (!list || !list.records) {
+                console.error("No destination list found");
+                return;
+            }
+
+            const recordToDelete = list.records.find(rec => rec && rec.id === localId);
+
             if (recordToDelete) {
                 // Check if it's a virtual record (new, unsaved record)
                 if (typeof recordToDelete.resId !== 'number' || recordToDelete.resId <= 0) {
@@ -393,7 +404,7 @@ export class MissionMapPlannerWidget extends Component {
         try {
             const destToRemove = this.state.destinations[index];
             if (!destToRemove) return;
-            
+
             await this.removeDestinationByLocalId(destToRemove.localId);
         } catch (error) {
             console.error('Error removing destination:', error);
@@ -401,54 +412,93 @@ export class MissionMapPlannerWidget extends Component {
         }
     }
 
-    // FIXED: Clear all method
     async clearAllMarkers() {
-        try {
-            if (confirm('Are you sure you want to clear all markers?')) {
-                console.log("Clearing all markers...");
-                
-                // Clear source location
+        if (confirm('Are you sure you want to clear all markers?')) {
+            try {
+                console.log("Starting clearAllMarkers operation");
+
+                // Clear all routes immediately - this should remove ghost routes
+                this.clearRoute();
+
+                // Clear source first
                 await this.props.record.update({
                     source_location: false,
                     source_latitude: false,
                     source_longitude: false,
                 });
-                
-                // Clear all destinations - handle both virtual and saved records
+
+                // Get the list of destinations
                 const list = this.props.record.data.destination_ids;
+
                 if (list && list.records && list.records.length > 0) {
-                    // Separate virtual records from saved records
-                    const virtualRecords = list.records.filter(rec => 
-                        typeof rec.resId !== 'number' || rec.resId <= 0
-                    );
-                    const savedRecords = list.records.filter(rec => 
-                        typeof rec.resId === 'number' && rec.resId > 0
-                    );
-                    
-                    // Remove virtual records using removeRecord
-                    for (const virtualRecord of virtualRecords) {
-                        console.log("Removing virtual record:", virtualRecord.id);
-                        await list.removeRecord(virtualRecord);
-                    }
-                    
-                    // Delete saved records using delete
-                    for (const savedRecord of savedRecords) {
-                        console.log("Deleting saved record:", savedRecord.resId);
-                        await savedRecord.delete();
+                    console.log(`Clearing ${list.records.length} destination records`);
+
+                    // Clear destinations one by one to ensure proper deletion
+                    const recordsToDelete = [...list.records]; // Create a copy to avoid mutation issues
+
+                    for (const record of recordsToDelete) {
+                        try {
+                            if (typeof record.resId === 'number' && record.resId > 0) {
+                                // For saved records, use delete
+                                console.log(`Deleting saved record ${record.resId}`);
+                                await record.delete();
+                            } else {
+                                // For virtual/new records, use removeRecord
+                                console.log(`Removing virtual record ${record.id}`);
+                                await list.removeRecord(record);
+                            }
+                        } catch (recordError) {
+                            console.error(`Error deleting record ${record.id}:`, recordError);
+                            // Continue with other records even if one fails
+                        }
                     }
                 }
-                
+
+                // Clear visual elements immediately to prevent UI issues
+                this.clearRoute();
+                if (this.sourceMarker && this.map) {
+                    try {
+                        this.map.removeLayer(this.sourceMarker);
+                    } catch (e) {
+                        console.warn("Error removing source marker:", e);
+                    }
+                    this.sourceMarker = null;
+                }
+
+                // Clear destination markers safely
+                Object.values(this.destinationMarkers).forEach(marker => {
+                    if (marker && this.map) {
+                        try {
+                            this.map.removeLayer(marker);
+                        } catch (e) {
+                            console.warn("Error removing destination marker:", e);
+                        }
+                    }
+                });
+                this.destinationMarkers = {};
+
+                // Force state sync to ensure UI reflects the cleared state
+                this.state.source = null;
+                this.state.destinations = [];
+
+                // Wait a moment for the UI to update before proceeding
+                await new Promise(resolve => setTimeout(resolve, 50));
+
+                // Final route clearing to ensure no ghost routes remain
+                this.clearRoute();
+
                 this.notification.add("All markers cleared", { type: "success" });
+                console.log("clearAllMarkers operation completed");
+            } catch (error) {
+                console.error('Error clearing markers:', error);
+                this.notification.add("Failed to clear all markers", { type: "danger" });
             }
-        } catch (error) {
-            console.error('Error clearing markers:', error);
-            this.notification.add("Failed to clear all markers", { type: "danger" });
         }
     }
 
     fitMapToMarkers() {
         if (!this.map) return;
-        
+
         if (this.state.destinations.length > 0 || this.state.source) {
             const allMarkers = [
                 ...Object.values(this.destinationMarkers),
@@ -463,33 +513,73 @@ export class MissionMapPlannerWidget extends Component {
         }
     }
 
-        // Replace the old drawRoute with this new one
-    async drawRoute() {
-        // --- CHANGED: Added safety guard ---
+    clearRoute() {
         if (!this.map) return;
 
+        // Remove the tracked route layer
         if (this.routeLayer) {
-            this.map.removeLayer(this.routeLayer);
+            try {
+                this.map.removeLayer(this.routeLayer);
+            } catch (error) {
+                console.warn('Error removing tracked route layer:', error);
+            }
+            this.routeLayer = null;
         }
 
+        // Also remove any polyline layers that might be lingering
+        // This is a more aggressive cleanup to handle ghost routes
+        this.map.eachLayer((layer) => {
+            if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
+                try {
+                    this.map.removeLayer(layer);
+                } catch (error) {
+                    console.warn('Error removing polyline layer:', error);
+                }
+            }
+        });
+    }
+
+    debouncedDrawRoute() {
+        // Clear any existing timeout
+        if (this.routeUpdateTimeout) {
+            clearTimeout(this.routeUpdateTimeout);
+        }
+
+        // Set a new timeout to debounce rapid route updates
+        this.routeUpdateTimeout = setTimeout(() => {
+            this.drawRoute();
+        }, 100);
+    }
+
+    async drawRoute() {
+        if (!this.map) return;
+
+        // Always clear existing route first to prevent ghost routes
+        this.clearRoute();
+
+        // Small delay to ensure the route layer is fully removed
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        // Gather all current points
         const points = [];
         if (this.state.source) {
             points.push([this.state.source.longitude, this.state.source.latitude]);
         }
         this.state.destinations.forEach(d => {
-            if(d.latitude && d.longitude) {
+            if (d.latitude && d.longitude) {
                 points.push([d.longitude, d.latitude]);
             }
         });
 
+        // If not enough points for a route, ensure distance is zero and exit
         if (points.length < 2) {
-            this.state.totalDistance = 0;
             if (this.props.record.data.total_distance_km !== 0) {
                 this.props.record.update({ total_distance_km: 0 });
             }
             return;
         }
 
+        // Proceed with fetching and drawing the new route
         const coordinates = points.map(p => p.join(',')).join(';');
         const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=polyline`;
 
@@ -498,8 +588,8 @@ export class MissionMapPlannerWidget extends Component {
             if (!response.ok) throw new Error(`OSRM request failed: ${response.statusText}`);
             const data = await response.json();
 
-            // --- CHANGED: Added safety guard before drawing ---
-            if (!this.map) return; 
+            // Safety check - component might have been unmounted during async operation
+            if (!this.map) return;
 
             if (data.code !== "Ok" || !data.routes || data.routes.length === 0) {
                 throw new Error(data.message || "No route found by OSRM.");
@@ -509,21 +599,34 @@ export class MissionMapPlannerWidget extends Component {
             const routeGeometry = decodePolyline(route.geometry);
             const routeDistance = route.distance / 1000;
 
-            this.routeLayer = L.polyline(routeGeometry, { color: '#007bff', weight: 5, opacity: 0.7 }).addTo(this.map);
+            // Clear route again before adding new one (extra safety)
+            this.clearRoute();
 
-            this.state.totalDistance = routeDistance;
+            this.routeLayer = L.polyline(routeGeometry, {
+                color: '#007bff',
+                weight: 5,
+                opacity: 0.7
+            }).addTo(this.map);
+
             if (Math.abs(this.props.record.data.total_distance_km - routeDistance) > 0.01) {
                 this.props.record.update({ total_distance_km: routeDistance });
             }
         } catch (error) {
             console.error("Error fetching route from OSRM:", error);
             this.notification.add("Could not calculate road route.", { type: "warning" });
-            
-            // --- CHANGED: Added safety guard before drawing fallback ---
+
             if (!this.map) return;
 
+            // Clear route before adding fallback route
+            this.clearRoute();
+
             const latLngPoints = points.map(p => [p[1], p[0]]);
-            this.routeLayer = L.polyline(latLngPoints, { color: 'red', weight: 3, opacity: 0.5, dashArray: '5, 10' }).addTo(this.map);
+            this.routeLayer = L.polyline(latLngPoints, {
+                color: 'red',
+                weight: 3,
+                opacity: 0.5,
+                dashArray: '5, 10'
+            }).addTo(this.map);
         }
     }
 }

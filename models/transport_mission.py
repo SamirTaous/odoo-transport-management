@@ -1,6 +1,24 @@
 # In: models/transport_mission.py
+
+# --- ADDED IMPORTS ---
+import requests
+import json
+import logging
+# --------------------
+
 from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 from math import radians, sin, cos, sqrt, atan2
+
+# --- START: THE MISSING LINE ---
+# This line makes the 'ai_analyst_service' file and its classes available here.
+from . import ai_analyst_service
+# --- END: THE MISSING LINE ---
+
+# --- ADDED LOGGER ---
+_logger = logging.getLogger(__name__)
+# --------------------
+
 
 # --- HELPER FUNCTION ---
 def _haversine_distance(lat1, lon1, lat2, lon2):
@@ -8,6 +26,8 @@ def _haversine_distance(lat1, lon1, lat2, lon2):
     Calculate the great-circle distance between two points
     on the earth (specified in decimal degrees).
     Returns distance in kilometers.
+    NOTE: This is a simple 'as the crow flies' distance. The API will provide
+    more accurate road distance.
     """
     # Convert decimal degrees to radians
     lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
@@ -109,3 +129,52 @@ class TransportMission(models.Model):
         self.write({'state': 'cancelled'})
     def action_reset_to_draft(self):
         self.write({'state': 'draft'})
+
+    # --- THIS IS THE PRODUCTION-READY OPTIMIZATION ACTION ---
+    def action_optimize_route(self):
+        self.ensure_one()
+
+        if len(self.destination_ids) < 2:
+            raise UserError("Optimization requires at least two destinations.")
+
+        # 1. Prepare the payload for the service
+        destinations_payload = [
+            {'id': dest.id, 'lat': dest.latitude, 'lon': dest.longitude}
+            for dest in self.destination_ids
+        ]
+        mission_payload = {
+            'mission_id': self.name or f'mission_{self.id}',
+            'source': {'lat': self.source_latitude, 'lon': self.source_longitude},
+            'destinations': destinations_payload,
+        }
+
+        try:
+            # 2. Instantiate and call our new, isolated service
+            analyst = ai_analyst_service.AiAnalystService(self.env)
+            optimized_data = analyst.optimize_route(mission_payload)
+            
+            # 3. Process the clean response from the service
+            optimized_ids = optimized_data.get('optimized_sequence')
+            if not optimized_ids:
+                raise UserError("AI response did not contain a valid 'optimized_sequence'.")
+
+            with self.env.cr.savepoint():
+                for new_sequence, dest_id in enumerate(optimized_ids, start=1):
+                    self.env['transport.destination'].browse(dest_id).write({'sequence': new_sequence})
+            
+            # 4. (Optional) Update totals from the AI's more accurate calculation
+            if optimized_data.get('route_summary'):
+                self.write({
+                    'total_distance_km': optimized_data['route_summary'].get('total_distance_km', self.total_distance_km)
+                })
+
+            raise UserError(_("Success! The route has been optimized."))
+            
+        except UserError as e:
+            # Re-raise known UserErrors to show them in the UI
+            raise e
+        except Exception as e:
+            _logger.error(f"An unexpected error occurred during route optimization for mission {self.id}: {e}")
+            raise UserError(f"An unexpected error occurred: {e}")
+
+        return True

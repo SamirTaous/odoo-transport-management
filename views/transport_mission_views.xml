@@ -27,6 +27,10 @@
         <field name="arch" type="xml">
             <form string="Transport Mission" class="o_form_nosheet">
                 <header>
+                    <!-- START: ADDED/MODIFIED BUTTONS -->
+                    <button name="action_optimize_route" string="Test API Connection" type="object" class="btn-secondary"/>
+                    <!-- END: ADDED/MODIFIED BUTTONS -->
+
                     <button name="action_confirm" string="Confirm" type="object" class="btn-primary" data-hotkey="v" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
                     <button name="action_start_mission" string="Start Mission" type="object" class="btn-primary" data-hotkey="s" attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
                     <button name="action_done" string="Mark as Done" type="object" class="btn-primary" data-hotkey="d" attrs="{'invisible': [('state', '!=', 'in_progress')]}"/>

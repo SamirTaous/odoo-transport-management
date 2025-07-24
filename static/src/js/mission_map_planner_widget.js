@@ -629,6 +629,55 @@ export class MissionMapPlannerWidget extends Component {
             }).addTo(this.map);
         }
     }
+
+     /**
+     * A generic method to update any field on the mission record.
+     * This is a robust way to avoid repeating code.
+     * @param {string} fieldName The technical name of the field to update.
+     * @param {any} value The new value for the field.
+     */
+    async _updateRecord(fieldName, value) {
+        try {
+            await this.props.record.update({ [fieldName]: value });
+        } catch (error) {
+            console.error(`Error updating field ${fieldName}:`, error);
+            this.notification.add(`Failed to update ${fieldName}.`, { type: 'danger' });
+        }
+    }
+
+    /**
+     * Handles changes for the Mission Type radio buttons.
+     * @param {Event} ev The browser event.
+     */
+    onMissionTypeChange(ev) {
+        this._updateRecord('mission_type', ev.target.value);
+    }
+
+    /**
+     * Handles changes for the Mission Date input.
+     * @param {Event} ev The browser event.
+     */
+    onMissionDateChange(ev) {
+        // Odoo expects 'YYYY-MM-DD' or false. An empty input should clear the date.
+        const value = ev.target.value || false;
+        this._updateRecord('mission_date', value);
+    }
+
+    /**
+     * Handles changes for the Priority radio buttons.
+     * @param {Event} ev The browser event.
+     */
+    onPriorityChange(ev) {
+        this._updateRecord('priority', ev.target.value);
+    }
+
+    /**
+     * Handles changes for the Notes textarea.
+     * @param {Event} ev The browser event.
+     */
+    onNotesChange(ev) {
+        this._updateRecord('notes', ev.target.value);
+    }
 }
 
 MissionMapPlannerWidget.template = "transport_management.MissionMapPlannerWidget";

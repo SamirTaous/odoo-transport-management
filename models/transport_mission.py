@@ -45,7 +45,11 @@ class TransportMission(models.Model):
     state = fields.Selection([('draft', 'Draft'), ('confirmed', 'Confirmed'), ('in_progress', 'In Progress'), ('done', 'Done'), ('cancelled', 'Cancelled')], default='draft', string='Status', tracking=True)
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
     notes = fields.Text(string='Internal Notes', tracking=True)
-    priority = fields.Selection([('0', 'Normal'), ('1', 'High')], string='Priority', default='0')
+    priority = fields.Selection([
+        ('0', 'Low'),
+        ('1', 'Normal'),
+        ('2', 'High')
+    ], string='Priority', default='1', tracking=True) # Default to Normal
     destination_progress = fields.Float(string="Destination Progress", compute='_compute_destination_progress', store=True, help="Progress of completed destinations for this mission.")
     total_distance_km = fields.Float(string="Total Distance (km)", compute='_compute_total_distance', store=True, help="Estimated total travel distance for the mission.")
 

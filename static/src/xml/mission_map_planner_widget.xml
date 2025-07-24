@@ -87,6 +87,98 @@
 
                 <!-- Mission Details Form Sections -->
                 <div class="tm_details_form">
+                    <!-- Mission Configuration Section -->
+                    <div class="tm_form_section">
+                        <h4><i class="fa fa-cog me-2 text-info"/>Mission Configuration</h4>
+                        <div class="tm_config_grid">
+                            <div class="tm_config_item">
+                                <label class="tm_config_label">Mission Type</label>
+                                <div class="tm_config_value">
+                                    <div class="tm_radio_group">
+                                        <label class="tm_radio_option">
+                                            <input type="radio" name="mission_type" value="pickup" 
+                                                   t-att-checked="props.record.data.mission_type === 'pickup'"
+                                                   t-on-change="onMissionTypeChange"/>
+                                            <span class="tm_radio_label">
+                                                <i class="fa fa-arrow-up me-1"/>Pickup
+                                            </span>
+                                        </label>
+                                        <label class="tm_radio_option">
+                                            <input type="radio" name="mission_type" value="delivery" 
+                                                   t-att-checked="props.record.data.mission_type === 'delivery'"
+                                                   t-on-change="onMissionTypeChange"/>
+                                            <span class="tm_radio_label">
+                                                <i class="fa fa-arrow-down me-1"/>Delivery
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tm_config_item">
+                                <label class="tm_config_label">Mission Date</label>
+                                <div class="tm_config_value">
+                                    <input type="date" class="form-control" 
+                                           t-att-value="props.record.data.mission_date"
+                                           t-on-change="onMissionDateChange"/>
+                                </div>
+                            </div>
+                            
+                            <div class="tm_config_item">
+                                <label class="tm_config_label">Driver</label>
+                                <div class="tm_config_value">
+                                    <div class="tm_driver_display">
+                                        <t t-if="props.record.data.driver_id">
+                                            <div class="tm_driver_avatar">
+                                                <i class="fa fa-user"/>
+                                            </div>
+                                            <span><t t-esc="props.record.data.driver_id[1] || 'Select Driver'"/></span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="text-muted">Select Driver</span>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tm_config_item">
+                                <label class="tm_config_label">Vehicle</label>
+                                <div class="tm_config_value">
+                                    <div class="tm_vehicle_display">
+                                        <i class="fa fa-truck me-2"/>
+                                        <span><t t-esc="props.record.data.vehicle_id and props.record.data.vehicle_id[1] or 'Select Vehicle'"/></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tm_config_item">
+                                <label class="tm_config_label">Priority</label>
+                                <div class="tm_config_value">
+                                    <div class="tm_priority_group">
+                                        <label class="tm_priority_option tm_priority_low" t-att-class="{'active': props.record.data.priority === '0'}">
+                                            <input type="radio" name="priority" value="0" 
+                                                   t-att-checked="props.record.data.priority === '0'"
+                                                   t-on-change="onPriorityChange"/>
+                                            <span>Low</span>
+                                        </label>
+                                        <label class="tm_priority_option tm_priority_normal" t-att-class="{'active': props.record.data.priority === '1'}">
+                                            <input type="radio" name="priority" value="1" 
+                                                   t-att-checked="props.record.data.priority === '1' || !props.record.data.priority"
+                                                   t-on-change="onPriorityChange"/>
+                                            <span>Normal</span>
+                                        </label>
+                                        <label class="tm_priority_option tm_priority_high" t-att-class="{'active': props.record.data.priority === '2'}">
+                                            <input type="radio" name="priority" value="2" 
+                                                   t-att-checked="props.record.data.priority === '2'"
+                                                   t-on-change="onPriorityChange"/>
+                                            <span>High</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Source Location Display -->
                     <div class="tm_form_section">
                         <h4><i class="fa fa-play-circle me-2 text-primary"/>Source Location</h4>
@@ -132,6 +224,18 @@
                                 <i class="fa fa-map-signs fa-2x text-muted"/>
                                 <p>Right-click on map to add destinations</p>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Operational Notes Section -->
+                    <div class="tm_form_section">
+                        <h4><i class="fa fa-sticky-note me-2 text-warning"/>Operational Notes</h4>
+                        <div class="tm_notes_container">
+                            <textarea class="form-control tm_notes_textarea" 
+                                      placeholder="Add mission notes and special instructions..."
+                                      t-att-value="props.record.data.notes"
+                                      t-on-change="onNotesChange"
+                                      rows="4"></textarea>
                         </div>
                     </div>
 

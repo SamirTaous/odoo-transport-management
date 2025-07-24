@@ -6,7 +6,7 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
-# The Prompt Engineering we designed in Phase 2
+# The Prompt Engineering remains the same. It's solid.
 PROMPT_TEMPLATE = """
 You are a high-performance Logistics Optimization API. Your SOLE function is to receive a JSON-like text block containing mission data and return a SINGLE, minified JSON object with the optimized route.
 
@@ -48,7 +48,8 @@ class AiAnalystService:
         """
         self.env = env
         self.api_key = None
-        self.api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
+        # --- CHANGED: This is the exact URL that you successfully tested ---
+        self.api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
 
     def _get_api_key(self):
         """Fetches the API key from Odoo System Parameters."""
@@ -78,32 +79,35 @@ class AiAnalystService:
                 {"parts": [{"text": full_prompt}]}
             ],
             "generationConfig": {
-                "response_mime_type": "application/json", # A hint for Gemini to return JSON
-                "temperature": 0.0, # Make the output deterministic
+                "response_mime_type": "application/json",
+                "temperature": 0.0,
             }
         }
         
+        # --- CHANGED: This section now matches the successful curl command ---
+        # The API key is passed as a query parameter in the URL.
+        request_url = f"{self.api_url}?key={api_key}"
+        
+        # The 'X-goog-api-key' header is not needed when the key is in the URL.
         headers = {
             'Content-Type': 'application/json',
-            'X-goog-api-key': api_key
         }
+        # --------------------------------------------------------------------
 
-        _logger.info("Sending request to Gemini for mission optimization.")
+        _logger.info("Sending request to Google AI Studio API for mission optimization.")
         
         try:
-            # 3. Make the API call
-            response = requests.post(self.api_url, json=gemini_payload, headers=headers, timeout=45)
+            # 3. Make the API call to the correctly formatted URL
+            response = requests.post(request_url, json=gemini_payload, headers=headers, timeout=45)
             response.raise_for_status()
             
             # 4. Extract the JSON string from the response
             response_data = response.json()
-            # The JSON we want is inside a nested structure
             content_text = response_data['candidates'][0]['content']['parts'][0]['text']
             
             _logger.info(f"Raw response text from Gemini: {content_text}")
 
             # 5. Parse the extracted text string into a Python dictionary
-            # This is where our strict prompt engineering pays off.
             optimized_data = json.loads(content_text)
             
             if optimized_data.get("status") != "success":
@@ -112,8 +116,8 @@ class AiAnalystService:
             return optimized_data
 
         except requests.exceptions.RequestException as e:
-            _logger.error(f"Gemini API request failed: {e}")
+            _logger.error(f"Google AI Studio API request failed: {e}")
             raise UserError(f"Failed to connect to the AI optimization service: {e}")
         except (KeyError, IndexError, json.JSONDecodeError) as e:
-            _logger.error(f"Failed to parse Gemini response: {e}. Response was: {response_data}")
-            raise UserError("The AI service returned an invalid response. Please try again.")
+            _logger.error(f"Failed to parse Gemini response: {e}. Response was: {response_data if 'response_data' in locals() else 'Not available'}")
+            raise UserError("The AI service returned an invalid or unexpected response. Please try again or check the logs.")

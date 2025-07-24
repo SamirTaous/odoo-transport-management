@@ -18,6 +18,95 @@
                         </div>
                     </div>
                     
+                    <!-- Mission Status and Optimization Panel -->
+                    <div class="tm_map_status_panel">
+                        <div class="tm_status_section">
+                            <div class="tm_status_header">
+                                <h5><i class="fa fa-tasks me-2"/>Mission Status</h5>
+                            </div>
+                            <div class="tm_status_controls">
+                                <div class="tm_status_buttons">
+                                    <!-- Draft Status - Always visible, shows current state -->
+                                    <div class="tm_status_indicator tm_status_draft" 
+                                         t-att-class="{'active': props.record.data.state === 'draft'}">
+                                        <span>Draft</span>
+                                    </div>
+                                    
+                                    <!-- Confirm Button - Only show if in draft state -->
+                                    <button type="button" 
+                                            t-if="props.record.data.state === 'draft'"
+                                            class="tm_status_btn tm_status_confirmed" 
+                                            t-on-click="() => this.updateMissionState('confirmed')">
+                                        <i class="fa fa-check me-1"/>
+                                        <span>Confirm</span>
+                                    </button>
+                                    
+                                    <!-- Confirmed Status Indicator -->
+                                    <div t-if="props.record.data.state !== 'draft'"
+                                         class="tm_status_indicator tm_status_confirmed" 
+                                         t-att-class="{'active': props.record.data.state === 'confirmed'}">
+                                        <i class="fa fa-check me-1"/>
+                                        <span>Confirmed</span>
+                                    </div>
+                                    
+                                    <!-- Start Button - Only show if confirmed -->
+                                    <button type="button" 
+                                            t-if="props.record.data.state === 'confirmed'"
+                                            class="tm_status_btn tm_status_progress" 
+                                            t-on-click="() => this.updateMissionState('in_progress')">
+                                        <i class="fa fa-play me-1"/>
+                                        <span>Start</span>
+                                    </button>
+                                    
+                                    <!-- In Progress Status Indicator -->
+                                    <div t-if="props.record.data.state === 'in_progress' || props.record.data.state === 'done' || props.record.data.state === 'cancelled'"
+                                         class="tm_status_indicator tm_status_progress" 
+                                         t-att-class="{'active': props.record.data.state === 'in_progress'}">
+                                        <i class="fa fa-play me-1"/>
+                                        <span>In Progress</span>
+                                    </div>
+                                    
+                                    <!-- Complete Button - Only show if in progress -->
+                                    <button type="button" 
+                                            t-if="props.record.data.state === 'in_progress'"
+                                            class="tm_status_btn tm_status_done" 
+                                            t-on-click="() => this.updateMissionState('done')">
+                                        <i class="fa fa-flag-checkered me-1"/>
+                                        <span>Complete</span>
+                                    </button>
+                                    
+                                    <!-- Done Status Indicator -->
+                                    <div t-if="props.record.data.state === 'done'"
+                                         class="tm_status_indicator tm_status_done active">
+                                        <i class="fa fa-flag-checkered me-1"/>
+                                        <span>Done</span>
+                                    </div>
+                                    
+                                    <!-- Cancel Button - Show if not done -->
+                                    <button type="button" 
+                                            t-if="props.record.data.state != 'done' and props.record.data.state != 'cancelled'"
+                                            class="tm_status_btn tm_status_cancel" 
+                                            t-on-click="() => this.updateMissionState('cancelled')">
+                                        <i class="fa fa-times me-1"/>
+                                        <span>Cancel</span>
+                                    </button>
+                                    
+                                    <!-- Cancelled Status Indicator -->
+                                    <div t-if="props.record.data.state === 'cancelled'"
+                                         class="tm_status_indicator tm_status_cancelled active">
+                                        <i class="fa fa-times me-1"/>
+                                        <span>Cancelled</span>
+                                    </div>
+                                </div>
+                                <div class="tm_optimization_controls">
+                                    <button type="button" class="btn btn-sm btn-success tm_optimize_btn" t-on-click="optimizeRoute">
+                                        <i class="fa fa-route me-1"/>Optimize Route
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- The Map Container -->
                     <div class="tm_interactive_map" t-ref="mapContainer">
                         <!-- Leaflet map will be rendered here by JS -->

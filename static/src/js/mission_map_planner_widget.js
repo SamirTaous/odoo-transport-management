@@ -236,50 +236,21 @@ export class MissionMapPlannerWidget extends Component {
     }
 
     createMarkerIcon(color, number = null) {
-        const backgroundColor = color === 'blue' ? '#007bff' : '#dc3545';
+        const isSource = color === 'blue';
+        const markerClass = isSource ? 'tm-source-marker' : 'tm-destination-marker';
 
         let html;
         if (number) {
-            html = `
-                <div class="tm-marker-number" style="
-                    background-color: ${backgroundColor}; 
-                    color: white; 
-                    width: 30px; 
-                    height: 30px; 
-                    border-radius: 50%; 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center; 
-                    font-weight: bold; 
-                    font-size: 14px;
-                    border: 2px solid white;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                ">${number}</div>
-            `;
+            html = `<div class="tm-marker-number ${markerClass}">${number}</div>`;
         } else {
-            html = `
-                <div style="
-                    background-color: ${backgroundColor}; 
-                    color: white; 
-                    width: 30px; 
-                    height: 30px; 
-                    border-radius: 50%; 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center; 
-                    font-weight: bold; 
-                    font-size: 16px;
-                    border: 2px solid white;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                ">S</div>
-            `;
+            html = `<div class="tm-marker-number ${markerClass}">S</div>`;
         }
 
         return L.divIcon({
             className: 'tm-custom-marker',
             html: html,
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
+            iconSize: [36, 36],
+            iconAnchor: [18, 18]
         });
     }
 
@@ -601,9 +572,10 @@ export class MissionMapPlannerWidget extends Component {
             const routeDistance = route.distance / 1000;
 
             this.routeLayer = L.polyline(routeGeometry, {
+                className: 'tm-route-line',
                 color: '#007bff',
-                weight: 5,
-                opacity: 0.7
+                weight: 6,
+                opacity: 0.8
             }).addTo(this.map);
 
             // Update both the record and the state for UI display
@@ -622,10 +594,11 @@ export class MissionMapPlannerWidget extends Component {
 
             const latLngPoints = points.map(p => [p[1], p[0]]);
             this.routeLayer = L.polyline(latLngPoints, {
-                color: 'red',
-                weight: 3,
-                opacity: 0.5, 
-                dashArray: '5, 10'
+                className: 'tm-route-line tm-route-fallback',
+                color: '#dc3545',
+                weight: 4,
+                opacity: 0.6, 
+                dashArray: '10, 5'
             }).addTo(this.map);
         }
     }
@@ -677,6 +650,91 @@ export class MissionMapPlannerWidget extends Component {
      */
     onNotesChange(ev) {
         this._updateRecord('notes', ev.target.value);
+    }
+
+    /**
+     * Updates the mission state (status workflow).
+     * @param {string} newState The new state to set.
+     */
+    async updateMissionState(newState) {
+        try {
+            await this.props.record.update({ state: newState });
+            this.notification.add(`Mission status updated to ${newState}`, { type: "success" });
+        } catch (error) {
+            console.error('Error updating mission state:', error);
+            this.notification.add("Failed to update mission status", { type: "danger" });
+        }
+    }
+
+    /**
+     * Optimizes the route by reordering destinations for shortest path.
+     */
+    async optimizeRoute() {
+        if (!this.state.source || this.state.destinations.length < 2) {
+            this.notification.add("Need at least 2 destinations to optimize route", { type: "warning" });
+            return;
+        }
+
+        try {
+            this.notification.add("Optimizing route...", { type: "info" });
+
+            // Create points array with source first
+            const points = [
+                [this.state.source.longitude, this.state.source.latitude],
+                ...this.state.destinations.map(d => [d.longitude, d.latitude])
+            ];
+
+            // Use OSRM Table API to get distance matrix
+            const coordinates = points.map(p => p.join(',')).join(';');
+            const tableUrl = `https://router.project-osrm.org/table/v1/driving/${coordinates}`;
+
+            const response = await fetch(tableUrl);
+            if (!response.ok) throw new Error('OSRM table request failed');
+            const data = await response.json();
+
+            if (data.code !== "Ok" || !data.durations) {
+                throw new Error("Failed to get distance matrix");
+            }
+
+            // Simple nearest neighbor optimization starting from source (index 0)
+            const distances = data.durations;
+            const unvisited = new Set(Array.from({length: this.state.destinations.length}, (_, i) => i + 1));
+            const optimizedOrder = [];
+            let current = 0; // Start from source
+
+            while (unvisited.size > 0) {
+                let nearest = null;
+                let nearestDistance = Infinity;
+
+                for (const dest of unvisited) {
+                    if (distances[current][dest] < nearestDistance) {
+                        nearestDistance = distances[current][dest];
+                        nearest = dest;
+                    }
+                }
+
+                if (nearest !== null) {
+                    optimizedOrder.push(nearest - 1); // Convert back to destination index
+                    unvisited.delete(nearest);
+                    current = nearest;
+                }
+            }
+
+            // Update destination sequences based on optimized order
+            const list = this.props.record.data.destination_ids;
+            for (let i = 0; i < optimizedOrder.length; i++) {
+                const destIndex = optimizedOrder[i];
+                const record = list.records[destIndex];
+                if (record) {
+                    await record.update({ sequence: i + 1 });
+                }
+            }
+
+            this.notification.add("Route optimized successfully!", { type: "success" });
+        } catch (error) {
+            console.error('Error optimizing route:', error);
+            this.notification.add("Failed to optimize route", { type: "danger" });
+        }
     }
 }
 

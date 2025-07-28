@@ -189,6 +189,8 @@ export class MissionMapPlannerWidget extends Component {
                 });
             } else {
                 this.sourceMarker.setLatLng(latLng);
+                // FIXED: Update the source marker icon when mission type changes
+                this.sourceMarker.setIcon(this.createMarkerIcon('blue'));
             }
             this.sourceMarker.bindPopup(`...`).getPopup().setContent(`
                 <div>
@@ -250,26 +252,24 @@ export class MissionMapPlannerWidget extends Component {
         let html;
 
         if (isSource) {
-            // Source marker with mission type specific icon
+            // Source marker with compact design
             const sourceIcon = missionType === 'pickup' ? '🏭' : '📦';
             html = `
-                <div class="tm-marker-container ${missionTypeClass}">
-                    <div class="tm-truck-icon">
-                        <div class="tm-mission-type-icon">${sourceIcon}</div>
+                <div class="tm-compact-marker ${missionTypeClass}">
+                    <div class="tm-marker-pin">
+                        <div class="tm-marker-icon">${sourceIcon}</div>
                     </div>
-                    <div class="tm-marker-status status-pending"></div>
                 </div>
             `;
         } else {
-            // Destination marker with number and mission type styling
+            // Destination marker with compact design and number
             const destinationIcon = missionType === 'pickup' ? '📤' : '📥';
             html = `
-                <div class="tm-marker-container ${missionTypeClass}">
-                    <div class="tm-truck-icon">
-                        <div class="tm-truck-number">${number}</div>
-                        <div class="tm-mission-indicator">${destinationIcon}</div>
+                <div class="tm-compact-marker ${missionTypeClass}">
+                    <div class="tm-marker-pin">
+                        <div class="tm-marker-number">${number}</div>
+                        <div class="tm-marker-icon">${destinationIcon}</div>
                     </div>
-                    <div class="tm-marker-status status-pending"></div>
                 </div>
             `;
         }
@@ -277,8 +277,8 @@ export class MissionMapPlannerWidget extends Component {
         return L.divIcon({
             className: 'tm-custom-marker',
             html: html,
-            iconSize: [50, 60],
-            iconAnchor: [25, 50]
+            iconSize: [40, 50],
+            iconAnchor: [20, 45]
         });
     }
 
@@ -660,6 +660,8 @@ export class MissionMapPlannerWidget extends Component {
         await this._updateRecord('mission_type', ev.target.value);
         // Refresh markers to reflect the new mission type styling
         this.updateMarkers();
+        // Also update the route color to match the new mission type
+        this.drawRoute();
     }
 
     /**

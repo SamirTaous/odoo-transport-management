@@ -60,139 +60,98 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
 }
 
-// === 3. Enhanced Truck-Themed Map Marker Styling ===
+// === 3. Compact Map Marker Styling ===
 .tm-custom-marker {
     background: transparent !important;
     border: none !important;
 }
 
-.tm-marker-container {
+.tm-compact-marker {
     position: relative;
-    width: 50px;
-    height: 60px;
+    width: 40px;
+    height: 50px;
     display: flex;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 
     &:hover {
-        transform: scale(1.1) translateY(-3px);
-        filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
+        transform: scale(1.1);
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
     }
 }
 
-// Truck icon base styling
-.tm-truck-icon {
-    width: 44px;
+// Pin-style marker base
+.tm-marker-pin {
+    width: 32px;
     height: 32px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
     position: relative;
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    border: 2px solid white;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
     display: flex;
     align-items: center;
     justify-content: center;
     
-    // Truck cab (front part)
-    &::before {
-        content: '';
-        position: absolute;
-        left: -6px;
-        top: 4px;
-        width: 12px;
-        height: 20px;
-        border-radius: 4px 0 0 4px;
-        border: 2px solid white;
-        border-right: none;
-    }
-    
-    // Truck wheels
+    // Pin tip shadow
     &::after {
         content: '';
         position: absolute;
         bottom: -8px;
-        left: 6px;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #333;
-        border: 2px solid white;
-        box-shadow: 20px 0 0 0 #333, 20px 0 0 2px white;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 6px solid rgba(0, 0, 0, 0.1);
+        z-index: -1;
     }
 }
 
-// Number badge on truck
-.tm-truck-number {
+// Icon inside the pin (rotated back to normal)
+.tm-marker-icon {
+    font-size: 1rem;
+    transform: rotate(45deg);
+    z-index: 2;
+}
+
+// Number badge for destinations
+.tm-marker-number {
     position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 24px;
-    height: 24px;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 0.9rem;
-    color: white;
-    border: 3px solid white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    z-index: 10;
-}
-
-// Mission type icon styling
-.tm-mission-type-icon {
-    font-size: 1.2rem;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 5;
-}
-
-.tm-mission-indicator {
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    font-size: 0.7rem;
     background: white;
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
+    color: #333;
+    font-weight: 800;
+    font-size: 0.7rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    border: 2px solid white;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    z-index: 3;
+    transform: rotate(45deg);
 }
 
 // PICKUP MISSION STYLING
 .tm-pickup-source {
-    .tm-truck-icon {
+    .tm-marker-pin {
         background: linear-gradient(135deg, #17a2b8, #138496);
-        
-        &::before {
-            background: linear-gradient(135deg, #17a2b8, #138496);
-        }
     }
 }
 
 .tm-pickup-destination {
-    .tm-truck-icon {
+    .tm-marker-pin {
         background: linear-gradient(135deg, #6f42c1, #5a32a3);
-        
-        &::before {
-            background: linear-gradient(135deg, #6f42c1, #5a32a3);
-        }
     }
     
-    .tm-truck-number {
-        background: linear-gradient(135deg, #17a2b8, #138496);
-        color: white;
-        font-weight: 900;
-    }
-    
-    .tm-mission-indicator {
+    .tm-marker-number {
         background: linear-gradient(135deg, #17a2b8, #138496);
         color: white;
     }
@@ -200,61 +159,19 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 
 // DELIVERY MISSION STYLING
 .tm-delivery-source {
-    .tm-truck-icon {
+    .tm-marker-pin {
         background: linear-gradient(135deg, #28a745, #20c997);
-        
-        &::before {
-            background: linear-gradient(135deg, #28a745, #20c997);
-        }
     }
 }
 
 .tm-delivery-destination {
-    .tm-truck-icon {
-        background: linear-gradient(135deg, #dc3545, #c82333);
-        
-        &::before {
-            background: linear-gradient(135deg, #dc3545, #c82333);
-        }
+    .tm-marker-pin {
+        background: linear-gradient(135deg, #6f42c1, #5a32a3);
     }
     
-    .tm-truck-number {
-        background: linear-gradient(135deg, #ffc107, #e0a800);
-        color: #333;
-        font-weight: 900;
-    }
-    
-    .tm-mission-indicator {
+    .tm-marker-number {
         background: linear-gradient(135deg, #28a745, #20c997);
-        color: white;
-    }
-}
-
-// Generic source marker styling (fallback)
-.tm-source-marker {
-    .tm-truck-icon {
-        background: linear-gradient(135deg, #6c757d, #5a6268);
-        
-        &::before {
-            background: linear-gradient(135deg, #6c757d, #5a6268);
-        }
-    }
-}
-
-// Generic destination marker styling (fallback)
-.tm-destination-marker {
-    .tm-truck-icon {
-        background: linear-gradient(135deg, #6c757d, #5a6268);
-        
-        &::before {
-            background: linear-gradient(135deg, #6c757d, #5a6268);
-        }
-    }
-    
-    .tm-truck-number {
-        background: linear-gradient(135deg, #007bff, #0056b3);
-        color: white;
-        font-weight: 900;
+        color: #333;
     }
 }
 

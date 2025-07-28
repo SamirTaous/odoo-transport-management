@@ -404,7 +404,7 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
 }
 
-// Enhanced route line styling
+// Enhanced route line styling with mission type theming
 .tm-route-line {
     stroke-width: 6px !important;
     stroke: #007bff !important;
@@ -417,6 +417,27 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         stroke: #dc3545 !important;
         stroke-dasharray: 10, 5 !important;
         stroke-opacity: 0.6 !important;
+        filter: drop-shadow(0 2px 4px rgba(220, 53, 69, 0.3));
+    }
+}
+
+// Mission-specific route line colors
+.tm-mission-pickup .tm-route-line {
+    stroke: #17a2b8 !important;
+    filter: drop-shadow(0 2px 4px rgba(23, 162, 184, 0.3));
+    
+    &.tm-route-fallback {
+        stroke: #6f42c1 !important;
+        filter: drop-shadow(0 2px 4px rgba(111, 66, 193, 0.3));
+    }
+}
+
+.tm-mission-delivery .tm-route-line {
+    stroke: #28a745 !important;
+    filter: drop-shadow(0 2px 4px rgba(40, 167, 69, 0.3));
+    
+    &.tm-route-fallback {
+        stroke: #dc3545 !important;
         filter: drop-shadow(0 2px 4px rgba(220, 53, 69, 0.3));
     }
 }
@@ -465,7 +486,273 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     border-top-color: $tm-border-color !important;
 }
 
-// === 4. Transport Mission Form Layout ===
+// === 4. Mission Type Theming ===
+// Define mission type color variables
+$pickup-primary: #17a2b8;
+$pickup-secondary: #6f42c1;
+$pickup-accent: #FF6B35;
+$pickup-light: rgba(23, 162, 184, 0.1);
+
+$delivery-primary: #28a745;
+$delivery-secondary: #dc3545;
+$delivery-accent: #ffc107;
+$delivery-light: rgba(40, 167, 69, 0.1);
+
+// PICKUP MISSION THEMING
+.tm-mission-pickup {
+    // Map header theming
+    .tm_map_header {
+        background: linear-gradient(135deg, $pickup-primary, darken($pickup-primary, 10%)) !important;
+        color: white !important;
+        
+        h3, i {
+            color: white !important;
+        }
+        
+        .tm_map_controls .btn {
+            border-color: white !important;
+            color: white !important;
+            
+            &:hover {
+                background: white !important;
+                color: $pickup-primary !important;
+            }
+        }
+    }
+    
+    // Status panel theming
+    .tm_map_status_panel {
+        border-bottom-color: $pickup-primary !important;
+        
+        .tm_status_header h5 {
+            color: $pickup-primary !important;
+        }
+        
+        .tm_optimize_btn {
+            background: linear-gradient(135deg, $pickup-primary, darken($pickup-primary, 10%)) !important;
+            border-color: $pickup-primary !important;
+            
+            &:hover {
+                background: linear-gradient(135deg, darken($pickup-primary, 10%), $pickup-primary) !important;
+            }
+        }
+    }
+    
+    // Mission header theming
+    .tm_mission_header {
+        border-bottom-color: $pickup-primary !important;
+        
+        .tm_title_section h1 {
+            color: $pickup-primary !important;
+        }
+        
+        .tm_pickup_badge {
+            background: linear-gradient(135deg, $pickup-primary, darken($pickup-primary, 10%)) !important;
+            color: white !important;
+        }
+        
+        .tm_metric_card .tm_metric_icon {
+            background: $pickup-primary !important;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, $pickup-primary, $pickup-secondary) !important;
+        }
+    }
+    
+    // Form section headers
+    .tm_form_section h4 {
+        color: $pickup-primary !important;
+        border-bottom-color: $pickup-light !important;
+        
+        i {
+            color: $pickup-primary !important;
+        }
+    }
+    
+    // Radio buttons and controls
+    .tm_radio_group .tm_radio_option {
+        &:hover {
+            border-color: $pickup-primary !important;
+            background: $pickup-light !important;
+        }
+        
+        &:has(input[type="radio"]:checked) {
+            border-color: $pickup-primary !important;
+            background: $pickup-light !important;
+        }
+        
+        input[type="radio"]:checked + .tm_radio_label {
+            color: $pickup-primary !important;
+        }
+    }
+    
+    // Form controls
+    .form-control:focus {
+        border-color: $pickup-primary !important;
+        box-shadow: 0 0 0 2px $pickup-light !important;
+    }
+    
+    // Location items
+    .tm_source_item {
+        border-left-color: $pickup-primary !important;
+    }
+    
+    .tm_destination_item {
+        border-left-color: $pickup-secondary !important;
+        
+        .tm_destination_number {
+            background: $pickup-secondary !important;
+        }
+    }
+    
+    // Route summary
+    .tm_route_step_marker {
+        &.tm_route_start {
+            background: $pickup-primary !important;
+        }
+        
+        &.tm_route_destination {
+            background: $pickup-secondary !important;
+        }
+    }
+    
+    // Instructions theming
+    .tm_map_instructions .tm_instruction_item i {
+        &.text-primary { color: $pickup-primary !important; }
+        &.text-success { color: $pickup-secondary !important; }
+        &.text-warning { color: $pickup-accent !important; }
+    }
+}
+
+// DELIVERY MISSION THEMING
+.tm-mission-delivery {
+    // Map header theming
+    .tm_map_header {
+        background: linear-gradient(135deg, $delivery-primary, darken($delivery-primary, 10%)) !important;
+        color: white !important;
+        
+        h3, i {
+            color: white !important;
+        }
+        
+        .tm_map_controls .btn {
+            border-color: white !important;
+            color: white !important;
+            
+            &:hover {
+                background: white !important;
+                color: $delivery-primary !important;
+            }
+        }
+    }
+    
+    // Status panel theming
+    .tm_map_status_panel {
+        border-bottom-color: $delivery-primary !important;
+        
+        .tm_status_header h5 {
+            color: $delivery-primary !important;
+        }
+        
+        .tm_optimize_btn {
+            background: linear-gradient(135deg, $delivery-primary, darken($delivery-primary, 10%)) !important;
+            border-color: $delivery-primary !important;
+            
+            &:hover {
+                background: linear-gradient(135deg, darken($delivery-primary, 10%), $delivery-primary) !important;
+            }
+        }
+    }
+    
+    // Mission header theming
+    .tm_mission_header {
+        border-bottom-color: $delivery-primary !important;
+        
+        .tm_title_section h1 {
+            color: $delivery-primary !important;
+        }
+        
+        .tm_delivery_badge {
+            background: linear-gradient(135deg, $delivery-primary, darken($delivery-primary, 10%)) !important;
+            color: white !important;
+        }
+        
+        .tm_metric_card .tm_metric_icon {
+            background: $delivery-primary !important;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, $delivery-primary, $delivery-secondary) !important;
+        }
+    }
+    
+    // Form section headers
+    .tm_form_section h4 {
+        color: $delivery-primary !important;
+        border-bottom-color: $delivery-light !important;
+        
+        i {
+            color: $delivery-primary !important;
+        }
+    }
+    
+    // Radio buttons and controls
+    .tm_radio_group .tm_radio_option {
+        &:hover {
+            border-color: $delivery-primary !important;
+            background: $delivery-light !important;
+        }
+        
+        &:has(input[type="radio"]:checked) {
+            border-color: $delivery-primary !important;
+            background: $delivery-light !important;
+        }
+        
+        input[type="radio"]:checked + .tm_radio_label {
+            color: $delivery-primary !important;
+        }
+    }
+    
+    // Form controls
+    .form-control:focus {
+        border-color: $delivery-primary !important;
+        box-shadow: 0 0 0 2px $delivery-light !important;
+    }
+    
+    // Location items
+    .tm_source_item {
+        border-left-color: $delivery-primary !important;
+    }
+    
+    .tm_destination_item {
+        border-left-color: $delivery-secondary !important;
+        
+        .tm_destination_number {
+            background: $delivery-secondary !important;
+        }
+    }
+    
+    // Route summary
+    .tm_route_step_marker {
+        &.tm_route_start {
+            background: $delivery-primary !important;
+        }
+        
+        &.tm_route_destination {
+            background: $delivery-secondary !important;
+        }
+    }
+    
+    // Instructions theming
+    .tm_map_instructions .tm_instruction_item i {
+        &.text-primary { color: $delivery-primary !important; }
+        &.text-success { color: $delivery-secondary !important; }
+        &.text-warning { color: $delivery-accent !important; }
+    }
+}
+
+// === 5. Transport Mission Form Layout ===
 .o_form_nosheet .o_form_sheet_bg {
     padding: 0 !important;
 }

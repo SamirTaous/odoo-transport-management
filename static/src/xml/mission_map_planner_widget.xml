@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="transport_management.MissionMapPlannerWidget" owl="1">
-        <div class="tm_main_container">
+        <div class="tm_main_container" t-att-class="'tm-mission-' + (props.record.data.mission_type || 'delivery')">
             <!-- LEFT COLUMN: Interactive Map -->
             <div class="tm_map_column">
                 <div class="tm_map_panel">

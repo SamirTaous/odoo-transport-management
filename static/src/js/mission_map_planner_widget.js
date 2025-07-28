@@ -599,9 +599,12 @@ export class MissionMapPlannerWidget extends Component {
             const routeGeometry = decodePolyline(route.geometry);
             const routeDistance = route.distance / 1000;
 
+            const missionType = this.props.record.data.mission_type || 'delivery';
+            const routeColor = missionType === 'pickup' ? '#17a2b8' : '#28a745';
+
             this.routeLayer = L.polyline(routeGeometry, {
                 className: 'tm-route-line',
-                color: '#007bff',
+                color: routeColor,
                 weight: 6,
                 opacity: 0.8
             }).addTo(this.map);
@@ -620,10 +623,13 @@ export class MissionMapPlannerWidget extends Component {
             // Clear route before adding fallback route
             this.clearRoute();
 
+            const missionType = this.props.record.data.mission_type || 'delivery';
+            const fallbackColor = missionType === 'pickup' ? '#6f42c1' : '#dc3545';
+
             const latLngPoints = points.map(p => [p[1], p[0]]);
             this.routeLayer = L.polyline(latLngPoints, {
                 className: 'tm-route-line tm-route-fallback',
-                color: '#dc3545',
+                color: fallbackColor,
                 weight: 4,
                 opacity: 0.6,
                 dashArray: '10, 5'

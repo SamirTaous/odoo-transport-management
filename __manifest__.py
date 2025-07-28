@@ -17,10 +17,16 @@
         # 2. Data (Sequences, etc.)
         'data/sequence_data.xml',
         'data/ir_config_parameter_data.xml',
-        # 3. Views (UI)
+        # 3. Actions (Load before views that reference them)
+        'views/actions.xml',
+        # 4. Views (UI)
         'views/transport_vehicle_views.xml',
         'views/transport_mission_views.xml',
+        'views/route_cache_views.xml',
         'views/menus.xml',
+    ],
+    'demo': [
+        'data/demo_data.xml',
     ],
     'assets': {
         'web.assets_backend': [
@@ -35,6 +41,10 @@
             # Map Widget Files
             'transport_management/static/src/js/mission_map_planner_widget.js',
             'transport_management/static/src/xml/mission_map_planner_widget.xml',
+            
+            # Overview Map Files
+            'transport_management/static/src/js/mission_overview_simple.js',
+            'transport_management/static/src/xml/mission_overview_simple.xml',
         ],
     },
     'external_dependencies': {

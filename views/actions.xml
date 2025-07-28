@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Client Actions -->
+    <record id="action_transport_mission_overview_simple" model="ir.actions.client">
+        <field name="name">Mission Overview Map</field>
+        <field name="tag">transport_mission_overview_simple</field>
+    </record>
+</odoo>

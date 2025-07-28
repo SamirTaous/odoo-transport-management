@@ -579,11 +579,67 @@ export class MissionMapPlannerWidget extends Component {
             return;
         }
 
-        // Proceed with fetching and drawing the new route
-        const coordinates = points.map(p => p.join(',')).join(';');
-        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=polyline`;
-
         try {
+            // Try to get cached route data from backend if this is a saved mission
+            let routeData = null;
+            if (this.props.record.resId) {
+                try {
+                    routeData = await this.props.record.model.orm.call(
+                        "transport.mission",
+                        "get_cached_route_data",
+                        [this.props.record.resId]
+                    );
+                } catch (e) {
+                    console.warn("Failed to get cached route, falling back to OSRM:", e);
+                }
+            }
+
+            if (routeData) {
+                // Use cached route
+                let routeGeometry;
+                
+                if (routeData.is_fallback) {
+                    // Handle fallback route (stored as JSON points)
+                    const cachedPoints = JSON.parse(routeData.geometry);
+                    routeGeometry = cachedPoints;
+                } else {
+                    // Handle OSRM polyline geometry
+                    routeGeometry = decodePolyline(routeData.geometry);
+                }
+
+                const missionType = this.props.record.data.mission_type || 'delivery';
+                const routeColor = missionType === 'pickup' ? '#17a2b8' : '#28a745';
+
+                const routeOptions = {
+                    className: 'tm-route-line',
+                    color: routeColor,
+                    weight: 6,
+                    opacity: 0.8
+                };
+
+                // Add visual indicator for fallback routes
+                if (routeData.is_fallback) {
+                    routeOptions.dashArray = '10, 5';
+                    routeOptions.opacity = 0.6;
+                    routeOptions.className += ' tm-route-fallback';
+                }
+
+                this.routeLayer = L.polyline(routeGeometry, routeOptions).addTo(this.map);
+
+                // Update distance from cached data
+                this.state.totalDistance = routeData.distance;
+                if (Math.abs(this.props.record.data.total_distance_km - routeData.distance) > 0.01) {
+                    this.props.record.update({ total_distance_km: routeData.distance });
+                }
+
+                console.log(`Using cached route (${routeData.is_fallback ? 'fallback' : 'OSRM'})`);
+                return;
+            }
+
+            // No cached route available, proceed with OSRM calculation
+            const coordinates = points.map(p => p.join(',')).join(';');
+            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=polyline`;
+
             const response = await fetch(osrmUrl);
             if (!response.ok) throw new Error(`OSRM request failed: ${response.statusText}`);
             const data = await response.json();
@@ -614,8 +670,11 @@ export class MissionMapPlannerWidget extends Component {
             if (Math.abs(this.props.record.data.total_distance_km - routeDistance) > 0.01) {
                 this.props.record.update({ total_distance_km: routeDistance });
             }
+
+            console.log("Calculated new OSRM route");
+
         } catch (error) {
-            console.error("Error fetching route from OSRM:", error);
+            console.error("Error fetching route:", error);
             this.notification.add("Could not calculate road route.", { type: "warning" });
 
             if (!this.map) return;

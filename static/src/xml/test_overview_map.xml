@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="transport_management.TestOverviewMap" owl="1">
+        <div style="padding: 20px;">
+            <h1>Test Overview Map</h1>
+            <p>If you can see this, the client action registration is working!</p>
+        </div>
+    </t>
+</templates>

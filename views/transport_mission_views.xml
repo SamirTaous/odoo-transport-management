@@ -125,5 +125,33 @@
         <field name="name">Transport Missions</field>
         <field name="res_model">transport.mission</field>
         <field name="view_mode">kanban,tree,form</field>
+        <field name="context">{'search_default_active_missions': 1}</field>
+    </record>
+
+    <!-- Search view for missions -->
+    <record id="view_transport_mission_search" model="ir.ui.view">
+        <field name="name">transport.mission.search</field>
+        <field name="model">transport.mission</field>
+        <field name="arch" type="xml">
+            <search string="Transport Missions">
+                <field name="name"/>
+                <field name="driver_id"/>
+                <field name="vehicle_id"/>
+                <field name="source_location"/>
+                <filter name="active_missions" string="Active Missions" 
+                        domain="[('state', 'in', ['confirmed', 'in_progress'])]"/>
+                <filter name="confirmed" string="Confirmed" 
+                        domain="[('state', '=', 'confirmed')]"/>
+                <filter name="in_progress" string="In Progress" 
+                        domain="[('state', '=', 'in_progress')]"/>
+                <filter name="completed" string="Completed" 
+                        domain="[('state', '=', 'done')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_by_driver" string="Driver" context="{'group_by': 'driver_id'}"/>
+                    <filter name="group_by_date" string="Date" context="{'group_by': 'mission_date'}"/>
+                </group>
+            </search>
+        </field>
     </record>
 </odoo>

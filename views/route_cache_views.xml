@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Route Cache Tree View -->
+    <record id="view_route_cache_tree" model="ir.ui.view">
+        <field name="name">transport.route.cache.tree</field>
+        <field name="model">transport.route.cache</field>
+        <field name="arch" type="xml">
+            <tree string="Route Cache" default_order="last_used desc">
+                <field name="route_hash"/>
+                <field name="route_distance" sum="Total Distance"/>
+                <field name="route_duration" sum="Total Duration"/>
+                <field name="is_fallback"/>
+                <field name="use_count" sum="Total Uses"/>
+                <field name="created_date"/>
+                <field name="last_used"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Route Cache Form View -->
+    <record id="view_route_cache_form" model="ir.ui.view">
+        <field name="name">transport.route.cache.form</field>
+        <field name="model">transport.route.cache</field>
+        <field name="arch" type="xml">
+            <form string="Route Cache Entry">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="route_hash"/>
+                            <field name="is_fallback"/>
+                            <field name="route_distance"/>
+                            <field name="route_duration"/>
+                        </group>
+                        <group>
+                            <field name="use_count"/>
+                            <field name="created_date"/>
+                            <field name="last_used"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Waypoints">
+                            <field name="waypoints" widget="text"/>
+                        </page>
+                        <page string="Route Geometry">
+                            <field name="route_geometry" widget="text"/>
+                        </page>
+                        <page string="OSRM Response" attrs="{'invisible': [('is_fallback', '=', True)]}">
+                            <field name="osrm_response" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Route Cache Search View -->
+    <record id="view_route_cache_search" model="ir.ui.view">
+        <field name="name">transport.route.cache.search</field>
+        <field name="model">transport.route.cache</field>
+        <field name="arch" type="xml">
+            <search string="Route Cache">
+                <field name="route_hash"/>
+                <filter name="osrm_routes" string="OSRM Routes" domain="[('is_fallback', '=', False)]"/>
+                <filter name="fallback_routes" string="Fallback Routes" domain="[('is_fallback', '=', True)]"/>
+                <filter name="frequently_used" string="Frequently Used" domain="[('use_count', '>', 5)]"/>
+                <filter name="recent" string="Used Recently" domain="[('last_used', '>=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_fallback" string="Route Type" context="{'group_by': 'is_fallback'}"/>
+                    <filter name="group_by_date" string="Created Date" context="{'group_by': 'created_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Route Cache Action -->
+    <record id="action_route_cache" model="ir.actions.act_window">
+        <field name="name">Route Cache</field>
+        <field name="res_model">transport.route.cache</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_recent': 1}</field>
+    </record>
+
+    <!-- Route Cache Statistics Action -->
+    <record id="action_route_cache_stats" model="ir.actions.server">
+        <field name="name">Route Cache Statistics</field>
+        <field name="model_id" ref="model_transport_mission"/>
+        <field name="state">code</field>
+        <field name="code">
+stats = model.get_route_cache_stats()
+message = f"""
+Route Cache Statistics:
+- Total cached routes: {stats['total_entries']}
+- OSRM routes: {stats['osrm_entries']}
+- Fallback routes: {stats['fallback_entries']}
+- Total usage: {stats['total_usage']}
+- Cache hits saved: {stats['cache_hit_potential']} API calls
+"""
+action = {
+    'type': 'ir.actions.client',
+    'tag': 'display_notification',
+    'params': {
+        'title': 'Route Cache Statistics',
+        'message': message,
+        'type': 'info',
+        'sticky': True,
+    }
+}
+        </field>
+    </record>
+
+    <!-- Route Cache Cleanup Action -->
+    <record id="action_route_cache_cleanup" model="ir.actions.server">
+        <field name="name">Cleanup Old Routes</field>
+        <field name="model_id" ref="model_transport_mission"/>
+        <field name="state">code</field>
+        <field name="code">
+cleaned = model.cleanup_route_cache(30)  # Clean routes older than 30 days
+action = {
+    'type': 'ir.actions.client',
+    'tag': 'display_notification',
+    'params': {
+        'title': 'Route Cache Cleanup',
+        'message': f'Cleaned up {cleaned} old route cache entries',
+        'type': 'success',
+    }
+}
+        </field>
+    </record>
+</odoo>

@@ -15,6 +15,14 @@
         action="action_transport_mission"
         sequence="10"/>
 
+    <!-- Overview Map Menu -->
+    <menuitem
+        id="menu_transport_mission_overview"
+        name="Overview Map"
+        parent="menu_transport_root"
+        action="action_transport_mission_overview_simple"
+        sequence="15"/>
+
     <!-- Menu Item for Vehicles -->
     <menuitem
         id="menu_transport_vehicle"
@@ -22,4 +30,34 @@
         parent="menu_transport_root"
         action="action_transport_vehicle"
         sequence="20"/>
+
+    <!-- Configuration Submenu -->
+    <menuitem
+        id="menu_transport_config"
+        name="Configuration"
+        parent="menu_transport_root"
+        sequence="30"/>
+
+    <!-- Route Cache Menu -->
+    <menuitem
+        id="menu_route_cache"
+        name="Route Cache"
+        parent="menu_transport_config"
+        action="action_route_cache"
+        sequence="10"/>
+
+    <!-- Route Cache Actions Menu -->
+    <menuitem
+        id="menu_route_cache_stats"
+        name="Cache Statistics"
+        parent="menu_transport_config"
+        action="action_route_cache_stats"
+        sequence="20"/>
+
+    <menuitem
+        id="menu_route_cache_cleanup"
+        name="Cleanup Old Routes"
+        parent="menu_transport_config"
+        action="action_route_cache_cleanup"
+        sequence="30"/>
 </odoo>

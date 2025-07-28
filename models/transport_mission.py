@@ -9,6 +9,8 @@ from . import ai_analyst_service
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 from math import radians, sin, cos, sqrt, atan2
+import requests
+import json
 
 # --- Logger is correct ---
 _logger = logging.getLogger(__name__)
@@ -145,3 +147,128 @@ class TransportMission(models.Model):
         except Exception as e:
             _logger.error(f"An unexpected error occurred during route optimization for mission {self.id}: {e}")
             raise UserError(f"An unexpected error occurred: {e}")
+
+    def action_open_overview_map(self):
+        """Open the mission overview map"""
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'transport_mission_overview_map',
+            'name': _('Mission Overview Map'),
+        }
+
+    def get_cached_route_data(self):
+        """Get cached route data for this mission"""
+        self.ensure_one()
+        
+        if not self.source_latitude or not self.source_longitude:
+            return None
+            
+        # Build waypoints array
+        waypoints = [[self.source_latitude, self.source_longitude]]
+        
+        # Add destinations in sequence order
+        destinations = self.destination_ids.filtered(lambda d: d.latitude and d.longitude).sorted('sequence')
+        for dest in destinations:
+            waypoints.append([dest.latitude, dest.longitude])
+            
+        if len(waypoints) < 2:
+            return None
+            
+        # Try to get from cache first
+        route_cache = self.env['transport.route.cache']
+        cached_route = route_cache.get_cached_route(waypoints)
+        
+        if cached_route:
+            return cached_route
+            
+        # If not cached, calculate and cache the route
+        return self._calculate_and_cache_route(waypoints)
+    
+    def _calculate_and_cache_route(self, waypoints):
+        """Calculate route using OSRM and cache the result"""
+        route_cache = self.env['transport.route.cache']
+        
+        try:
+            # Prepare OSRM request
+            coordinates = []
+            for waypoint in waypoints:
+                coordinates.append(f"{waypoint[1]},{waypoint[0]}")  # OSRM expects lon,lat
+            
+            coordinates_str = ';'.join(coordinates)
+            osrm_url = f"https://router.project-osrm.org/route/v1/driving/{coordinates_str}?overview=full&geometries=polyline"
+            
+            response = requests.get(osrm_url, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if data.get('code') == 'Ok' and data.get('routes'):
+                    # Cache successful OSRM response
+                    route_cache.cache_route(waypoints, osrm_response=data)
+                    
+                    route = data['routes'][0]
+                    return {
+                        'geometry': route.get('geometry', ''),
+                        'distance': route.get('distance', 0) / 1000,  # Convert to km
+                        'duration': route.get('duration', 0) / 60,    # Convert to minutes
+                        'is_fallback': False,
+                        'cached': False
+                    }
+                else:
+                    raise Exception(f"OSRM API error: {data.get('message', 'Unknown error')}")
+            else:
+                raise Exception(f"OSRM API request failed with status {response.status_code}")
+                
+        except Exception as e:
+            _logger.warning(f"OSRM route calculation failed for mission {self.name}: {e}")
+            
+            # Create fallback straight-line route
+            fallback_data = self._create_fallback_route(waypoints)
+            
+            # Cache the fallback route
+            route_cache.cache_route(waypoints, fallback_data=fallback_data)
+            
+            return {
+                'geometry': fallback_data.get('geometry', ''),
+                'distance': fallback_data.get('distance', 0),
+                'duration': fallback_data.get('duration', 0),
+                'is_fallback': True,
+                'cached': False
+            }
+    
+    def _create_fallback_route(self, waypoints):
+        """Create a fallback straight-line route when OSRM fails"""
+        # Calculate total straight-line distance
+        total_distance = 0
+        
+        for i in range(len(waypoints) - 1):
+            lat1, lon1 = waypoints[i]
+            lat2, lon2 = waypoints[i + 1]
+            distance = _haversine_distance(lat1, lon1, lat2, lon2)
+            total_distance += distance
+        
+        # Estimate duration (assuming 50 km/h average speed)
+        estimated_duration = (total_distance / 50) * 60  # minutes
+        
+        # Create simple polyline geometry (just the waypoints)
+        geometry_points = []
+        for lat, lon in waypoints:
+            geometry_points.append([lat, lon])
+        
+        return {
+            'geometry': json.dumps(geometry_points),  # Store as JSON for fallback
+            'distance': total_distance,
+            'duration': estimated_duration
+        }
+
+    @api.model
+    def get_route_cache_stats(self):
+        """Get route cache statistics for admin purposes"""
+        route_cache = self.env['transport.route.cache']
+        return route_cache.get_cache_stats()
+    
+    @api.model
+    def cleanup_route_cache(self, days_old=30):
+        """Clean up old route cache entries"""
+        route_cache = self.env['transport.route.cache']
+        return route_cache.cleanup_old_cache(days_old)

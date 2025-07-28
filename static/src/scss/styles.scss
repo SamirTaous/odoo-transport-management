@@ -94,7 +94,7 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     // Pin tip shadow
     &::after {
         content: '';
@@ -150,7 +150,7 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     .tm-marker-pin {
         background: linear-gradient(135deg, #6f42c1, #5a32a3);
     }
-    
+
     .tm-marker-number {
         background: linear-gradient(135deg, #17a2b8, #138496);
         color: white;
@@ -168,7 +168,7 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     .tm-marker-pin {
         background: linear-gradient(135deg, #6f42c1, #5a32a3);
     }
-    
+
     .tm-marker-number {
         background: linear-gradient(135deg, #28a745, #20c997);
         color: #333;
@@ -185,19 +185,19 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     height: 16px;
     border-radius: 50%;
     border: 2px solid white;
-    
+
     &.status-pending {
         background: #ffc107;
     }
-    
+
     &.status-in-progress {
         background: #17a2b8;
         animation: pulse 2s infinite;
     }
-    
+
     &.status-completed {
         background: #28a745;
-        
+
         &::after {
             content: '✓';
             color: white;
@@ -216,9 +216,11 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     0% {
         box-shadow: 0 0 0 0 rgba(23, 162, 184, 0.7);
     }
+
     70% {
         box-shadow: 0 0 0 10px rgba(23, 162, 184, 0);
     }
+
     100% {
         box-shadow: 0 0 0 0 rgba(23, 162, 184, 0);
     }
@@ -233,7 +235,7 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     width: 2px;
     height: 20px;
     background: linear-gradient(to bottom, #007bff, transparent);
-    
+
     &::after {
         content: '';
         position: absolute;
@@ -258,19 +260,19 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     height: 16px;
     border-radius: 50%;
     border: 2px solid white;
-    
+
     &.status-pending {
         background: #ffc107;
     }
-    
+
     &.status-in-progress {
         background: #17a2b8;
         animation: pulse 2s infinite;
     }
-    
+
     &.status-completed {
         background: #28a745;
-        
+
         &::after {
             content: '✓';
             color: white;
@@ -289,9 +291,11 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     0% {
         box-shadow: 0 0 0 0 rgba(23, 162, 184, 0.7);
     }
+
     70% {
         box-shadow: 0 0 0 10px rgba(23, 162, 184, 0);
     }
+
     100% {
         box-shadow: 0 0 0 0 rgba(23, 162, 184, 0);
     }
@@ -306,7 +310,7 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     width: 2px;
     height: 20px;
     background: linear-gradient(to bottom, #007bff, transparent);
-    
+
     &::after {
         content: '';
         position: absolute;
@@ -342,7 +346,7 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 .tm-mission-pickup .tm-route-line {
     stroke: #17a2b8 !important;
     filter: drop-shadow(0 2px 4px rgba(23, 162, 184, 0.3));
-    
+
     &.tm-route-fallback {
         stroke: #6f42c1 !important;
         filter: drop-shadow(0 2px 4px rgba(111, 66, 193, 0.3));
@@ -352,7 +356,7 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 .tm-mission-delivery .tm-route-line {
     stroke: #28a745 !important;
     filter: drop-shadow(0 2px 4px rgba(40, 167, 69, 0.3));
-    
+
     &.tm-route-fallback {
         stroke: #dc3545 !important;
         filter: drop-shadow(0 2px 4px rgba(220, 53, 69, 0.3));
@@ -417,255 +421,275 @@ $delivery-light: rgba(40, 167, 69, 0.1);
 
 // PICKUP MISSION THEMING
 .tm-mission-pickup {
+
     // Map header theming
     .tm_map_header {
         background: linear-gradient(135deg, $pickup-primary, darken($pickup-primary, 10%)) !important;
         color: white !important;
-        
-        h3, i {
+
+        h3,
+        i {
             color: white !important;
         }
-        
+
         .tm_map_controls .btn {
             border-color: white !important;
             color: white !important;
-            
+
             &:hover {
                 background: white !important;
                 color: $pickup-primary !important;
             }
         }
     }
-    
+
     // Status panel theming
     .tm_map_status_panel {
         border-bottom-color: $pickup-primary !important;
-        
+
         .tm_status_header h5 {
             color: $pickup-primary !important;
         }
-        
+
         .tm_optimize_btn {
             background: linear-gradient(135deg, $pickup-primary, darken($pickup-primary, 10%)) !important;
             border-color: $pickup-primary !important;
-            
+
             &:hover {
                 background: linear-gradient(135deg, darken($pickup-primary, 10%), $pickup-primary) !important;
             }
         }
     }
-    
+
     // Mission header theming
     .tm_mission_header {
         border-bottom-color: $pickup-primary !important;
-        
+
         .tm_title_section h1 {
             color: $pickup-primary !important;
         }
-        
+
         .tm_pickup_badge {
             background: linear-gradient(135deg, $pickup-primary, darken($pickup-primary, 10%)) !important;
             color: white !important;
         }
-        
+
         .tm_metric_card .tm_metric_icon {
             background: $pickup-primary !important;
         }
-        
+
         .progress-bar {
             background: linear-gradient(90deg, $pickup-primary, $pickup-secondary) !important;
         }
     }
-    
+
     // Form section headers
     .tm_form_section h4 {
         color: $pickup-primary !important;
         border-bottom-color: $pickup-light !important;
-        
+
         i {
             color: $pickup-primary !important;
         }
     }
-    
+
     // Radio buttons and controls
     .tm_radio_group .tm_radio_option {
         &:hover {
             border-color: $pickup-primary !important;
             background: $pickup-light !important;
         }
-        
+
         &:has(input[type="radio"]:checked) {
             border-color: $pickup-primary !important;
             background: $pickup-light !important;
         }
-        
-        input[type="radio"]:checked + .tm_radio_label {
+
+        input[type="radio"]:checked+.tm_radio_label {
             color: $pickup-primary !important;
         }
     }
-    
+
     // Form controls
     .form-control:focus {
         border-color: $pickup-primary !important;
         box-shadow: 0 0 0 2px $pickup-light !important;
     }
-    
+
     // Location items
     .tm_source_item {
         border-left-color: $pickup-primary !important;
     }
-    
+
     .tm_destination_item {
         border-left-color: $pickup-secondary !important;
-        
+
         .tm_destination_number {
             background: $pickup-secondary !important;
         }
     }
-    
+
     // Route summary
     .tm_route_step_marker {
         &.tm_route_start {
             background: $pickup-primary !important;
         }
-        
+
         &.tm_route_destination {
             background: $pickup-secondary !important;
         }
     }
-    
+
     // Instructions theming
     .tm_map_instructions .tm_instruction_item i {
-        &.text-primary { color: $pickup-primary !important; }
-        &.text-success { color: $pickup-secondary !important; }
-        &.text-warning { color: $pickup-accent !important; }
+        &.text-primary {
+            color: $pickup-primary !important;
+        }
+
+        &.text-success {
+            color: $pickup-secondary !important;
+        }
+
+        &.text-warning {
+            color: $pickup-accent !important;
+        }
     }
 }
 
 // DELIVERY MISSION THEMING
 .tm-mission-delivery {
+
     // Map header theming
     .tm_map_header {
         background: linear-gradient(135deg, $delivery-primary, darken($delivery-primary, 10%)) !important;
         color: white !important;
-        
-        h3, i {
+
+        h3,
+        i {
             color: white !important;
         }
-        
+
         .tm_map_controls .btn {
             border-color: white !important;
             color: white !important;
-            
+
             &:hover {
                 background: white !important;
                 color: $delivery-primary !important;
             }
         }
     }
-    
+
     // Status panel theming
     .tm_map_status_panel {
         border-bottom-color: $delivery-primary !important;
-        
+
         .tm_status_header h5 {
             color: $delivery-primary !important;
         }
-        
+
         .tm_optimize_btn {
             background: linear-gradient(135deg, $delivery-primary, darken($delivery-primary, 10%)) !important;
             border-color: $delivery-primary !important;
-            
+
             &:hover {
                 background: linear-gradient(135deg, darken($delivery-primary, 10%), $delivery-primary) !important;
             }
         }
     }
-    
+
     // Mission header theming
     .tm_mission_header {
         border-bottom-color: $delivery-primary !important;
-        
+
         .tm_title_section h1 {
             color: $delivery-primary !important;
         }
-        
+
         .tm_delivery_badge {
             background: linear-gradient(135deg, $delivery-primary, darken($delivery-primary, 10%)) !important;
             color: white !important;
         }
-        
+
         .tm_metric_card .tm_metric_icon {
             background: $delivery-primary !important;
         }
-        
+
         .progress-bar {
             background: linear-gradient(90deg, $delivery-primary, $delivery-secondary) !important;
         }
     }
-    
+
     // Form section headers
     .tm_form_section h4 {
         color: $delivery-primary !important;
         border-bottom-color: $delivery-light !important;
-        
+
         i {
             color: $delivery-primary !important;
         }
     }
-    
+
     // Radio buttons and controls
     .tm_radio_group .tm_radio_option {
         &:hover {
             border-color: $delivery-primary !important;
             background: $delivery-light !important;
         }
-        
+
         &:has(input[type="radio"]:checked) {
             border-color: $delivery-primary !important;
             background: $delivery-light !important;
         }
-        
-        input[type="radio"]:checked + .tm_radio_label {
+
+        input[type="radio"]:checked+.tm_radio_label {
             color: $delivery-primary !important;
         }
     }
-    
+
     // Form controls
     .form-control:focus {
         border-color: $delivery-primary !important;
         box-shadow: 0 0 0 2px $delivery-light !important;
     }
-    
+
     // Location items
     .tm_source_item {
         border-left-color: $delivery-primary !important;
     }
-    
+
     .tm_destination_item {
         border-left-color: $delivery-secondary !important;
-        
+
         .tm_destination_number {
             background: $delivery-secondary !important;
         }
     }
-    
+
     // Route summary
     .tm_route_step_marker {
         &.tm_route_start {
             background: $delivery-primary !important;
         }
-        
+
         &.tm_route_destination {
             background: $delivery-secondary !important;
         }
     }
-    
+
     // Instructions theming
     .tm_map_instructions .tm_instruction_item i {
-        &.text-primary { color: $delivery-primary !important; }
-        &.text-success { color: $delivery-secondary !important; }
-        &.text-warning { color: $delivery-accent !important; }
+        &.text-primary {
+            color: $delivery-primary !important;
+        }
+
+        &.text-success {
+            color: $delivery-secondary !important;
+        }
+
+        &.text-warning {
+            color: $delivery-accent !important;
+        }
     }
 }
 
@@ -1074,298 +1098,1030 @@ $delivery-light: rgba(40, 167, 69, 0.1);
                     flex: 1;
 
                     .tm_metric_label {
-                        font-size: 0.75rem;
+                        display: block;
+                        font-size: 0.8rem;
                         color: $tm-secondary-color;
-                        text-transform: uppercase;
                         margin-bottom: 4px;
                     }
 
                     .tm_metric_value {
+                        font-size: 1rem;
                         font-weight: 600;
                         color: $tm-primary-color;
-                        font-size: 1.1rem;
                     }
                 }
             }
+        }
+
+        .tm_details_form {
+            .tm_form_section {
+                margin-bottom: 24px;
+
+                h4 {
+                    color: $tm-primary-color;
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    margin-bottom: 16px;
+                    padding-bottom: 8px;
+                    border-bottom: 1px solid rgba(74, 93, 135, 0.1);
+                    display: flex;
+                    align-items: center;
+
+                    i {
+                        margin-right: 8px;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// === 6. Mission Overview Map Styles ===
+.tm-overview-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: $tm-bg-light;
+}
+
+.tm-overview-header {
+    background: white;
+    border-bottom: 1px solid $tm-border-color;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: $tm-card-shadow;
+    flex-shrink: 0;
+
+    .tm-header-left {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+
+        h2 {
+            margin: 0;
+            color: $tm-primary-color;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+
+            i {
+                color: $tm-primary-color;
+            }
+        }
+
+        .tm-status-summary {
+            display: flex;
+            gap: 16px;
+
+            .tm-status-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 12px;
+                border-radius: 6px;
+                font-size: 0.9rem;
+                font-weight: 500;
+
+                &.tm-confirmed {
+                    background: rgba(23, 162, 184, 0.1);
+                    color: #17a2b8;
+                    border: 1px solid rgba(23, 162, 184, 0.2);
+                }
+
+                &.tm-in-progress {
+                    background: rgba(255, 193, 7, 0.1);
+                    color: #ffc107;
+                    border: 1px solid rgba(255, 193, 7, 0.2);
+                }
+
+                &.tm-total {
+                    background: rgba(74, 93, 135, 0.1);
+                    color: $tm-primary-color;
+                    border: 1px solid rgba(74, 93, 135, 0.2);
+                }
+            }
+        }
+    }
+
+    .tm-header-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+
+        .tm-last-update {
+            font-size: 0.8rem;
+        }
+
+        .tm-controls {
+            .btn {
+                border-radius: 6px;
+                font-weight: 500;
+                transition: all 0.2s ease;
+
+                &:hover:not(:disabled) {
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+                }
+
+                .fa-spin {
+                    animation: fa-spin 1s infinite linear;
+                }
+            }
+        }
+    }
+}
+
+.tm-legend {
+    background: white;
+    border-bottom: 1px solid $tm-border-color;
+    padding: 12px 24px;
+    display: flex;
+    gap: 32px;
+    flex-shrink: 0;
+
+    .tm-legend-section {
+        h6 {
+            margin: 0 0 8px 0;
+            color: $tm-primary-color;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .tm-legend-items {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+
+            .tm-legend-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 0.8rem;
+                color: $tm-secondary-color;
+
+                .tm-legend-marker {
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.7rem;
+                    border: 2px solid white;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+                    &.tm-pickup {
+                        background: linear-gradient(135deg, #17a2b8, #138496);
+                    }
+
+                    &.tm-delivery {
+                        background: linear-gradient(135deg, #28a745, #20c997);
+                    }
+
+                    &.tm-completed {
+                        background: #28a745;
+                        color: white;
+                    }
+
+                    &.tm-pending {
+                        background: #ffc107;
+                        color: white;
+                    }
+                }
+
+                .tm-legend-line {
+                    width: 30px;
+                    height: 3px;
+                    border-radius: 2px;
+
+                    &.tm-confirmed {
+                        background: #17a2b8;
+                        background-image: repeating-linear-gradient(45deg,
+                                transparent,
+                                transparent 3px,
+                                white 3px,
+                                white 6px);
+                    }
+
+                    &.tm-in-progress {
+                        background: #ffc107;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.tm-map-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+
+    .tm-overview-map {
+        flex: 1;
+        height: 100%;
+
+        .leaflet-container {
+            height: 100%;
+            width: 100%;
+        }
+    }
+
+    .tm-loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+
+        .tm-loading-content {
+            text-align: center;
+            color: $tm-primary-color;
+
+            i {
+                margin-bottom: 12px;
+                color: $tm-primary-color;
+            }
+
+            p {
+                margin: 0;
+                font-weight: 500;
+            }
+        }
+    }
+
+    .tm-empty-state {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+
+        .tm-empty-content {
+            text-align: center;
+            color: $tm-secondary-color;
+
+            i {
+                margin-bottom: 16px;
+            }
+
+            h4 {
+                margin-bottom: 8px;
+                color: $tm-primary-color;
+            }
+
+            p {
+                margin: 0;
+            }
+        }
+    }
+}
+
+.tm-sidebar {
+    width: 350px;
+    background: white;
+    border-left: 1px solid $tm-border-color;
+    display: flex;
+    flex-direction: column;
+
+    .tm-sidebar-header {
+        padding: 16px;
+        border-bottom: 1px solid $tm-border-color;
+        background: $tm-bg-light;
+
+        h5 {
+            margin: 0;
+            color: $tm-primary-color;
+            font-weight: 600;
+        }
+    }
+
+    .tm-mission-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 8px;
+
+        .tm-mission-card {
+            background: white;
+            border: 1px solid $tm-border-color;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            padding: 12px;
+            transition: all 0.2s ease;
+
+            &:hover {
+                box-shadow: $tm-card-hover-shadow;
+                transform: translateY(-1px);
+            }
+
+            &.tm-state-confirmed {
+                border-left: 4px solid #17a2b8;
+            }
+
+            &.tm-state-in_progress {
+                border-left: 4px solid #ffc107;
+            }
+
+            .tm-mission-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 8px;
+
+                .tm-mission-name {
+                    flex: 1;
+
+                    strong {
+                        color: $tm-primary-color;
+                        font-size: 0.9rem;
+                    }
+
+                    .tm-mission-type {
+                        display: block;
+                        font-size: 0.75rem;
+                        margin-top: 2px;
+
+                        &.tm-type-pickup {
+                            color: #17a2b8;
+                        }
+
+                        &.tm-type-delivery {
+                            color: #28a745;
+                        }
+                    }
+                }
+
+                .tm-mission-status {
+                    font-size: 0.75rem;
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    font-weight: 500;
+
+                    &.tm-status-confirmed {
+                        background: rgba(23, 162, 184, 0.1);
+                        color: #17a2b8;
+                    }
+
+                    &.tm-status-in_progress {
+                        background: rgba(255, 193, 7, 0.1);
+                        color: #ffc107;
+                    }
+                }
+            }
+
+            .tm-mission-details {
+                margin-bottom: 8px;
+
+                .tm-detail-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 0.8rem;
+                    color: $tm-secondary-color;
+                    margin-bottom: 2px;
+
+                    i {
+                        width: 12px;
+                        font-size: 0.75rem;
+                    }
+                }
+            }
+
+            .tm-progress-section {
+                .tm-progress-label {
+                    font-size: 0.75rem;
+                    color: $tm-secondary-color;
+                    margin-bottom: 4px;
+                }
+
+                .tm-progress-bar {
+                    height: 6px;
+                    background: $tm-bg-light;
+                    border-radius: 3px;
+
+                    .progress-bar {
+                        border-radius: 3px;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Overview map marker styles
+.tm-overview-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+.tm-overview-marker {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        transform: scale(1.1);
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    }
+
+    &.tm-source-marker {
+        .tm-marker-content {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+
+            .tm-marker-icon {
+                font-size: 1.2rem;
+            }
+        }
+
+        .tm-marker-label {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            margin-top: 4px;
+            white-space: nowrap;
+        }
+
+        &.tm-active .tm-marker-content {
+            animation: pulse 2s infinite;
+        }
+    }
+
+    &.tm-dest-marker {
+        .tm-marker-content {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            position: relative;
+
+            .tm-marker-number {
+                position: absolute;
+                top: -8px;
+                right: -8px;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: white;
+                color: #333;
+                font-weight: 800;
+                font-size: 0.6rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #ccc;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            }
+
+            .tm-marker-icon {
+                font-size: 0.9rem;
+            }
+        }
+
+        &.tm-completed .tm-marker-content {
+            opacity: 0.7;
+
+            &::after {
+                content: '✓';
+                position: absolute;
+                bottom: -6px;
+                right: -6px;
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                background: #28a745;
+                color: white;
+                font-size: 0.6rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid white;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            }
+        }
+    }
+}
+
+// Overview popup styles
+.tm-overview-popup {
+    min-width: 200px;
+
+    h5,
+    h6 {
+        margin: 0 0 8px 0;
+        color: $tm-primary-color;
+        font-weight: 600;
+    }
+
+    .tm-popup-info {
+        p {
+            margin: 4px 0;
+            font-size: 0.85rem;
+
+            strong {
+                color: $tm-primary-color;
+                font-weight: 500;
+            }
+        }
+
+        .tm-progress-container {
+            margin: 8px 0;
+
+            label {
+                font-size: 0.8rem;
+                color: $tm-secondary-color;
+                font-weight: 500;
+            }
+
+            .progress {
+                background: $tm-bg-light;
+                border-radius: 4px;
+
+                .progress-bar {
+                    background: linear-gradient(90deg, $tm-primary-color, #17a2b8);
+                    border-radius: 4px;
+                    font-size: 0.75rem;
+                    font-weight: 500;
+                }
+            }
+        }
+    }
+
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+}
+
+.tm_metric_content {
+    flex: 1;
+
+    .tm_metric_label {
+        font-size: 0.75rem;
+        color: $tm-secondary-color;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+
+    .tm_metric_value {
+        font-weight: 600;
+        color: $tm-primary-color;
+        font-size: 1.1rem;
+    }
+}
+}
+}
+
+.tm_form_section {
+    margin-bottom: 24px;
+
+    h4 {
+        color: $tm-primary-color;
+        font-size: 1rem;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e9ecef;
+    }
+}
+
+// === 5. Mission Configuration Styles ===
+.tm_config_grid {
+    display: grid;
+    gap: 16px;
+}
+
+.tm_config_item {
+    .tm_config_label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: $tm-secondary-color;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        letter-spacing: 0.5px;
+    }
+
+    .tm_config_value {
+        .form-control {
+            border: 1px solid $tm-border-color;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+
+            &:focus {
+                border-color: $tm-primary-color;
+                box-shadow: 0 0 0 2px rgba(74, 93, 135, 0.1);
+            }
+        }
+    }
+}
+
+// Radio Group Styles
+.tm_radio_group {
+    display: flex;
+    gap: 12px;
+
+    .tm_radio_option {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 8px 12px;
+        border: 1px solid $tm-border-color;
+        border-radius: 6px;
+        background: white;
+        transition: all 0.2s ease;
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        .tm_radio_label {
+            font-size: 0.9rem;
+            color: $tm-secondary-color;
+        }
+
+        &:hover {
+            border-color: $tm-primary-color;
+            background: rgba(74, 93, 135, 0.05);
+        }
+
+        input[type="radio"]:checked+.tm_radio_label {
+            color: $tm-primary-color;
+            font-weight: 600;
+        }
+
+        &:has(input[type="radio"]:checked) {
+            border-color: $tm-primary-color;
+            background: rgba(74, 93, 135, 0.1);
+        }
+    }
+}
+
+// Priority Group Styles
+.tm_priority_group {
+    display: flex;
+    gap: 8px;
+
+    .tm_priority_option {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 8px 12px;
+        border: 1px solid $tm-border-color;
+        border-radius: 6px;
+        background: white;
+        transition: all 0.2s ease;
+        font-size: 0.85rem;
+        text-align: center;
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        span {
+            color: $tm-secondary-color;
+            font-weight: 500;
+        }
+
+        &.tm_priority_low {
+            &:hover {
+                border-color: #28a745;
+                background: rgba(40, 167, 69, 0.05);
+            }
+
+            &.active {
+                border-color: #28a745;
+                background: rgba(40, 167, 69, 0.1);
+
+                span {
+                    color: #28a745;
+                    font-weight: 600;
+                }
+            }
+        }
+
+        &.tm_priority_normal {
+            &:hover {
+                border-color: #ffc107;
+                background: rgba(255, 193, 7, 0.05);
+            }
+
+            &.active {
+                border-color: #ffc107;
+                background: rgba(255, 193, 7, 0.1);
+
+                span {
+                    color: #ffc107;
+                    font-weight: 600;
+                }
+            }
+        }
+
+        &.tm_priority_high {
+            &:hover {
+                border-color: #dc3545;
+                background: rgba(220, 53, 69, 0.05);
+            }
+
+            &.active {
+                border-color: #dc3545;
+                background: rgba(220, 53, 69, 0.1);
+
+                span {
+                    color: #dc3545;
+                    font-weight: 600;
+                }
+            }
+        }
+    }
+}
+
+// Driver and Vehicle Display
+.tm_driver_display,
+.tm_vehicle_display {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: $tm-bg-light;
+    border: 1px solid $tm-border-color;
+    border-radius: 6px;
+
+    .tm_driver_avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: $tm-primary-color;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        font-size: 0.9rem;
+    }
+
+    span {
+        font-size: 0.9rem;
+        color: $tm-secondary-color;
+
+        &.text-muted {
+            font-style: italic;
+        }
+    }
+}
+
+// Notes Section
+.tm_notes_container {
+    .tm_notes_textarea {
+        border: 1px solid $tm-border-color;
+        border-radius: 6px;
+        padding: 12px;
+        font-size: 0.9rem;
+        resize: vertical;
+        min-height: 80px;
+
+        &:focus {
+            border-color: $tm-primary-color;
+            box-shadow: 0 0 0 2px rgba(74, 93, 135, 0.1);
+            outline: none;
+        }
+
+        &::placeholder {
+            color: #aaa;
+            font-style: italic;
+        }
+    }
+}
+
+// Location Item Styles
+.tm_location_item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px;
+    background: $tm-bg-light;
+    border-radius: 6px;
+    margin-bottom: 8px;
+
+    &.tm_source_item {
+        border-left: 4px solid #007bff;
+    }
+
+    &.tm_destination_item {
+        border-left: 4px solid #dc3545;
+    }
+
+    .tm_destination_number {
+        width: 24px;
+        height: 24px;
+        background: #dc3545;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-right: 12px;
+        flex-shrink: 0;
+    }
+
+    >i {
+        margin-right: 12px;
+        margin-top: 2px;
+        font-size: 1.2rem;
+    }
+
+    .tm_location_info {
+        flex: 1;
+
+        .tm_location_address {
+            display: block;
+            font-weight: 500;
+        }
+
+        .tm_location_coords {
+            color: $tm-secondary-color;
+            font-size: 0.8rem;
+        }
+    }
+
+    .tm_location_actions {
+        margin-left: 8px;
+
+        .btn {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+    }
+}
+
+.tm_empty_destinations {
+    text-align: center;
+    padding: 20px;
+    color: $tm-secondary-color;
+    font-style: italic;
+
+    i {
+        margin-bottom: 8px;
+    }
+}
+
+// Route Summary Styles
+.tm_route_summary {
+    .tm_route_step {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        .tm_route_step_marker {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-right: 12px;
+            flex-shrink: 0;
+
+            &.tm_route_start {
+                background: #007bff;
+                color: white;
+            }
+
+            &.tm_route_destination {
+                background: #dc3545;
+                color: white;
+            }
+        }
+
+        .tm_route_step_content {
+            font-size: 0.9rem;
+            color: $tm-secondary-color;
+
+            strong {
+                color: $tm-primary-color;
+            }
+        }
+    }
+}
+}
+
+// Responsive adjustments
+@media (max-width: 1400px) {
+    .tm_main_container {
+        grid-template-columns: 1fr 450px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .tm_main_container {
+        grid-template-columns: 1fr 420px;
+    }
+
+    .tm_details_column {
+        padding: 16px;
+
+        .tm_mission_header .tm_title_section h1 {
+            font-size: 1.3rem;
+        }
+
+        .tm_config_grid {
+            gap: 12px;
+        }
+    }
+}
+
+@media (max-width: 992px) {
+    .tm_main_container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 50vh 1fr; // Map takes 50% of viewport height
+        height: auto;
+    }
+
+    .tm_details_column {
+        padding: 16px;
+        max-height: 50vh;
+    }
+
+    .tm_config_grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tm_radio_group {
+        flex-wrap: wrap;
+    }
+
+    .tm_priority_group {
+        flex-direction: column;
+        gap: 6px;
+    }
+}
+
+@media (max-width: 768px) {
+    .tm_details_column {
+        padding: 12px;
+
+        .tm_mission_header .tm_metrics_grid {
+            grid-template-columns: 1fr;
+            gap: 8px;
         }
 
         .tm_form_section {
-            margin-bottom: 24px;
+            margin-bottom: 16px;
 
             h4 {
-                color: $tm-primary-color;
-                font-size: 1rem;
-                margin-bottom: 12px;
-                padding-bottom: 8px;
-                border-bottom: 1px solid #e9ecef;
+                font-size: 0.9rem;
             }
         }
+    }
 
-        // === 5. Mission Configuration Styles ===
-        .tm_config_grid {
-            display: grid;
-            gap: 16px;
-        }
-
-        .tm_config_item {
-            .tm_config_label {
-                display: block;
-                font-size: 0.8rem;
-                font-weight: 600;
-                color: $tm-secondary-color;
-                text-transform: uppercase;
-                margin-bottom: 8px;
-                letter-spacing: 0.5px;
-            }
-
-            .tm_config_value {
-                .form-control {
-                    border: 1px solid $tm-border-color;
-                    border-radius: 6px;
-                    padding: 8px 12px;
-                    font-size: 0.9rem;
-
-                    &:focus {
-                        border-color: $tm-primary-color;
-                        box-shadow: 0 0 0 2px rgba(74, 93, 135, 0.1);
-                    }
-                }
-            }
-        }
-
-        // Radio Group Styles
-        .tm_radio_group {
-            display: flex;
-            gap: 12px;
-
-            .tm_radio_option {
-                display: flex;
-                align-items: center;
-                cursor: pointer;
-                padding: 8px 12px;
-                border: 1px solid $tm-border-color;
-                border-radius: 6px;
-                background: white;
-                transition: all 0.2s ease;
-
-                input[type="radio"] {
-                    display: none;
-                }
-
-                .tm_radio_label {
-                    font-size: 0.9rem;
-                    color: $tm-secondary-color;
-                }
-
-                &:hover {
-                    border-color: $tm-primary-color;
-                    background: rgba(74, 93, 135, 0.05);
-                }
-
-                input[type="radio"]:checked+.tm_radio_label {
-                    color: $tm-primary-color;
-                    font-weight: 600;
-                }
-
-                &:has(input[type="radio"]:checked) {
-                    border-color: $tm-primary-color;
-                    background: rgba(74, 93, 135, 0.1);
-                }
-            }
-        }
-
-        // Priority Group Styles
-        .tm_priority_group {
-            display: flex;
-            gap: 8px;
-
-            .tm_priority_option {
-                flex: 1;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                padding: 8px 12px;
-                border: 1px solid $tm-border-color;
-                border-radius: 6px;
-                background: white;
-                transition: all 0.2s ease;
-                font-size: 0.85rem;
-                text-align: center;
-
-                input[type="radio"] {
-                    display: none;
-                }
-
-                span {
-                    color: $tm-secondary-color;
-                    font-weight: 500;
-                }
-
-                &.tm_priority_low {
-                    &:hover {
-                        border-color: #28a745;
-                        background: rgba(40, 167, 69, 0.05);
-                    }
-
-                    &.active {
-                        border-color: #28a745;
-                        background: rgba(40, 167, 69, 0.1);
-
-                        span {
-                            color: #28a745;
-                            font-weight: 600;
-                        }
-                    }
-                }
-
-                &.tm_priority_normal {
-                    &:hover {
-                        border-color: #ffc107;
-                        background: rgba(255, 193, 7, 0.05);
-                    }
-
-                    &.active {
-                        border-color: #ffc107;
-                        background: rgba(255, 193, 7, 0.1);
-
-                        span {
-                            color: #ffc107;
-                            font-weight: 600;
-                        }
-                    }
-                }
-
-                &.tm_priority_high {
-                    &:hover {
-                        border-color: #dc3545;
-                        background: rgba(220, 53, 69, 0.05);
-                    }
-
-                    &.active {
-                        border-color: #dc3545;
-                        background: rgba(220, 53, 69, 0.1);
-
-                        span {
-                            color: #dc3545;
-                            font-weight: 600;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Driver and Vehicle Display
-        .tm_driver_display,
-        .tm_vehicle_display {
-            display: flex;
-            align-items: center;
+    .tm_map_column {
+        .tm_map_header {
             padding: 8px 12px;
-            background: $tm-bg-light;
-            border: 1px solid $tm-border-color;
-            border-radius: 6px;
 
-            .tm_driver_avatar {
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                background: $tm-primary-color;
-                color: white;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-right: 10px;
-                font-size: 0.9rem;
+            h3 {
+                font-size: 1rem;
             }
 
-            span {
-                font-size: 0.9rem;
-                color: $tm-secondary-color;
-
-                &.text-muted {
-                    font-style: italic;
-                }
-            }
-        }
-
-        // Notes Section
-        .tm_notes_container {
-            .tm_notes_textarea {
-                border: 1px solid $tm-border-color;
-                border-radius: 6px;
-                padding: 12px;
-                font-size: 0.9rem;
-                resize: vertical;
-                min-height: 80px;
-
-                &:focus {
-                    border-color: $tm-primary-color;
-                    box-shadow: 0 0 0 2px rgba(74, 93, 135, 0.1);
-                    outline: none;
-                }
-
-                &::placeholder {
-                    color: #aaa;
-                    font-style: italic;
-                }
-            }
-        }
-
-        // Location Item Styles
-        .tm_location_item {
-            display: flex;
-            align-items: flex-start;
-            padding: 12px;
-            background: $tm-bg-light;
-            border-radius: 6px;
-            margin-bottom: 8px;
-
-            &.tm_source_item {
-                border-left: 4px solid #007bff;
-            }
-
-            &.tm_destination_item {
-                border-left: 4px solid #dc3545;
-            }
-
-            .tm_destination_number {
-                width: 24px;
-                height: 24px;
-                background: #dc3545;
-                color: white;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 0.8rem;
-                font-weight: 600;
-                margin-right: 12px;
-                flex-shrink: 0;
-            }
-
-            >i {
-                margin-right: 12px;
-                margin-top: 2px;
-                font-size: 1.2rem;
-            }
-
-            .tm_location_info {
-                flex: 1;
-
-                .tm_location_address {
-                    display: block;
-                    font-weight: 500;
-                }
-
-                .tm_location_coords {
-                    color: $tm-secondary-color;
-                    font-size: 0.8rem;
-                }
-            }
-
-            .tm_location_actions {
-                margin-left: 8px;
-
+            .tm_map_controls {
                 .btn {
                     padding: 4px 8px;
                     font-size: 0.8rem;
@@ -1373,177 +2129,749 @@ $delivery-light: rgba(40, 167, 69, 0.1);
             }
         }
 
-        .tm_empty_destinations {
-            text-align: center;
-            padding: 20px;
-            color: $tm-secondary-color;
-            font-style: italic;
-
-            i {
-                margin-bottom: 8px;
-            }
-        }
-
-        // Route Summary Styles
-        .tm_route_summary {
-            .tm_route_step {
-                display: flex;
-                align-items: center;
-                margin-bottom: 12px;
-
-                &:last-child {
-                    margin-bottom: 0;
-                }
-
-                .tm_route_step_marker {
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-weight: 600;
-                    font-size: 0.9rem;
-                    margin-right: 12px;
-                    flex-shrink: 0;
-
-                    &.tm_route_start {
-                        background: #007bff;
-                        color: white;
-                    }
-
-                    &.tm_route_destination {
-                        background: #dc3545;
-                        color: white;
-                    }
-                }
-
-                .tm_route_step_content {
-                    font-size: 0.9rem;
-                    color: $tm-secondary-color;
-
-                    strong {
-                        color: $tm-primary-color;
-                    }
-                }
-            }
-        }
-    }
-
-    // Responsive adjustments
-    @media (max-width: 1400px) {
-        .tm_main_container {
-            grid-template-columns: 1fr 450px;
-        }
-    }
-
-    @media (max-width: 1200px) {
-        .tm_main_container {
-            grid-template-columns: 1fr 420px;
-        }
-
-        .tm_details_column {
-            padding: 16px;
-
-            .tm_mission_header .tm_title_section h1 {
-                font-size: 1.3rem;
-            }
-
-            .tm_config_grid {
-                gap: 12px;
-            }
-        }
-    }
-
-    @media (max-width: 992px) {
-        .tm_main_container {
-            grid-template-columns: 1fr;
-            grid-template-rows: 50vh 1fr; // Map takes 50% of viewport height
-            height: auto;
-        }
-
-        .tm_details_column {
-            padding: 16px;
-            max-height: 50vh;
-        }
-
-        .tm_config_grid {
-            grid-template-columns: 1fr;
-        }
-
-        .tm_radio_group {
-            flex-wrap: wrap;
-        }
-
-        .tm_priority_group {
-            flex-direction: column;
-            gap: 6px;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .tm_details_column {
+        .tm_map_status_panel {
             padding: 12px;
 
-            .tm_mission_header .tm_metrics_grid {
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }
+            .tm_status_controls {
+                flex-direction: column;
+                gap: 12px;
 
-            .tm_form_section {
-                margin-bottom: 16px;
+                .tm_status_buttons {
+                    gap: 6px;
+                    flex-wrap: wrap;
 
-                h4 {
-                    font-size: 0.9rem;
-                }
-            }
-        }
-
-        .tm_map_column {
-            .tm_map_header {
-                padding: 8px 12px;
-
-                h3 {
-                    font-size: 1rem;
-                }
-
-                .tm_map_controls {
-                    .btn {
-                        padding: 4px 8px;
+                    .tm_status_indicator,
+                    .tm_status_btn {
+                        min-width: 60px;
+                        padding: 6px 8px;
                         font-size: 0.8rem;
                     }
                 }
-            }
 
-            .tm_map_status_panel {
-                padding: 12px;
+                .tm_optimization_controls {
+                    align-self: stretch;
 
-                .tm_status_controls {
-                    flex-direction: column;
-                    gap: 12px;
-
-                    .tm_status_buttons {
-                        gap: 6px;
-                        flex-wrap: wrap;
-
-                        .tm_status_indicator,
-                        .tm_status_btn {
-                            min-width: 60px;
-                            padding: 6px 8px;
-                            font-size: 0.8rem;
-                        }
-                    }
-
-                    .tm_optimization_controls {
-                        align-self: stretch;
-
-                        .tm_optimize_btn {
-                            width: 100%;
-                            padding: 8px 12px;
-                        }
+                    .tm_optimize_btn {
+                        width: 100%;
+                        padding: 8px 12px;
                     }
                 }
             }
         }
     }
 }
+}
+
+// 
+===6. Mission Overview Map Styles===.tm-overview-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: $tm-bg-light;
+}
+
+.tm-overview-header {
+    background: white;
+    border-bottom: 1px solid $tm-border-color;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: $tm-card-shadow;
+    flex-shrink: 0;
+
+    .tm-header-left {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+
+        h2 {
+            margin: 0;
+            color: $tm-primary-color;
+            font-size: 1.4rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+
+            i {
+                color: $tm-primary-color;
+            }
+        }
+
+        .tm-status-summary {
+            display: flex;
+            gap: 16px;
+
+            .tm-status-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 12px;
+                border-radius: 6px;
+                font-size: 0.9rem;
+                font-weight: 500;
+
+                &.tm-confirmed {
+                    background: rgba(23, 162, 184, 0.1);
+                    color: #17a2b8;
+                    border: 1px solid rgba(23, 162, 184, 0.2);
+                }
+
+                &.tm-in-progress {
+                    background: rgba(255, 193, 7, 0.1);
+                    color: #ffc107;
+                    border: 1px solid rgba(255, 193, 7, 0.2);
+                }
+
+                &.tm-total {
+                    background: rgba(74, 93, 135, 0.1);
+                    color: $tm-primary-color;
+                    border: 1px solid rgba(74, 93, 135, 0.2);
+                }
+            }
+        }
+    }
+
+    .tm-header-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+
+        .tm-last-update {
+            font-size: 0.8rem;
+        }
+
+        .tm-controls {
+            .btn {
+                border-radius: 6px;
+                font-weight: 500;
+                transition: all 0.2s ease;
+
+                &:hover:not(:disabled) {
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+                }
+
+                .fa-spin {
+                    animation: fa-spin 1s infinite linear;
+                }
+            }
+        }
+    }
+}
+
+.tm-legend {
+    background: white;
+    border-bottom: 1px solid $tm-border-color;
+    padding: 12px 24px;
+    display: flex;
+    gap: 32px;
+    flex-shrink: 0;
+
+    .tm-legend-section {
+        h6 {
+            margin: 0 0 8px 0;
+            color: $tm-primary-color;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .tm-legend-items {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+
+            .tm-legend-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 0.8rem;
+                color: $tm-secondary-color;
+
+                .tm-legend-marker {
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.7rem;
+                    border: 2px solid white;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+                    &.tm-pickup {
+                        background: linear-gradient(135deg, #17a2b8, #138496);
+                    }
+
+                    &.tm-delivery {
+                        background: linear-gradient(135deg, #28a745, #20c997);
+                    }
+
+                    &.tm-completed {
+                        background: #28a745;
+                        color: white;
+                    }
+
+                    &.tm-pending {
+                        background: #ffc107;
+                        color: white;
+                    }
+                }
+
+                .tm-legend-line {
+                    width: 30px;
+                    height: 3px;
+                    border-radius: 2px;
+
+                    &.tm-confirmed {
+                        background: #17a2b8;
+                        background-image: repeating-linear-gradient(45deg,
+                                transparent,
+                                transparent 3px,
+                                white 3px,
+                                white 6px);
+
+                        // 
+                        ===Mission Overview Map Styles===.tm-overview-container {
+                            height: 100vh;
+                            display: flex;
+                            flex-direction: column;
+                            background: $tm-bg-light;
+                        }
+
+                        .tm-overview-header {
+                            background: white;
+                            border-bottom: 1px solid $tm-border-color;
+                            padding: 16px 24px;
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            box-shadow: $tm-card-shadow;
+                            flex-shrink: 0;
+
+                            .tm-header-left {
+                                display: flex;
+                                align-items: center;
+                                gap: 24px;
+
+                                h2 {
+                                    margin: 0;
+                                    color: $tm-primary-color;
+                                    font-size: 1.4rem;
+                                    font-weight: 600;
+                                    display: flex;
+                                    align-items: center;
+
+                                    i {
+                                        color: $tm-primary-color;
+                                    }
+                                }
+
+                                .tm-status-summary {
+                                    display: flex;
+                                    gap: 16px;
+
+                                    .tm-status-item {
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 6px;
+                                        padding: 6px 12px;
+                                        border-radius: 6px;
+                                        font-size: 0.9rem;
+                                        font-weight: 500;
+
+                                        &.tm-confirmed {
+                                            background: rgba(23, 162, 184, 0.1);
+                                            color: #17a2b8;
+                                            border: 1px solid rgba(23, 162, 184, 0.2);
+                                        }
+
+                                        &.tm-in-progress {
+                                            background: rgba(255, 193, 7, 0.1);
+                                            color: #ffc107;
+                                            border: 1px solid rgba(255, 193, 7, 0.2);
+                                        }
+
+                                        &.tm-total {
+                                            background: rgba(74, 93, 135, 0.1);
+                                            color: $tm-primary-color;
+                                            border: 1px solid rgba(74, 93, 135, 0.2);
+                                        }
+                                    }
+                                }
+                            }
+
+                            .tm-header-right {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: flex-end;
+                                gap: 8px;
+
+                                .tm-last-update {
+                                    font-size: 0.8rem;
+                                }
+
+                                .tm-controls {
+                                    .btn {
+                                        border-radius: 6px;
+                                        font-weight: 500;
+                                        transition: all 0.2s ease;
+
+                                        &:hover:not(:disabled) {
+                                            transform: translateY(-1px);
+                                            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+                                        }
+
+                                        .fa-spin {
+                                            animation: fa-spin 1s infinite linear;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        .tm-legend {
+                            background: white;
+                            border-bottom: 1px solid $tm-border-color;
+                            padding: 12px 24px;
+                            display: flex;
+                            gap: 32px;
+                            flex-shrink: 0;
+
+                            .tm-legend-section {
+                                h6 {
+                                    margin: 0 0 8px 0;
+                                    color: $tm-primary-color;
+                                    font-size: 0.85rem;
+                                    font-weight: 600;
+                                }
+
+                                .tm-legend-items {
+                                    display: flex;
+                                    gap: 16px;
+                                    flex-wrap: wrap;
+
+                                    .tm-legend-item {
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 6px;
+                                        font-size: 0.8rem;
+                                        color: $tm-secondary-color;
+
+                                        .tm-legend-marker {
+                                            width: 20px;
+                                            height: 20px;
+                                            border-radius: 50%;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            font-size: 0.7rem;
+                                            border: 2px solid white;
+                                            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+                                            &.tm-pickup {
+                                                background: linear-gradient(135deg, #17a2b8, #138496);
+                                            }
+
+                                            &.tm-delivery {
+                                                background: linear-gradient(135deg, #28a745, #20c997);
+                                            }
+
+                                            &.tm-completed {
+                                                background: #28a745;
+                                                color: white;
+                                            }
+
+                                            &.tm-pending {
+                                                background: #ffc107;
+                                                color: white;
+                                            }
+                                        }
+
+                                        .tm-legend-line {
+                                            width: 30px;
+                                            height: 3px;
+                                            border-radius: 2px;
+
+                                            &.tm-confirmed {
+                                                background: #17a2b8;
+                                                background-image: repeating-linear-gradient(45deg,
+                                                        transparent,
+                                                        transparent 3px,
+                                                        white 3px,
+                                                        white 6px);
+                                            }
+
+                                            &.tm-in-progress {
+                                                background: #ffc107;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        .tm-map-wrapper {
+                            flex: 1;
+                            position: relative;
+                            display: flex;
+                            min-height: 400px;
+
+                            .tm-overview-map {
+                                flex: 1;
+                                height: 100%;
+                                min-height: 400px;
+
+                                .leaflet-container {
+                                    height: 100% !important;
+                                    width: 100% !important;
+                                    min-height: 400px !important;
+                                }
+                            }
+
+                            .tm-loading-overlay {
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                right: 0;
+                                bottom: 0;
+                                background: rgba(255, 255, 255, 0.9);
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                z-index: 1000;
+
+                                .tm-loading-content {
+                                    text-align: center;
+                                    color: $tm-primary-color;
+
+                                    i {
+                                        margin-bottom: 12px;
+                                        color: $tm-primary-color;
+                                    }
+
+                                    p {
+                                        margin: 0;
+                                        font-weight: 500;
+                                    }
+                                }
+                            }
+
+                            .tm-empty-state {
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                right: 0;
+                                bottom: 0;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                background: white;
+
+                                .tm-empty-content {
+                                    text-align: center;
+                                    color: $tm-secondary-color;
+
+                                    i {
+                                        margin-bottom: 16px;
+                                    }
+
+                                    h4 {
+                                        margin-bottom: 8px;
+                                        color: $tm-primary-color;
+                                    }
+
+                                    p {
+                                        margin: 0;
+                                    }
+                                }
+                            }
+                        }
+
+                        .tm-sidebar {
+                            width: 350px;
+                            background: white;
+                            border-left: 1px solid $tm-border-color;
+                            display: flex;
+                            flex-direction: column;
+
+                            .tm-sidebar-header {
+                                padding: 16px;
+                                border-bottom: 1px solid $tm-border-color;
+                                background: $tm-bg-light;
+
+                                h5 {
+                                    margin: 0;
+                                    color: $tm-primary-color;
+                                    font-weight: 600;
+                                }
+                            }
+
+                            .tm-mission-list {
+                                flex: 1;
+                                overflow-y: auto;
+                                padding: 8px;
+
+                                .tm-mission-card {
+                                    background: white;
+                                    border: 1px solid $tm-border-color;
+                                    border-radius: 8px;
+                                    margin-bottom: 8px;
+                                    padding: 12px;
+                                    transition: all 0.2s ease;
+
+                                    &:hover {
+                                        box-shadow: $tm-card-hover-shadow;
+                                        transform: translateY(-1px);
+                                    }
+
+                                    &.tm-state-confirmed {
+                                        border-left: 4px solid #17a2b8;
+                                    }
+
+                                    &.tm-state-in_progress {
+                                        border-left: 4px solid #ffc107;
+                                    }
+
+                                    .tm-mission-header {
+                                        display: flex;
+                                        justify-content: space-between;
+                                        align-items: flex-start;
+                                        margin-bottom: 8px;
+
+                                        .tm-mission-name {
+                                            flex: 1;
+
+                                            strong {
+                                                color: $tm-primary-color;
+                                                font-size: 0.9rem;
+                                            }
+
+                                            .tm-mission-type {
+                                                display: block;
+                                                font-size: 0.75rem;
+                                                margin-top: 2px;
+
+                                                &.tm-type-pickup {
+                                                    color: #17a2b8;
+                                                }
+
+                                                &.tm-type-delivery {
+                                                    color: #28a745;
+                                                }
+                                            }
+                                        }
+
+                                        .tm-mission-status {
+                                            font-size: 0.75rem;
+                                            padding: 2px 6px;
+                                            border-radius: 4px;
+                                            font-weight: 500;
+
+                                            &.tm-status-confirmed {
+                                                background: rgba(23, 162, 184, 0.1);
+                                                color: #17a2b8;
+                                            }
+
+                                            &.tm-status-in_progress {
+                                                background: rgba(255, 193, 7, 0.1);
+                                                color: #ffc107;
+                                            }
+                                        }
+                                    }
+
+                                    .tm-mission-details {
+                                        margin-bottom: 8px;
+
+                                        .tm-detail-row {
+                                            display: flex;
+                                            align-items: center;
+                                            gap: 6px;
+                                            font-size: 0.8rem;
+                                            color: $tm-secondary-color;
+                                            margin-bottom: 2px;
+
+                                            i {
+                                                width: 12px;
+                                                font-size: 0.75rem;
+                                            }
+                                        }
+                                    }
+
+                                    .tm-progress-section {
+                                        .tm-progress-label {
+                                            font-size: 0.75rem;
+                                            color: $tm-secondary-color;
+                                            margin-bottom: 4px;
+                                        }
+
+                                        .tm-progress-bar {
+                                            height: 6px;
+                                            background: $tm-bg-light;
+                                            border-radius: 3px;
+
+                                            .progress-bar {
+                                                border-radius: 3px;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Overview map marker styles
+                        .tm-overview-icon {
+                            background: transparent !important;
+                            border: none !important;
+                        }
+
+                        .tm-overview-marker {
+                            position: relative;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+
+                            &:hover {
+                                transform: scale(1.1);
+                                filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+                            }
+
+                            &.tm-source-marker {
+                                .tm-marker-content {
+                                    width: 40px;
+                                    height: 40px;
+                                    border-radius: 50%;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    border: 3px solid white;
+                                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+
+                                    .tm-marker-icon {
+                                        font-size: 1.2rem;
+                                    }
+                                }
+
+                                .tm-marker-label {
+                                    background: rgba(0, 0, 0, 0.8);
+                                    color: white;
+                                    padding: 2px 6px;
+                                    border-radius: 4px;
+                                    font-size: 0.7rem;
+                                    font-weight: 500;
+                                    margin-top: 4px;
+                                    white-space: nowrap;
+                                }
+
+                                &.tm-active .tm-marker-content {
+                                    animation: pulse 2s infinite;
+                                }
+                            }
+
+                            &.tm-dest-marker {
+                                .tm-marker-content {
+                                    width: 30px;
+                                    height: 30px;
+                                    border-radius: 50%;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    border: 2px solid white;
+                                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+                                    position: relative;
+
+                                    .tm-marker-number {
+                                        position: absolute;
+                                        top: -8px;
+                                        right: -8px;
+                                        width: 16px;
+                                        height: 16px;
+                                        border-radius: 50%;
+                                        background: white;
+                                        color: #333;
+                                        font-weight: 800;
+                                        font-size: 0.6rem;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        border: 1px solid #ccc;
+                                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+                                    }
+
+                                    .tm-marker-icon {
+                                        font-size: 0.9rem;
+                                    }
+                                }
+
+                                &.tm-completed .tm-marker-content {
+                                    opacity: 0.7;
+
+                                    &::after {
+                                        content: '✓';
+                                        position: absolute;
+                                        bottom: -6px;
+                                        right: -6px;
+                                        width: 14px;
+                                        height: 14px;
+                                        border-radius: 50%;
+                                        background: #28a745;
+                                        color: white;
+                                        font-size: 0.6rem;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        border: 2px solid white;
+                                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+                                    }
+                                }
+                            }
+                        }
+
+                        // Overview popup styles
+                        .tm-overview-popup {
+                            min-width: 200px;
+
+                            h5,
+                            h6 {
+                                margin: 0 0 8px 0;
+                                color: $tm-primary-color;
+                                font-weight: 600;
+                            }
+
+                            .tm-popup-info {
+                                p {
+                                    margin: 4px 0;
+                                    font-size: 0.85rem;
+
+                                    strong {
+                                        color: $tm-primary-color;
+                                        font-weight: 500;
+                                    }
+                                }
+
+                                .tm-progress-container {
+                                    margin: 8px 0;
+
+                                    label {
+                                        font-size: 0.8rem;
+                                        color: $tm-secondary-color;
+                                        font-weight: 500;
+                                    }
+
+                                    .progress {
+                                        background: $tm-bg-light;
+                                        border-radius: 4px;
+
+                                        .progress-bar {
+                                            background: linear-gradient(90deg, $tm-primary-color, #17a2b8);
+                                            border-radius: 4px;
+                                            font-size: 0.75rem;
+                                            font-weight: 500;
+                                        }
+                                    }
+                                }
+                            }
+                        }

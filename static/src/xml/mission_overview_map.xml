@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="transport_management.MissionOverviewMap" owl="1">
+        <div class="tm-overview-container">
+            <!-- Header with controls and stats -->
+            <div class="tm-overview-header">
+                <div class="tm-header-left">
+                    <h2><i class="fa fa-map me-2"/>Mission Overview Map</h2>
+                    <div class="tm-status-summary">
+                        <div class="tm-status-item tm-confirmed">
+                            <i class="fa fa-check-circle"/>
+                            <span>Confirmed: <t t-esc="getStatusSummary().confirmed"/></span>
+                        </div>
+                        <div class="tm-status-item tm-in-progress">
+                            <i class="fa fa-truck"/>
+                            <span>In Progress: <t t-esc="getStatusSummary().inProgress"/></span>
+                        </div>
+                        <div class="tm-status-item tm-total">
+                            <i class="fa fa-list"/>
+                            <span>Total: <t t-esc="getStatusSummary().total"/></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tm-header-right">
+                    <div class="tm-last-update" t-if="state.lastUpdate">
+                        <small class="text-muted">
+                            Last updated: <t t-esc="state.lastUpdate.toLocaleTimeString()"/>
+                        </small>
+                    </div>
+                    <div class="tm-controls">
+                        <button type="button" 
+                                class="btn btn-outline-primary btn-sm" 
+                                t-on-click="refreshMissions"
+                                t-att-disabled="state.loading">
+                            <i class="fa fa-refresh" t-att-class="{'fa-spin': state.loading}"/>
+                            <span t-if="!state.loading">Refresh</span>
+                            <span t-else="">Loading...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="tm-legend">
+                <div class="tm-legend-section">
+                    <h6>Mission Types</h6>
+                    <div class="tm-legend-items">
+                        <div class="tm-legend-item">
+                            <div class="tm-legend-marker tm-pickup">🏭</div>
+                            <span>Pickup Source</span>
+                        </div>
+                        <div class="tm-legend-item">
+                            <div class="tm-legend-marker tm-pickup">📤</div>
+                            <span>Pickup Destination</span>
+                        </div>
+                        <div class="tm-legend-item">
+                            <div class="tm-legend-marker tm-delivery">📦</div>
+                            <span>Delivery Source</span>
+                        </div>
+                        <div class="tm-legend-item">
+                            <div class="tm-legend-marker tm-delivery">📥</div>
+                            <span>Delivery Destination</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tm-legend-section">
+                    <h6>Mission Status</h6>
+                    <div class="tm-legend-items">
+                        <div class="tm-legend-item">
+                            <div class="tm-legend-line tm-confirmed"></div>
+                            <span>Confirmed (dashed)</span>
+                        </div>
+                        <div class="tm-legend-item">
+                            <div class="tm-legend-line tm-in-progress"></div>
+                            <span>In Progress (solid)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tm-legend-section">
+                    <h6>Destination Status</h6>
+                    <div class="tm-legend-items">
+                        <div class="tm-legend-item">
+                            <div class="tm-legend-marker tm-completed">✅</div>
+                            <span>Completed</span>
+                        </div>
+                        <div class="tm-legend-item">
+                            <div class="tm-legend-marker tm-pending">⏳</div>
+                            <span>Pending</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Container -->
+            <div class="tm-map-wrapper">
+                <div class="tm-overview-map" t-ref="mapContainer">
+                    <!-- Leaflet map will be rendered here -->
+                </div>
+                
+                <!-- Loading overlay -->
+                <div class="tm-loading-overlay" t-if="state.loading">
+                    <div class="tm-loading-content">
+                        <i class="fa fa-spinner fa-spin fa-2x"/>
+                        <p>Loading missions...</p>
+                    </div>
+                </div>
+                
+                <!-- Empty state -->
+                <div class="tm-empty-state" t-if="!state.loading and !state.missions.length">
+                    <div class="tm-empty-content">
+                        <i class="fa fa-map-o fa-3x text-muted"/>
+                        <h4>No Active Missions</h4>
+                        <p>There are currently no confirmed or in-progress missions to display.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mission List Sidebar (collapsible) -->
+            <div class="tm-sidebar" t-if="state.missions.length">
+                <div class="tm-sidebar-header">
+                    <h5><i class="fa fa-list me-2"/>Active Missions</h5>
+                </div>
+                <div class="tm-mission-list">
+                    <t t-foreach="state.missions" t-as="mission" t-key="mission.id">
+                        <div class="tm-mission-card" t-att-class="'tm-state-' + mission.state">
+                            <div class="tm-mission-header">
+                                <div class="tm-mission-name">
+                                    <strong><t t-esc="mission.name"/></strong>
+                                    <span class="tm-mission-type" t-att-class="'tm-type-' + mission.mission_type">
+                                        <t t-if="mission.mission_type === 'pickup'">📤 Pickup</t>
+                                        <t t-else="">📥 Delivery</t>
+                                    </span>
+                                </div>
+                                <div class="tm-mission-status" t-att-class="'tm-status-' + mission.state">
+                                    <t t-if="mission.state === 'confirmed'">✅ Confirmed</t>
+                                    <t t-elif="mission.state === 'in_progress'">🚛 In Progress</t>
+                                </div>
+                            </div>
+                            
+                            <div class="tm-mission-details">
+                                <div class="tm-detail-row">
+                                    <i class="fa fa-calendar"/>
+                                    <span><t t-esc="mission.mission_date"/></span>
+                                </div>
+                                <div class="tm-detail-row" t-if="mission.driver_id">
+                                    <i class="fa fa-user"/>
+                                    <span><t t-esc="mission.driver_id[1]"/></span>
+                                </div>
+                                <div class="tm-detail-row" t-if="mission.vehicle_id">
+                                    <i class="fa fa-truck"/>
+                                    <span><t t-esc="mission.vehicle_id[1]"/></span>
+                                </div>
+                                <div class="tm-detail-row">
+                                    <i class="fa fa-route"/>
+                                    <span><t t-esc="(mission.total_distance_km || 0).toFixed(1)"/> km</span>
+                                </div>
+                                <div class="tm-detail-row">
+                                    <i class="fa fa-map-marker"/>
+                                    <span><t t-esc="mission.destinations.length"/> destinations</span>
+                                </div>
+                            </div>
+                            
+                            <div class="tm-progress-section">
+                                <div class="tm-progress-label">
+                                    Progress: <t t-esc="(mission.destination_progress || 0).toFixed(0)"/>%
+                                </div>
+                                <div class="progress tm-progress-bar">
+                                    <div class="progress-bar" 
+                                         t-att-style="'width: ' + (mission.destination_progress || 0) + '%;'"
+                                         t-att-class="mission.state === 'in_progress' ? 'bg-success' : 'bg-info'">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

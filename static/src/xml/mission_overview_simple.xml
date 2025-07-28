@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="transport_management.MissionOverviewSimple" owl="1">
+        <div style="height: 100vh; display: flex; flex-direction: column; background: #f8f9fa;">
+            
+            <!-- Header -->
+            <div style="background: white; border-bottom: 1px solid #dee2e6; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 24px;">
+                    <h2 style="margin: 0; color: #4a5d87; font-size: 1.4rem; font-weight: 600;">
+                        <i class="fa fa-map me-2"/>Mission Overview Map
+                    </h2>
+                    <div style="display: flex; gap: 16px;">
+                        <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; background: rgba(23, 162, 184, 0.1); color: #17a2b8; border: 1px solid rgba(23, 162, 184, 0.2);">
+                            <i class="fa fa-check-circle"/>
+                            <span>Confirmed: <t t-esc="getStatusSummary().confirmed"/></span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; background: rgba(255, 193, 7, 0.1); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.2);">
+                            <i class="fa fa-truck"/>
+                            <span>In Progress: <t t-esc="getStatusSummary().inProgress"/></span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; background: rgba(74, 93, 135, 0.1); color: #4a5d87; border: 1px solid rgba(74, 93, 135, 0.2);">
+                            <i class="fa fa-list"/>
+                            <span>Total: <t t-esc="getStatusSummary().total"/></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <div t-if="state.lastUpdate" style="font-size: 0.8rem; color: #6c757d;">
+                        Last updated: <t t-esc="state.lastUpdate.toLocaleTimeString()"/>
+                    </div>
+                    <button type="button" 
+                            class="btn btn-outline-primary btn-sm" 
+                            t-on-click="refreshMissions"
+                            t-att-disabled="state.loading"
+                            style="border-radius: 6px; font-weight: 500;">
+                        <i class="fa fa-refresh" t-att-class="{'fa-spin': state.loading}"/>
+                        <span t-if="!state.loading">Refresh</span>
+                        <span t-else="">Loading...</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div style="background: white; border-bottom: 1px solid #dee2e6; padding: 12px 24px; display: flex; gap: 32px;">
+                <div>
+                    <h6 style="margin: 0 0 8px 0; color: #4a5d87; font-size: 0.85rem; font-weight: 600;">Mission Types</h6>
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #6c757d;">
+                            <span style="font-size: 1rem;">🏭</span>
+                            <span>Pickup Source</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #6c757d;">
+                            <span style="font-size: 1rem;">📤</span>
+                            <span>Pickup Destination</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #6c757d;">
+                            <span style="font-size: 1rem;">📦</span>
+                            <span>Delivery Source</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #6c757d;">
+                            <span style="font-size: 1rem;">📥</span>
+                            <span>Delivery Destination</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h6 style="margin: 0 0 8px 0; color: #4a5d87; font-size: 0.85rem; font-weight: 600;">Mission Status</h6>
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #6c757d;">
+                            <div style="width: 30px; height: 3px; border-radius: 2px; background: #17a2b8; background-image: repeating-linear-gradient(45deg, transparent, transparent 3px, white 3px, white 6px);"></div>
+                            <span>Confirmed (dashed)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #6c757d;">
+                            <div style="width: 30px; height: 3px; border-radius: 2px; background: #ffc107;"></div>
+                            <span>In Progress (solid)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h6 style="margin: 0 0 8px 0; color: #4a5d87; font-size: 0.85rem; font-weight: 600;">Destination Status</h6>
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #6c757d;">
+                            <span style="font-size: 1rem;">✅</span>
+                            <span>Completed</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #6c757d;">
+                            <span style="font-size: 1rem;">⏳</span>
+                            <span>Pending</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Container -->
+            <div style="flex: 1; position: relative; min-height: 400px;">
+                <div t-ref="mapContainer" style="height: 100%; width: 100%;"></div>
+                
+                <!-- Loading overlay -->
+                <div t-if="state.loading" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.9); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                    <div style="text-align: center; color: #4a5d87;">
+                        <i class="fa fa-spinner fa-spin fa-2x" style="margin-bottom: 12px;"/>
+                        <p style="margin: 0; font-weight: 500;">Loading missions...</p>
+                    </div>
+                </div>
+                
+                <!-- Empty state -->
+                <div t-if="!state.loading and !state.missions.length" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; background: white;">
+                    <div style="text-align: center; color: #6c757d;">
+                        <i class="fa fa-map-o fa-3x" style="margin-bottom: 16px;"/>
+                        <h4 style="margin-bottom: 8px; color: #4a5d87;">No Active Missions</h4>
+                        <p style="margin: 0;">There are currently no confirmed or in-progress missions to display.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

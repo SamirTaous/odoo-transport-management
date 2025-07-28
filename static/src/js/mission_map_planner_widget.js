@@ -237,20 +237,48 @@ export class MissionMapPlannerWidget extends Component {
 
     createMarkerIcon(color, number = null) {
         const isSource = color === 'blue';
-        const markerClass = isSource ? 'tm-source-marker' : 'tm-destination-marker';
+        const missionType = this.props.record.data.mission_type || 'delivery';
+
+        let missionTypeClass;
+
+        if (isSource) {
+            missionTypeClass = missionType === 'pickup' ? 'tm-pickup-source' : 'tm-delivery-source';
+        } else {
+            missionTypeClass = missionType === 'pickup' ? 'tm-pickup-destination' : 'tm-delivery-destination';
+        }
 
         let html;
-        if (number) {
-            html = `<div class="tm-marker-number ${markerClass}">${number}</div>`;
+
+        if (isSource) {
+            // Source marker with mission type specific icon
+            const sourceIcon = missionType === 'pickup' ? '🏭' : '📦';
+            html = `
+                <div class="tm-marker-container ${missionTypeClass}">
+                    <div class="tm-truck-icon">
+                        <div class="tm-mission-type-icon">${sourceIcon}</div>
+                    </div>
+                    <div class="tm-marker-status status-pending"></div>
+                </div>
+            `;
         } else {
-            html = `<div class="tm-marker-number ${markerClass}">S</div>`;
+            // Destination marker with number and mission type styling
+            const destinationIcon = missionType === 'pickup' ? '📤' : '📥';
+            html = `
+                <div class="tm-marker-container ${missionTypeClass}">
+                    <div class="tm-truck-icon">
+                        <div class="tm-truck-number">${number}</div>
+                        <div class="tm-mission-indicator">${destinationIcon}</div>
+                    </div>
+                    <div class="tm-marker-status status-pending"></div>
+                </div>
+            `;
         }
 
         return L.divIcon({
             className: 'tm-custom-marker',
             html: html,
-            iconSize: [36, 36],
-            iconAnchor: [18, 18]
+            iconSize: [50, 60],
+            iconAnchor: [25, 50]
         });
     }
 
@@ -597,18 +625,18 @@ export class MissionMapPlannerWidget extends Component {
                 className: 'tm-route-line tm-route-fallback',
                 color: '#dc3545',
                 weight: 4,
-                opacity: 0.6, 
+                opacity: 0.6,
                 dashArray: '10, 5'
             }).addTo(this.map);
         }
     }
 
-     /**
-     * A generic method to update any field on the mission record.
-     * This is a robust way to avoid repeating code.
-     * @param {string} fieldName The technical name of the field to update.
-     * @param {any} value The new value for the field.
-     */
+    /**
+    * A generic method to update any field on the mission record.
+    * This is a robust way to avoid repeating code.
+    * @param {string} fieldName The technical name of the field to update.
+    * @param {any} value The new value for the field.
+    */
     async _updateRecord(fieldName, value) {
         try {
             await this.props.record.update({ [fieldName]: value });
@@ -622,8 +650,10 @@ export class MissionMapPlannerWidget extends Component {
      * Handles changes for the Mission Type radio buttons.
      * @param {Event} ev The browser event.
      */
-    onMissionTypeChange(ev) {
-        this._updateRecord('mission_type', ev.target.value);
+    async onMissionTypeChange(ev) {
+        await this._updateRecord('mission_type', ev.target.value);
+        // Refresh markers to reflect the new mission type styling
+        this.updateMarkers();
     }
 
     /**
@@ -698,7 +728,7 @@ export class MissionMapPlannerWidget extends Component {
 
             // Simple nearest neighbor optimization starting from source (index 0)
             const distances = data.durations;
-            const unvisited = new Set(Array.from({length: this.state.destinations.length}, (_, i) => i + 1));
+            const unvisited = new Set(Array.from({ length: this.state.destinations.length }, (_, i) => i + 1));
             const optimizedOrder = [];
             let current = 0; // Start from source
 

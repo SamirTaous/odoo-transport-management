@@ -60,77 +60,347 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
 }
 
-// === 3. Enhanced Map Marker Styling ===
+// === 3. Enhanced Truck-Themed Map Marker Styling ===
 .tm-custom-marker {
     background: transparent !important;
     border: none !important;
 }
 
-.tm-marker-number {
-    width: 36px;
-    height: 36px;
-    color: white;
+.tm-marker-container {
+    position: relative;
+    width: 50px;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: scale(1.1) translateY(-3px);
+        filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
+    }
+}
+
+// Truck icon base styling
+.tm-truck-icon {
+    width: 44px;
+    height: 32px;
+    position: relative;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    border: 2px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    // Truck cab (front part)
+    &::before {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 4px;
+        width: 12px;
+        height: 20px;
+        border-radius: 4px 0 0 4px;
+        border: 2px solid white;
+        border-right: none;
+    }
+    
+    // Truck wheels
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 6px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #333;
+        border: 2px solid white;
+        box-shadow: 20px 0 0 0 #333, 20px 0 0 2px white;
+    }
+}
+
+// Number badge on truck
+.tm-truck-number {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    font-size: 1rem;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: white;
     border: 3px solid white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    transition: all 0.2s ease;
-    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
 
-    &::before {
-        content: '';
-        position: absolute;
-        top: -2px;
-        left: -2px;
-        right: -2px;
-        bottom: -2px;
-        border-radius: 50%;
-        background: linear-gradient(45deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
-        z-index: -1;
-    }
+// Mission type icon styling
+.tm-mission-type-icon {
+    font-size: 1.2rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+}
 
-    &:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+.tm-mission-indicator {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    font-size: 0.7rem;
+    background: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+// PICKUP MISSION STYLING
+.tm-pickup-source {
+    .tm-truck-icon {
+        background: linear-gradient(135deg, #17a2b8, #138496);
+        
+        &::before {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+        }
     }
 }
 
-// Enhanced source marker styling
+.tm-pickup-destination {
+    .tm-truck-icon {
+        background: linear-gradient(135deg, #6f42c1, #5a32a3);
+        
+        &::before {
+            background: linear-gradient(135deg, #6f42c1, #5a32a3);
+        }
+    }
+    
+    .tm-truck-number {
+        background: linear-gradient(135deg, #17a2b8, #138496);
+        color: white;
+        font-weight: 900;
+    }
+    
+    .tm-mission-indicator {
+        background: linear-gradient(135deg, #17a2b8, #138496);
+        color: white;
+    }
+}
+
+// DELIVERY MISSION STYLING
+.tm-delivery-source {
+    .tm-truck-icon {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        
+        &::before {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+    }
+}
+
+.tm-delivery-destination {
+    .tm-truck-icon {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        
+        &::before {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+    }
+    
+    .tm-truck-number {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        color: #333;
+        font-weight: 900;
+    }
+    
+    .tm-mission-indicator {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+}
+
+// Generic source marker styling (fallback)
 .tm-source-marker {
-    background: linear-gradient(135deg, #007bff, #0056b3) !important;
-
-    &::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 8px;
-        height: 8px;
-        background: white;
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
-        box-shadow: 0 0 0 2px #007bff;
+    .tm-truck-icon {
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+        
+        &::before {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+        }
     }
 }
 
-// Enhanced destination marker styling
+// Generic destination marker styling (fallback)
 .tm-destination-marker {
-    background: linear-gradient(135deg, #dc3545, #a71e2a) !important;
+    .tm-truck-icon {
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+        
+        &::before {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+        }
+    }
+    
+    .tm-truck-number {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        font-weight: 900;
+    }
+}
 
+// Delivery status indicators
+.tm-marker-status {
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid white;
+    
+    &.status-pending {
+        background: #ffc107;
+    }
+    
+    &.status-in-progress {
+        background: #17a2b8;
+        animation: pulse 2s infinite;
+    }
+    
+    &.status-completed {
+        background: #28a745;
+        
+        &::after {
+            content: '✓';
+            color: white;
+            font-size: 0.6rem;
+            font-weight: bold;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    }
+}
+
+// Pulse animation for in-progress status
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(23, 162, 184, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(23, 162, 184, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(23, 162, 184, 0);
+    }
+}
+
+// Route connection line styling
+.tm-route-connection {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 20px;
+    background: linear-gradient(to bottom, #007bff, transparent);
+    
     &::after {
         content: '';
         position: absolute;
-        top: 50%;
+        bottom: -4px;
         left: 50%;
-        width: 6px;
-        height: 6px;
-        background: white;
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 6px solid #007bff;
+    }
+}
+
+// Delivery status indicators
+.tm-marker-status {
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid white;
+    
+    &.status-pending {
+        background: #ffc107;
+    }
+    
+    &.status-in-progress {
+        background: #17a2b8;
+        animation: pulse 2s infinite;
+    }
+    
+    &.status-completed {
+        background: #28a745;
+        
+        &::after {
+            content: '✓';
+            color: white;
+            font-size: 0.6rem;
+            font-weight: bold;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    }
+}
+
+// Pulse animation for in-progress status
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(23, 162, 184, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(23, 162, 184, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(23, 162, 184, 0);
+    }
+}
+
+// Route connection line styling
+.tm-route-connection {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 20px;
+    background: linear-gradient(to bottom, #007bff, transparent);
+    
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 6px solid #007bff;
     }
 }
 

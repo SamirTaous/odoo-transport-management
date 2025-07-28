@@ -101,24 +101,29 @@
                 
                 <!-- Floating Mission Panel -->
                 <div t-if="!state.loading and state.missions.length" 
-                     style="position: absolute; top: 20px; right: 20px; width: 350px; max-height: calc(100% - 40px); background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; display: flex; flex-direction: column;">
+                     class="tm_floating_panel">
                     
-                    <!-- Panel Header -->
-                    <div style="padding: 16px; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center; background: #4a5d87; color: white; border-radius: 8px 8px 0 0;">
-                        <h6 style="margin: 0; font-weight: 600;">
-                            <span t-if="!state.selectedMission">Active Missions (<t t-esc="state.missions.length"/>)</span>
-                            <span t-else="">Mission Details</span>
-                        </h6>
-                        <div style="display: flex; gap: 8px;">
+                    <!-- Mission Header (similar to tm_mission_header) -->
+                    <div class="tm_floating_header">
+                        <div class="tm_title_section">
+                            <h4 t-if="!state.selectedMission">
+                                <i class="fa fa-list me-2"/>Active Missions 
+                                <span class="badge badge-secondary"><t t-esc="state.missions.length"/></span>
+                            </h4>
+                            <h4 t-else="">
+                                <i class="fa fa-info-circle me-2"/>Mission Details
+                            </h4>
+                        </div>
+                        <div class="tm_panel_controls">
                             <button t-if="state.selectedMission" 
                                     type="button" 
-                                    t-on-click="deselectMission"
-                                    style="background: none; border: none; color: white; cursor: pointer; padding: 4px;">
+                                    class="btn btn-sm btn-outline-light"
+                                    t-on-click="deselectMission">
                                 <i class="fa fa-arrow-left"/>
                             </button>
                             <button type="button" 
-                                    t-on-click="togglePanel"
-                                    style="background: none; border: none; color: white; cursor: pointer; padding: 4px;">
+                                    class="btn btn-sm btn-outline-light"
+                                    t-on-click="togglePanel">
                                 <i class="fa fa-minus" t-if="!state.panelCollapsed"/>
                                 <i class="fa fa-plus" t-else=""/>
                             </button>
@@ -126,44 +131,49 @@
                     </div>
                     
                     <!-- Panel Content -->
-                    <div t-if="!state.panelCollapsed" style="flex: 1; overflow-y: auto; max-height: 500px;">
+                    <div t-if="!state.panelCollapsed" class="tm_floating_content">
                         
                         <!-- Mission List View -->
-                        <div t-if="!state.selectedMission" style="padding: 8px;">
+                        <div t-if="!state.selectedMission" class="tm_mission_list">
                             <t t-foreach="state.missions" t-as="mission" t-key="mission.id">
-                                <div t-on-click="() => this.selectMission(mission)"
-                                     style="padding: 12px; margin-bottom: 8px; border: 1px solid #dee2e6; border-radius: 6px; cursor: pointer; transition: all 0.2s ease;"
-                                     t-att-style="'border-left: 4px solid ' + (mission.state === 'in_progress' ? '#ffc107' : '#17a2b8') + ';'"
-                                     onmouseover="this.style.backgroundColor='#f8f9fa'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';"
-                                     onmouseout="this.style.backgroundColor='white'; this.style.transform='none'; this.style.boxShadow='none';">
+                                <div class="tm_mission_card" 
+                                     t-att-class="'tm-state-' + mission.state"
+                                     t-on-click="() => this.selectMission(mission)">
                                     
-                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                                        <div>
-                                            <strong style="color: #4a5d87; font-size: 0.9rem;"><t t-esc="mission.name"/></strong>
-                                            <div style="font-size: 0.75rem; color: #6c757d; margin-top: 2px;">
-                                                <span t-if="mission.mission_type === 'pickup'" style="color: #17a2b8;">📤 Pickup</span>
-                                                <span t-else="" style="color: #28a745;">📥 Delivery</span>
+                                    <div class="tm_mission_card_header">
+                                        <div class="tm_mission_name">
+                                            <strong><t t-esc="mission.name"/></strong>
+                                            <div class="tm_mission_type" t-att-class="'tm-type-' + mission.mission_type">
+                                                <span t-if="mission.mission_type === 'pickup'">📤 Pickup</span>
+                                                <span t-else="">📥 Delivery</span>
                                             </div>
                                         </div>
-                                        <div style="font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; font-weight: 500;"
-                                             t-att-style="'background: ' + (mission.state === 'in_progress' ? 'rgba(255, 193, 7, 0.1); color: #ffc107' : 'rgba(23, 162, 184, 0.1); color: #17a2b8') + ';'">
+                                        <div class="tm_mission_status" t-att-class="'tm-status-' + mission.state">
                                             <span t-if="mission.state === 'confirmed'">✅ Confirmed</span>
                                             <span t-else="">🚛 In Progress</span>
                                         </div>
                                     </div>
                                     
-                                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #6c757d;">
-                                        <span><i class="fa fa-map-marker" style="margin-right: 4px;"/><t t-esc="mission.destinations.length"/> stops</span>
-                                        <span><i class="fa fa-route" style="margin-right: 4px;"/><t t-esc="(mission.total_distance_km || 0).toFixed(1)"/> km</span>
+                                    <div class="tm_mission_details">
+                                        <div class="tm_detail_row">
+                                            <i class="fa fa-map-marker"/>
+                                            <span><t t-esc="mission.destinations.length"/> stops</span>
+                                        </div>
+                                        <div class="tm_detail_row">
+                                            <i class="fa fa-route"/>
+                                            <span><t t-esc="(mission.total_distance_km || 0).toFixed(1)"/> km</span>
+                                        </div>
                                     </div>
                                     
-                                    <!-- Progress bar -->
-                                    <div style="margin-top: 8px;">
-                                        <div style="background: #f0f0f0; height: 4px; border-radius: 2px; overflow: hidden;">
-                                            <div t-att-style="'background: ' + (mission.state === 'in_progress' ? '#ffc107' : '#17a2b8') + '; height: 100%; width: ' + (mission.destination_progress || 0) + '%; transition: width 0.3s ease;'"></div>
+                                    <div class="tm_progress_section">
+                                        <div class="tm_progress_label">
+                                            Progress: <t t-esc="(mission.destination_progress || 0).toFixed(0)"/>%
                                         </div>
-                                        <div style="font-size: 0.7rem; color: #6c757d; margin-top: 2px; text-align: right;">
-                                            <t t-esc="(mission.destination_progress || 0).toFixed(0)"/>% complete
+                                        <div class="progress tm_progress_bar">
+                                            <div class="progress-bar" 
+                                                 t-att-style="'width: ' + (mission.destination_progress || 0) + '%;'"
+                                                 t-att-class="mission.state === 'in_progress' ? 'bg-warning' : 'bg-info'">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -171,83 +181,117 @@
                         </div>
                         
                         <!-- Mission Detail View -->
-                        <div t-if="state.selectedMission" style="padding: 16px;">
-                            <div style="margin-bottom: 16px;">
-                                <h5 style="margin: 0 0 8px 0; color: #4a5d87;"><t t-esc="state.selectedMission.name"/></h5>
-                                <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                                    <span style="font-size: 0.85rem; padding: 4px 8px; border-radius: 4px;"
-                                          t-att-style="'background: ' + (state.selectedMission.mission_type === 'pickup' ? 'rgba(23, 162, 184, 0.1); color: #17a2b8' : 'rgba(40, 167, 69, 0.1); color: #28a745') + ';'">
-                                        <span t-if="state.selectedMission.mission_type === 'pickup'">📤 Pickup Mission</span>
-                                        <span t-else="">📥 Delivery Mission</span>
-                                    </span>
-                                    <span style="font-size: 0.85rem; padding: 4px 8px; border-radius: 4px;"
-                                          t-att-style="'background: ' + (state.selectedMission.state === 'in_progress' ? 'rgba(255, 193, 7, 0.1); color: #ffc107' : 'rgba(23, 162, 184, 0.1); color: #17a2b8') + ';'">
-                                        <span t-if="state.selectedMission.state === 'confirmed'">✅ Confirmed</span>
-                                        <span t-else="">🚛 In Progress</span>
-                                    </span>
+                        <div t-if="state.selectedMission" class="tm_details_form">
+                            <!-- Mission Header -->
+                            <div class="tm_form_section">
+                                <div class="tm_mission_title">
+                                    <h1><t t-esc="state.selectedMission.name"/></h1>
+                                    <div class="tm_mission_type_badge">
+                                        <span t-if="state.selectedMission.mission_type === 'pickup'" class="badge badge-info tm_pickup_badge">
+                                            <i class="fa fa-arrow-up me-1"/>Pickup Mission
+                                        </span>
+                                        <span t-else="" class="badge badge-success tm_delivery_badge">
+                                            <i class="fa fa-arrow-down me-1"/>Delivery Mission
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Metrics Grid -->
+                                <div class="tm_metrics_grid">
+                                    <div class="tm_metric_card">
+                                        <div class="tm_metric_icon"><i class="fa fa-route"/></div>
+                                        <div class="tm_metric_content">
+                                            <span class="tm_metric_label">Total Distance</span>
+                                            <div class="tm_metric_value">
+                                                <span><t t-esc="(state.selectedMission.total_distance_km || 0).toFixed(1)"/> km</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tm_metric_card">
+                                        <div class="tm_metric_icon"><i class="fa fa-tasks"/></div>
+                                        <div class="tm_metric_content">
+                                            <span class="tm_metric_label">Progress</span>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar" role="progressbar" 
+                                                     t-att-style="'width: ' + (state.selectedMission.destination_progress || 0) + '%;'" 
+                                                     t-att-aria-valuenow="state.selectedMission.destination_progress || 0" 
+                                                     aria-valuemin="0" aria-valuemax="100">
+                                                    <t t-esc="(state.selectedMission.destination_progress || 0).toFixed(0)"/>%
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <!-- Mission Info Grid -->
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; font-size: 0.85rem;">
-                                <div>
-                                    <strong style="color: #4a5d87;">Date:</strong><br/>
-                                    <span><t t-esc="state.selectedMission.mission_date"/></span>
-                                </div>
-                                <div>
-                                    <strong style="color: #4a5d87;">Distance:</strong><br/>
-                                    <span><t t-esc="(state.selectedMission.total_distance_km || 0).toFixed(1)"/> km</span>
-                                </div>
-                                <div>
-                                    <strong style="color: #4a5d87;">Driver:</strong><br/>
-                                    <span><t t-esc="state.selectedMission.driver_id ? state.selectedMission.driver_id[1] : 'Not assigned'"/></span>
-                                </div>
-                                <div>
-                                    <strong style="color: #4a5d87;">Vehicle:</strong><br/>
-                                    <span><t t-esc="state.selectedMission.vehicle_id ? state.selectedMission.vehicle_id[1] : 'Not assigned'"/></span>
-                                </div>
-                            </div>
-                            
-                            <!-- Progress -->
-                            <div style="margin-bottom: 16px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                    <strong style="color: #4a5d87; font-size: 0.85rem;">Progress:</strong>
-                                    <span style="font-size: 0.8rem; color: #6c757d;"><t t-esc="(state.selectedMission.destination_progress || 0).toFixed(0)"/>%</span>
-                                </div>
-                                <div style="background: #f0f0f0; height: 8px; border-radius: 4px; overflow: hidden;">
-                                    <div t-att-style="'background: linear-gradient(90deg, #4a5d87, #17a2b8); height: 100%; width: ' + (state.selectedMission.destination_progress || 0) + '%; transition: width 0.3s ease;'"></div>
+                            <!-- Mission Configuration -->
+                            <div class="tm_form_section">
+                                <h4><i class="fa fa-info-circle me-2 text-info"/>Mission Information</h4>
+                                <div class="tm_config_grid">
+                                    <div class="tm_config_item">
+                                        <label class="tm_config_label">Date</label>
+                                        <div class="tm_config_value">
+                                            <span><t t-esc="state.selectedMission.mission_date"/></span>
+                                        </div>
+                                    </div>
+                                    <div class="tm_config_item">
+                                        <label class="tm_config_label">Status</label>
+                                        <div class="tm_config_value">
+                                            <span t-if="state.selectedMission.state === 'confirmed'" class="badge badge-info">✅ Confirmed</span>
+                                            <span t-else="" class="badge badge-warning">🚛 In Progress</span>
+                                        </div>
+                                    </div>
+                                    <div class="tm_config_item">
+                                        <label class="tm_config_label">Driver</label>
+                                        <div class="tm_config_value">
+                                            <div class="tm_driver_display">
+                                                <i class="fa fa-user me-2"/>
+                                                <span><t t-esc="state.selectedMission.driver_id ? state.selectedMission.driver_id[1] : 'Not assigned'"/></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tm_config_item">
+                                        <label class="tm_config_label">Vehicle</label>
+                                        <div class="tm_config_value">
+                                            <div class="tm_vehicle_display">
+                                                <i class="fa fa-truck me-2"/>
+                                                <span><t t-esc="state.selectedMission.vehicle_id ? state.selectedMission.vehicle_id[1] : 'Not assigned'"/></span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
                             <!-- Source Location -->
-                            <div style="margin-bottom: 16px;">
-                                <strong style="color: #4a5d87; font-size: 0.85rem; display: block; margin-bottom: 8px;">
-                                    <i class="fa fa-play-circle" style="margin-right: 6px;"/>Source Location:
-                                </strong>
-                                <div style="padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 0.8rem;">
-                                    <t t-esc="state.selectedMission.source_location || 'Location not specified'"/>
+                            <div class="tm_form_section">
+                                <h4><i class="fa fa-play-circle me-2 text-primary"/>Source Location</h4>
+                                <div class="tm_location_display">
+                                    <div class="tm_location_item tm_source_item">
+                                        <i class="fa fa-map-marker-alt text-primary"/>
+                                        <div class="tm_location_info">
+                                            <span class="tm_location_address"><t t-esc="state.selectedMission.source_location || 'Location not specified'"/></span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
                             <!-- Destinations -->
-                            <div>
-                                <strong style="color: #4a5d87; font-size: 0.85rem; display: block; margin-bottom: 8px;">
-                                    <i class="fa fa-flag-checkered" style="margin-right: 6px;"/>Destinations (<t t-esc="state.selectedMission.destinations.length"/>):
-                                </strong>
-                                <div style="max-height: 200px; overflow-y: auto;">
+                            <div class="tm_form_section">
+                                <h4>
+                                    <i class="fa fa-flag-checkered me-2 text-success"/>
+                                    Destinations 
+                                    <span class="badge badge-secondary"><t t-esc="state.selectedMission.destinations.length"/></span>
+                                </h4>
+                                <div class="tm_destinations_list">
                                     <t t-foreach="state.selectedMission.destinations" t-as="dest" t-key="dest.id">
-                                        <div style="display: flex; align-items: center; padding: 6px 8px; margin-bottom: 4px; background: #f8f9fa; border-radius: 4px; font-size: 0.8rem;">
-                                            <div style="width: 20px; height: 20px; border-radius: 50%; background: #4a5d87; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; margin-right: 8px; flex-shrink: 0;">
-                                                <t t-esc="dest.sequence"/>
+                                        <div class="tm_location_item tm_destination_item">
+                                            <div class="tm_destination_number"><t t-esc="dest.sequence"/></div>
+                                            <div class="tm_location_info">
+                                                <span class="tm_location_address"><t t-esc="dest.location"/></span>
                                             </div>
-                                            <div style="flex: 1; min-width: 0;">
-                                                <div style="font-weight: 500; color: #4a5d87; margin-bottom: 2px;">
-                                                    <t t-esc="dest.location"/>
-                                                </div>
-                                            </div>
-                                            <div style="margin-left: 8px;">
-                                                <span t-if="dest.is_completed" style="color: #28a745; font-size: 0.9rem;">✅</span>
-                                                <span t-else="" style="color: #ffc107; font-size: 0.9rem;">⏳</span>
+                                            <div class="tm_destination_status">
+                                                <span t-if="dest.is_completed" class="text-success">✅</span>
+                                                <span t-else="" class="text-warning">⏳</span>
                                             </div>
                                         </div>
                                     </t>

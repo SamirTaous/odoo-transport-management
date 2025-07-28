@@ -2876,3 +2876,391 @@ $delivery-light: rgba(40, 167, 69, 0.1);
         }
     }
 }
+
+// === 7. Floating Mission Panel Styles===
+.tm_floating_panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 400px;
+    max-height: calc(100% - 40px);
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid $tm-border-color;
+}
+
+.tm_floating_header {
+    background: linear-gradient(135deg, $tm-primary-color, darken($tm-primary-color, 10%));
+    color: white;
+    padding: 16px 20px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid $tm-border-color;
+
+    .tm_title_section {
+        h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+
+            i {
+                color: white;
+            }
+
+            .badge {
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+                margin-left: 8px;
+            }
+        }
+    }
+
+    .tm_panel_controls {
+        display: flex;
+        gap: 8px;
+
+        .btn {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            border-color: rgba(255, 255, 255, 0.3);
+            color: white;
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.5);
+                color: white;
+            }
+        }
+    }
+}
+
+.tm_floating_content {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 600px;
+
+    // Mission List Styles
+    .tm_mission_list {
+        padding: 12px;
+
+        .tm_mission_card {
+            background: white;
+            border: 1px solid $tm-border-color;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:hover {
+                box-shadow: $tm-card-hover-shadow;
+                transform: translateY(-2px);
+            }
+
+            &.tm-state-confirmed {
+                border-left: 4px solid #17a2b8;
+            }
+
+            &.tm-state-in_progress {
+                border-left: 4px solid #ffc107;
+            }
+
+            .tm_mission_card_header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 12px;
+
+                .tm_mission_name {
+                    flex: 1;
+
+                    strong {
+                        color: $tm-primary-color;
+                        font-size: 0.95rem;
+                        font-weight: 600;
+                    }
+
+                    .tm_mission_type {
+                        font-size: 0.8rem;
+                        margin-top: 4px;
+                        color: $tm-secondary-color;
+
+                        &.tm-type-pickup {
+                            color: #17a2b8;
+                        }
+
+                        &.tm-type-delivery {
+                            color: #28a745;
+                        }
+                    }
+                }
+
+                .tm_mission_status {
+                    font-size: 0.8rem;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-weight: 500;
+
+                    &.tm-status-confirmed {
+                        background: rgba(23, 162, 184, 0.1);
+                        color: #17a2b8;
+                    }
+
+                    &.tm-status-in_progress {
+                        background: rgba(255, 193, 7, 0.1);
+                        color: #ffc107;
+                    }
+                }
+            }
+
+            .tm_mission_details {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 12px;
+
+                .tm_detail_row {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 0.85rem;
+                    color: $tm-secondary-color;
+
+                    i {
+                        width: 14px;
+                        font-size: 0.8rem;
+                    }
+                }
+            }
+
+            .tm_progress_section {
+                .tm_progress_label {
+                    font-size: 0.8rem;
+                    color: $tm-secondary-color;
+                    margin-bottom: 6px;
+                    font-weight: 500;
+                }
+
+                .tm_progress_bar {
+                    height: 6px;
+                    background: $tm-bg-light;
+                    border-radius: 3px;
+
+                    .progress-bar {
+                        border-radius: 3px;
+                        transition: width 0.3s ease;
+                    }
+                }
+            }
+        }
+    }
+
+    // Mission Detail Styles (reuse existing tm_details_form styles)
+    .tm_details_form {
+        padding: 20px;
+
+        .tm_mission_title {
+            margin-bottom: 20px;
+
+            h1 {
+                color: $tm-primary-color;
+                font-size: 1.3rem;
+                margin-bottom: 8px;
+            }
+
+            .tm_mission_type_badge {
+                .badge {
+                    font-size: 0.8rem;
+                    padding: 6px 12px;
+                }
+            }
+        }
+
+        .tm_metrics_grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+
+            .tm_metric_card {
+                background: $tm-bg-light;
+                border: 1px solid $tm-border-color;
+                border-radius: 8px;
+                padding: 12px;
+                display: flex;
+                align-items: center;
+
+                .tm_metric_icon {
+                    font-size: 1rem;
+                    width: 32px;
+                    height: 32px;
+                    background: $tm-primary-color;
+                    color: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 12px;
+                    flex-shrink: 0;
+                }
+
+                .tm_metric_content {
+                    flex: 1;
+
+                    .tm_metric_label {
+                        display: block;
+                        font-size: 0.75rem;
+                        color: $tm-secondary-color;
+                        margin-bottom: 4px;
+                    }
+
+                    .tm_metric_value {
+                        font-size: 0.9rem;
+                        font-weight: 600;
+                        color: $tm-primary-color;
+                    }
+
+                    .progress {
+                        margin-top: 4px;
+                    }
+                }
+            }
+        }
+
+        .tm_form_section {
+            margin-bottom: 20px;
+
+            h4 {
+                color: $tm-primary-color;
+                font-size: 1rem;
+                font-weight: 600;
+                margin-bottom: 12px;
+                padding-bottom: 6px;
+                border-bottom: 1px solid rgba(74, 93, 135, 0.1);
+                display: flex;
+                align-items: center;
+
+                i {
+                    margin-right: 8px;
+                }
+
+                .badge {
+                    margin-left: 8px;
+                    font-size: 0.7rem;
+                }
+            }
+
+            .tm_config_grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+
+                .tm_config_item {
+                    .tm_config_label {
+                        display: block;
+                        font-size: 0.8rem;
+                        color: $tm-secondary-color;
+                        font-weight: 500;
+                        margin-bottom: 4px;
+                    }
+
+                    .tm_config_value {
+                        font-size: 0.85rem;
+                        color: $tm-primary-color;
+
+                        .tm_driver_display,
+                        .tm_vehicle_display {
+                            display: flex;
+                            align-items: center;
+
+                            i {
+                                color: $tm-secondary-color;
+                            }
+                        }
+
+                        .badge {
+                            font-size: 0.75rem;
+                        }
+                    }
+                }
+            }
+
+            .tm_location_display {
+                .tm_location_item {
+                    display: flex;
+                    align-items: center;
+                    padding: 12px;
+                    background: $tm-bg-light;
+                    border-radius: 6px;
+                    border-left: 4px solid $tm-primary-color;
+
+                    &.tm_source_item {
+                        border-left-color: $tm-primary-color;
+                    }
+
+                    i {
+                        margin-right: 12px;
+                        font-size: 1rem;
+                    }
+
+                    .tm_location_info {
+                        flex: 1;
+
+                        .tm_location_address {
+                            font-weight: 500;
+                            color: $tm-primary-color;
+                        }
+                    }
+                }
+            }
+
+            .tm_destinations_list {
+                .tm_destination_item {
+                    display: flex;
+                    align-items: center;
+                    padding: 10px 12px;
+                    background: $tm-bg-light;
+                    border-radius: 6px;
+                    margin-bottom: 8px;
+                    border-left: 4px solid #6f42c1;
+
+                    .tm_destination_number {
+                        width: 24px;
+                        height: 24px;
+                        border-radius: 50%;
+                        background: #6f42c1;
+                        color: white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 0.8rem;
+                        font-weight: 600;
+                        margin-right: 12px;
+                        flex-shrink: 0;
+                    }
+
+                    .tm_location_info {
+                        flex: 1;
+
+                        .tm_location_address {
+                            font-weight: 500;
+                            color: $tm-primary-color;
+                            font-size: 0.85rem;
+                        }
+                    }
+
+                    .tm_destination_status {
+                        margin-left: 8px;
+                        font-size: 1rem;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -50,7 +50,9 @@ export class MissionOverviewSimple extends Component {
         this.state = useState({
             missions: [],
             loading: true,
-            lastUpdate: null
+            lastUpdate: null,
+            selectedMission: null,
+            panelCollapsed: false
         });
 
         onMounted(() => {
@@ -486,6 +488,41 @@ export class MissionOverviewSimple extends Component {
         const confirmed = this.state.missions.filter(m => m.state === 'confirmed').length;
         const inProgress = this.state.missions.filter(m => m.state === 'in_progress').length;
         return { confirmed, inProgress, total: this.state.missions.length };
+    }
+
+    selectMission(mission) {
+        this.state.selectedMission = mission;
+        
+        // Fit map to selected mission
+        if (this.map && mission) {
+            const bounds = L.latLngBounds();
+            
+            // Add source to bounds
+            if (mission.source_latitude && mission.source_longitude) {
+                bounds.extend([mission.source_latitude, mission.source_longitude]);
+            }
+            
+            // Add destinations to bounds
+            mission.destinations.forEach(dest => {
+                if (dest.latitude && dest.longitude) {
+                    bounds.extend([dest.latitude, dest.longitude]);
+                }
+            });
+            
+            if (bounds.isValid()) {
+                this.map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        }
+    }
+
+    deselectMission() {
+        this.state.selectedMission = null;
+        // Fit map to show all missions
+        this.fitMapToMissions();
+    }
+
+    togglePanel() {
+        this.state.panelCollapsed = !this.state.panelCollapsed;
     }
 }
 

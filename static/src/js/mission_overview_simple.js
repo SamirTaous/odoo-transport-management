@@ -42,11 +42,11 @@ export class MissionOverviewSimple extends Component {
         this.mapContainer = useRef("mapContainer");
         this.orm = useService("orm");
         this.notification = useService("notification");
-        
+
         this.map = null;
         this.missionLayers = [];
         this.refreshInterval = null;
-        
+
         this.state = useState({
             missions: [],
             loading: true,
@@ -58,10 +58,10 @@ export class MissionOverviewSimple extends Component {
         onMounted(() => {
             this.initializeMap();
             this.loadMissions();
-            // Auto-refresh every 30 seconds
+            // Auto-refresh every 5 minutes (300000 ms)
             this.refreshInterval = setInterval(() => {
-                this.loadMissions();
-            }, 30000);
+                this.loadMissions(false); // false = don't reset map view
+            }, 300000);
         });
 
         onWillUnmount(() => {
@@ -97,12 +97,21 @@ export class MissionOverviewSimple extends Component {
         }
     }
 
-    async loadMissions() {
+    async loadMissions(shouldFitMap = true) {
         if (!this.map) return;
 
         try {
             this.state.loading = true;
-            
+
+            // Store current map view if we have a selected mission
+            let currentView = null;
+            if (this.state.selectedMission && !shouldFitMap) {
+                currentView = {
+                    center: this.map.getCenter(),
+                    zoom: this.map.getZoom()
+                };
+            }
+
             // Fetch active missions
             const missions = await this.orm.searchRead(
                 "transport.mission",
@@ -125,17 +134,89 @@ export class MissionOverviewSimple extends Component {
                 mission.destinations = destinations;
             }
 
+            // Check if selected mission still exists
+            if (this.state.selectedMission) {
+                const selectedMissionExists = missions.find(m => m.id === this.state.selectedMission.id);
+                if (selectedMissionExists) {
+                    // Update the selected mission with fresh data
+                    this.state.selectedMission = selectedMissionExists;
+                } else {
+                    // Selected mission no longer exists, deselect it
+                    this.state.selectedMission = null;
+                    currentView = null; // Allow map to fit all missions
+                }
+            }
+
             this.state.missions = missions;
             this.state.lastUpdate = new Date();
-            
+
             this.updateMapDisplay();
-            
+
+            // Restore map view if we were viewing a specific mission
+            if (currentView && this.state.selectedMission) {
+                this.map.setView(currentView.center, currentView.zoom);
+            } else if (shouldFitMap) {
+                // Only fit map to missions on initial load or manual refresh
+                this.fitMapToMissions();
+            }
+
         } catch (error) {
             console.error("Error loading missions:", error);
             this.notification.add("Failed to load missions", { type: "danger" });
         } finally {
             this.state.loading = false;
         }
+    }
+
+    groupMissionsByProximity(missions, threshold = 0.05) {
+        // Group missions that are close to each other (within ~5km)
+        const groups = [];
+        const processed = new Set();
+
+        missions.forEach(mission => {
+            if (processed.has(mission.id) || !mission.source_latitude || !mission.source_longitude) {
+                return;
+            }
+
+            const group = [mission];
+            processed.add(mission.id);
+
+            // Find nearby missions
+            missions.forEach(otherMission => {
+                if (processed.has(otherMission.id) ||
+                    !otherMission.source_latitude ||
+                    !otherMission.source_longitude ||
+                    mission.id === otherMission.id) {
+                    return;
+                }
+
+                const distance = this.calculateDistance(
+                    mission.source_latitude, mission.source_longitude,
+                    otherMission.source_latitude, otherMission.source_longitude
+                );
+
+                if (distance < threshold) {
+                    group.push(otherMission);
+                    processed.add(otherMission.id);
+                }
+            });
+
+            groups.push(group);
+        });
+
+        return groups;
+    }
+
+    calculateDistance(lat1, lon1, lat2, lon2) {
+        // Haversine formula for distance calculation
+        const R = 6371; // Earth's radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 
     updateMapDisplay() {
@@ -145,13 +226,27 @@ export class MissionOverviewSimple extends Component {
         });
         this.missionLayers = [];
 
-        // Add each mission to the map
-        this.state.missions.forEach(mission => {
-            this.addMissionToMap(mission);
-        });
+        // If a mission is selected, show only that mission highlighted
+        if (this.state.selectedMission) {
+            this.addMissionToMap(this.state.selectedMission, true);
+        } else {
+            // Group missions by proximity to reduce clutter
+            const missionGroups = this.groupMissionsByProximity(this.state.missions);
 
-        // Fit map to show all missions
-        this.fitMapToMissions();
+            // Add mission groups to map with smart clustering
+            missionGroups.forEach(group => {
+                if (group.length === 1) {
+                    this.addMissionToMap(group[0], false);
+                } else {
+                    this.addMissionCluster(group);
+                }
+            });
+        }
+
+        // Only fit map if no mission is selected (to avoid unwanted zoom changes during refresh)
+        if (!this.state.selectedMission) {
+            this.fitMapToMissions();
+        }
     }
 
     addMissionToMap(mission) {
@@ -160,17 +255,17 @@ export class MissionOverviewSimple extends Component {
         }
 
         const missionGroup = L.layerGroup();
-        
+
         // Colors based on mission type and state
         const colors = this.getMissionColors(mission);
-        
+
         // Add source marker
         const sourceIcon = this.createSourceIcon(mission);
         const sourceMarker = L.marker(
             [mission.source_latitude, mission.source_longitude],
             { icon: sourceIcon }
         );
-        
+
         sourceMarker.bindPopup(this.createMissionPopup(mission));
         missionGroup.addLayer(sourceMarker);
 
@@ -179,7 +274,7 @@ export class MissionOverviewSimple extends Component {
             if (dest.latitude && dest.longitude) {
                 const destIcon = this.createDestinationIcon(mission, dest, index + 1);
                 const destMarker = L.marker([dest.latitude, dest.longitude], { icon: destIcon });
-                
+
                 const destPopup = `
                     <div style="min-width: 150px;">
                         <h6>${mission.name} - Stop ${dest.sequence}</h6>
@@ -194,10 +289,28 @@ export class MissionOverviewSimple extends Component {
 
         // Draw route
         this.drawMissionRoute(mission, missionGroup, colors);
-        
+
         // Add to map and track
         missionGroup.addTo(this.map);
         this.missionLayers.push(missionGroup);
+    }
+
+    addMissionCluster(missions) {
+        // Create a cluster marker for multiple missions in the same area
+        const centerLat = missions.reduce((sum, m) => sum + m.source_latitude, 0) / missions.length;
+        const centerLng = missions.reduce((sum, m) => sum + m.source_longitude, 0) / missions.length;
+
+        const clusterIcon = this.createClusterIcon(missions);
+        const clusterMarker = L.marker([centerLat, centerLng], {
+            icon: clusterIcon,
+            zIndexOffset: 500
+        });
+
+        const clusterPopup = this.createClusterPopup(missions);
+        clusterMarker.bindPopup(clusterPopup);
+
+        clusterMarker.addTo(this.map);
+        this.missionLayers.push(clusterMarker);
     }
 
     getMissionColors(mission) {
@@ -205,10 +318,10 @@ export class MissionOverviewSimple extends Component {
             pickup: { primary: '#17a2b8', secondary: '#138496' },
             delivery: { primary: '#28a745', secondary: '#1e7e34' }
         };
-        
+
         const typeColors = baseColors[mission.mission_type] || baseColors.delivery;
         const opacity = mission.state === 'in_progress' ? 1.0 : 0.7;
-        
+
         return {
             route: typeColors.primary,
             marker: typeColors.secondary,
@@ -220,7 +333,7 @@ export class MissionOverviewSimple extends Component {
         const colors = this.getMissionColors(mission);
         const typeIcon = mission.mission_type === 'pickup' ? '🏭' : '📦';
         const stateClass = mission.state === 'in_progress' ? 'active' : 'confirmed';
-        
+
         const html = `
             <div style="
                 position: relative;
@@ -272,7 +385,7 @@ export class MissionOverviewSimple extends Component {
         const colors = this.getMissionColors(mission);
         const typeIcon = mission.mission_type === 'pickup' ? '📤' : '📥';
         const completedStyle = destination.is_completed ? 'opacity: 0.7;' : '';
-        
+
         const html = `
             <div style="
                 position: relative;
@@ -344,6 +457,61 @@ export class MissionOverviewSimple extends Component {
         });
     }
 
+    createClusterIcon(missions) {
+        const confirmedCount = missions.filter(m => m.state === 'confirmed').length;
+        const inProgressCount = missions.filter(m => m.state === 'in_progress').length;
+        const pickupCount = missions.filter(m => m.mission_type === 'pickup').length;
+        const deliveryCount = missions.filter(m => m.mission_type === 'delivery').length;
+
+        const html = `
+            <div class="tm-cluster-marker" style="
+                position: relative;
+                width: 60px;
+                height: 60px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                cursor: pointer;
+            ">
+                <div style="
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #4a5d87, #17a2b8);
+                    border: 4px solid white;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                    color: white;
+                ">
+                    ${missions.length}
+                </div>
+                <div style="
+                    background: rgba(0, 0, 0, 0.8);
+                    color: white;
+                    padding: 2px 6px;
+                    border-radius: 8px;
+                    font-size: 0.6rem;
+                    font-weight: 500;
+                    margin-top: 4px;
+                    white-space: nowrap;
+                ">
+                    ${pickupCount}📤 ${deliveryCount}📥
+                </div>
+            </div>
+        `;
+
+        return L.divIcon({
+            className: 'tm-cluster-icon',
+            html: html,
+            iconSize: [60, 70],
+            iconAnchor: [30, 65]
+        });
+    }
+
     createMissionPopup(mission) {
         const progressBar = mission.destination_progress || 0;
         const stateLabel = {
@@ -390,7 +558,7 @@ export class MissionOverviewSimple extends Component {
             }
 
             let routeGeometry;
-            
+
             if (routeData.is_fallback) {
                 // Handle fallback route (stored as JSON points)
                 try {
@@ -430,7 +598,7 @@ export class MissionOverviewSimple extends Component {
 
         } catch (error) {
             console.warn(`Failed to draw route for mission ${mission.name}:`, error);
-            
+
             // Ultimate fallback - draw straight lines between points
             const points = [[mission.source_longitude, mission.source_latitude]];
             mission.destinations
@@ -465,7 +633,7 @@ export class MissionOverviewSimple extends Component {
                 bounds.extend([mission.source_latitude, mission.source_longitude]);
                 hasValidBounds = true;
             }
-            
+
             mission.destinations.forEach(dest => {
                 if (dest.latitude && dest.longitude) {
                     bounds.extend([dest.latitude, dest.longitude]);
@@ -480,7 +648,7 @@ export class MissionOverviewSimple extends Component {
     }
 
     async refreshMissions() {
-        await this.loadMissions();
+        await this.loadMissions(true); // true = allow map fitting on manual refresh
         this.notification.add("Missions refreshed", { type: "success" });
     }
 
@@ -492,23 +660,23 @@ export class MissionOverviewSimple extends Component {
 
     selectMission(mission) {
         this.state.selectedMission = mission;
-        
+
         // Fit map to selected mission
         if (this.map && mission) {
             const bounds = L.latLngBounds();
-            
+
             // Add source to bounds
             if (mission.source_latitude && mission.source_longitude) {
                 bounds.extend([mission.source_latitude, mission.source_longitude]);
             }
-            
+
             // Add destinations to bounds
             mission.destinations.forEach(dest => {
                 if (dest.latitude && dest.longitude) {
                     bounds.extend([dest.latitude, dest.longitude]);
                 }
             });
-            
+
             if (bounds.isValid()) {
                 this.map.fitBounds(bounds, { padding: [50, 50] });
             }

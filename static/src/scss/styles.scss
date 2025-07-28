@@ -1700,8 +1700,6 @@ $delivery-light: rgba(40, 167, 69, 0.1);
         font-size: 1.1rem;
     }
 }
-}
-}
 
 .tm_form_section {
     margin-bottom: 24px;
@@ -2042,7 +2040,6 @@ $delivery-light: rgba(40, 167, 69, 0.1);
         }
     }
 }
-}
 
 // Responsive adjustments
 @media (max-width: 1400px) {
@@ -2160,10 +2157,10 @@ $delivery-light: rgba(40, 167, 69, 0.1);
         }
     }
 }
-}
 
-// 
-===6. Mission Overview Map Styles===.tm-overview-container {
+// ===6. Mission Overview Map Styles===
+
+.tm-overview-container {
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -2332,8 +2329,7 @@ $delivery-light: rgba(40, 167, 69, 0.1);
                                 white 3px,
                                 white 6px);
 
-                        // 
-                        ===Mission Overview Map Styles===.tm-overview-container {
+                        // ===Mission Overview Map Styles===.tm-overview-container {
                             height: 100vh;
                             display: flex;
                             flex-direction: column;
@@ -2875,3 +2871,8 @@ $delivery-light: rgba(40, 167, 69, 0.1);
                                 }
                             }
                         }
+                }
+            }
+        }
+    }
+}

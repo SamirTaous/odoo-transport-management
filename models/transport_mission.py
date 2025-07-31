@@ -63,7 +63,16 @@ class TransportMission(models.Model):
     # --- All standard methods are correct ---
     @api.depends('source_latitude', 'source_longitude', 'destination_ids.latitude', 'destination_ids.longitude', 'destination_ids.sequence')
     def _compute_total_distance(self):
+        # Skip computation if this is being called from widget update
+        if self.env.context.get('widget_update'):
+            return
+            
         for mission in self:
+            # Skip if distance was recently set by widget (method is 'osrm' and distance > 0)
+            if (mission.distance_calculation_method == 'osrm' and 
+                mission.total_distance_km > 0):
+                continue
+                
             distance = 0.0
             calculation_method = 'osrm'
             
@@ -83,14 +92,19 @@ class TransportMission(models.Model):
                     
                     if cached_route:
                         distance = cached_route.get('distance', 0.0)
+                        # Mark as cached since we got it from cache
                         calculation_method = 'cached'
                     else:
-                        # Calculate and cache the route immediately
+                        # Calculate and cache the route immediately - this is a fresh calculation
                         try:
                             route_data = mission._calculate_and_cache_route(waypoints)
                             if route_data:
                                 distance = route_data.get('distance', 0.0)
-                                calculation_method = 'osrm' if not route_data.get('is_fallback') else 'cached'
+                                # This is a fresh calculation, so mark appropriately
+                                if route_data.get('is_fallback'):
+                                    calculation_method = 'haversine'
+                                else:
+                                    calculation_method = 'osrm'
                         except Exception as e:
                             _logger.warning(f"Failed to calculate route for mission {mission.name}: {e}")
                             # Only if OSRM completely fails, leave distance as 0
@@ -231,7 +245,8 @@ class TransportMission(models.Model):
     def update_distance_from_widget(self, distance_km):
         """Update distance from the JavaScript widget with OSRM calculation"""
         self.ensure_one()
-        self.write({
+        # Set a flag to indicate this was set by widget
+        self.with_context(widget_update=True).write({
             'total_distance_km': distance_km,
             'distance_calculation_method': 'osrm'
         })

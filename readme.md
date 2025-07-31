@@ -2,18 +2,38 @@
 
 ![License: LGPL-3](https://img.shields.io/badge/License-LGPL--3-blue.svg)
 ![Odoo Version: 16.0](https://img.shields.io/badge/Odoo-16.0-blueviolet.svg)
+![Version: 16.0.2.0.0](https://img.shields.io/badge/Version-16.0.2.0.0-green.svg)
 
-A custom Odoo module for managing transport missions effectively. This module provides the foundational structure for planning, executing, and tracking transport operations.
+A comprehensive Odoo module for managing transport operations with advanced features including AI-powered route optimization, interactive map planning, and real-time mission tracking.
 
 ## Key Features
 
--   **Mission Creation:** Create transport missions with a unique, automatically generated reference number (e.g., `TM/00001`).
--   **Core Details:** Assign a mission date, source location, a driver (`res.partner`), and a vehicle (`fleet.vehicle`).
--   **Multi-Destination Management:** Each mission can have a list of ordered destinations, allowing for complex route planning.
--   **Status Workflow:** Track the mission's progress through a clear lifecycle using a status bar:
-    -   `Draft` -> `Confirmed` -> `In Progress` -> `Done`
-    -   With options to `Cancel` and `Reset to Draft`.
--   **Integrated Communication:** A full chatter is available on each mission form for logging notes, sending messages to followers, and tracking field changes.
+### 🗺️ Interactive Mission Planning
+-   **Visual Map Interface:** Drag-and-drop mission planning with interactive Leaflet maps
+-   **Real-time Route Calculation:** Automatic route optimization using OSRM routing service
+-   **Multi-destination Support:** Handle complex routes with multiple ordered stops
+-   **Geocoding Integration:** Automatic address resolution for coordinates
+
+### 🤖 AI-Powered Optimization
+-   **Route Optimization:** Google Gemini AI integration for intelligent route planning
+-   **Performance Caching:** Smart route caching system for improved performance
+-   **Fallback Routes:** Automatic fallback to straight-line routes when needed
+
+### 📊 Mission Management
+-   **Complete Lifecycle:** `Draft` → `Confirmed` → `In Progress` → `Done` workflow
+-   **Progress Tracking:** Real-time destination completion tracking
+-   **Priority Management:** Low, Normal, High priority levels
+-   **Mission Types:** Support for both pickup and delivery missions
+
+### 🚛 Fleet Integration
+-   **Vehicle Management:** Enhanced vehicle tracking with mission statistics
+-   **Driver Assignment:** Link missions to drivers and vehicles
+-   **Mission History:** Complete mission history per vehicle
+
+### 📈 Real-time Overview
+-   **Live Mission Map:** Real-time overview of all active missions
+-   **Status Monitoring:** Visual indicators for mission states
+-   **Auto-refresh:** Automatic updates every 30 seconds
 
 ## Models
 
@@ -52,11 +72,27 @@ This model holds the details for each stop in a mission.
 4.  Click **Update Apps List** (Developer Mode may need to be activated).
 5.  Search for "Transport Management" and click **Install**.
 
-## Usage
+## Quick Start
 
-1.  After installation, a new top-level menu item named **Transport** will appear in the main Odoo menu.
-2.  Click on **Transport** -> **Missions** to view the list of all transport missions.
-3.  Click the **New** button to open the form and create a new mission.
+1.  After installation, navigate to **Transport** in the main Odoo menu
+2.  Go to **Transport** → **Missions** to view all missions
+3.  Click **New** to create a mission with the interactive map planner
+4.  Use **Transport** → **Overview Map** for real-time mission monitoring
+
+### Creating Your First Mission
+1. Click the map to set your source location
+2. Right-click to add destination points
+3. Drag markers to adjust positions
+4. Use the "Test API Connection" button to optimize routes
+5. Confirm and start your mission
+
+## Screenshots
+
+The module includes an interactive map-based mission planner and real-time overview dashboard. See the comprehensive documentation for detailed screenshots and usage examples.
+
+## Documentation
+
+For comprehensive technical documentation, see [COMPREHENSIVE_DOCUMENTATION.md](COMPREHENSIVE_DOCUMENTATION.md).
 
 ## Future Development (Planned Features)
 

@@ -60,4 +60,12 @@
         parent="menu_transport_config"
         action="action_route_cache_cleanup"
         sequence="30"/>
+
+    <!-- Distance Fix Menu -->
+    <menuitem
+        id="menu_fix_distances"
+        name="Fix Mission Distances"
+        parent="menu_transport_config"
+        action="action_fix_all_distances"
+        sequence="40"/>
 </odoo>

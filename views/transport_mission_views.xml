@@ -29,6 +29,7 @@
                 <header>
                     <!-- START: ADDED/MODIFIED BUTTONS -->
                     <button name="action_optimize_route" string="Test API Connection" type="object" class="btn-secondary"/>
+                    <button name="action_recalculate_distance" string="Fix Distance" type="object" class="btn-warning"/>
                     <!-- END: ADDED/MODIFIED BUTTONS -->
 
                     <button name="action_confirm" string="Confirm" type="object" class="btn-primary" data-hotkey="v" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
@@ -62,6 +63,7 @@
                     </field>
                     <field name="destination_progress"/>
                     <field name="total_distance_km"/>
+                    <field name="distance_calculation_method"/>
                     <field name="mission_type"/>
                     <field name="mission_date"/>
                     <field name="driver_id"/>
@@ -115,6 +117,7 @@
                 <field name="vehicle_id"/>
                 <field name="source_location"/>
                 <field name="total_distance_km" sum="Total Distance"/>
+                <field name="distance_calculation_method"/>
                 <field name="priority" widget="priority"/>
                 <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state in ('confirmed', 'in_progress')"/>
             </tree>
@@ -127,6 +130,31 @@
         <field name="view_mode">kanban,tree,form</field>
         <field name="context">{'search_default_active_missions': 1}</field>
     </record>
+
+    <!-- Simple method to fix distances -->
+    <record id="action_fix_all_distances" model="ir.actions.server">
+        <field name="name">Fix All Mission Distances</field>
+        <field name="model_id" ref="model_transport_mission"/>
+        <field name="state">code</field>
+        <field name="code">
+# Fix all distances immediately
+fixed_count = model.fix_all_distances_now()
+
+# Show notification
+action = {
+    'type': 'ir.actions.client',
+    'tag': 'display_notification',
+    'params': {
+        'title': 'Distance Fix Complete',
+        'message': 'Fixed %d missions with incorrect distances' % fixed_count,
+        'type': 'success',
+        'sticky': False,
+    }
+}
+        </field>
+    </record>
+
+
 
     <!-- Search view for missions -->
     <record id="view_transport_mission_search" model="ir.ui.view">

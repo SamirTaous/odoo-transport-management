@@ -574,7 +574,15 @@ export class MissionMapPlannerWidget extends Component {
         if (points.length < 2) {
             this.state.totalDistance = 0;
             if (this.props.record.data.total_distance_km !== 0) {
-                this.props.record.update({ total_distance_km: 0 });
+                if (this.props.record.resId) {
+                    this.props.record.model.orm.call(
+                        "transport.mission",
+                        "update_distance_from_widget",
+                        [this.props.record.resId, 0]
+                    );
+                } else {
+                    this.props.record.update({ total_distance_km: 0 });
+                }
             }
             return;
         }
@@ -629,7 +637,16 @@ export class MissionMapPlannerWidget extends Component {
                 // Update distance from cached data
                 this.state.totalDistance = routeData.distance;
                 if (Math.abs(this.props.record.data.total_distance_km - routeData.distance) > 0.01) {
-                    this.props.record.update({ total_distance_km: routeData.distance });
+                    // Use the new method to update distance with proper calculation method tracking
+                    if (this.props.record.resId) {
+                        this.props.record.model.orm.call(
+                            "transport.mission",
+                            "update_distance_from_widget",
+                            [this.props.record.resId, routeData.distance]
+                        );
+                    } else {
+                        this.props.record.update({ total_distance_km: routeData.distance });
+                    }
                 }
 
                 console.log(`Using cached route (${routeData.is_fallback ? 'fallback' : 'OSRM'})`);
@@ -668,10 +685,30 @@ export class MissionMapPlannerWidget extends Component {
             // Update both the record and the state for UI display
             this.state.totalDistance = routeDistance;
             if (Math.abs(this.props.record.data.total_distance_km - routeDistance) > 0.01) {
-                this.props.record.update({ total_distance_km: routeDistance });
+                // Use the new method to update distance with proper calculation method tracking
+                if (this.props.record.resId) {
+                    this.props.record.model.orm.call(
+                        "transport.mission",
+                        "update_distance_from_widget",
+                        [this.props.record.resId, routeDistance]
+                    );
+                } else {
+                    this.props.record.update({ total_distance_km: routeDistance });
+                }
             }
 
             console.log("Calculated new OSRM route");
+            
+            // Also trigger backend recalculation to ensure consistency
+            if (this.props.record.resId) {
+                this.props.record.model.orm.call(
+                    "transport.mission",
+                    "action_recalculate_distance",
+                    [this.props.record.resId]
+                ).catch(error => {
+                    console.warn("Failed to trigger backend distance recalculation:", error);
+                });
+            }
 
         } catch (error) {
             console.error("Error fetching route:", error);

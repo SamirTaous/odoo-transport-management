@@ -48,6 +48,7 @@ export class MissionMapPlannerWidget extends Component {
             source: null,
             destinations: [],
             totalDistance: 0,
+            totalDuration: 0,
         });
 
         onMounted(() => {
@@ -573,15 +574,19 @@ export class MissionMapPlannerWidget extends Component {
         // If not enough points for a route, ensure distance is zero and exit
         if (points.length < 2) {
             this.state.totalDistance = 0;
+            this.state.totalDuration = 0;
             if (this.props.record.data.total_distance_km !== 0) {
                 if (this.props.record.resId) {
                     this.props.record.model.orm.call(
                         "transport.mission",
                         "update_distance_from_widget",
-                        [this.props.record.resId, 0]
+                        [this.props.record.resId, 0, 0]
                     );
                 } else {
-                    this.props.record.update({ total_distance_km: 0 });
+                    this.props.record.update({ 
+                        total_distance_km: 0,
+                        estimated_duration_minutes: 0
+                    });
                 }
             }
             return;
@@ -634,18 +639,22 @@ export class MissionMapPlannerWidget extends Component {
 
                 this.routeLayer = L.polyline(routeGeometry, routeOptions).addTo(this.map);
 
-                // Update distance from cached data
+                // Update distance and duration from cached data
                 this.state.totalDistance = routeData.distance;
+                this.state.totalDuration = routeData.duration;
                 if (Math.abs(this.props.record.data.total_distance_km - routeData.distance) > 0.01) {
                     // Use the new method to update distance with proper calculation method tracking
                     if (this.props.record.resId) {
                         this.props.record.model.orm.call(
                             "transport.mission",
                             "update_distance_from_widget",
-                            [this.props.record.resId, routeData.distance]
+                            [this.props.record.resId, routeData.distance, routeData.duration]
                         );
                     } else {
-                        this.props.record.update({ total_distance_km: routeData.distance });
+                        this.props.record.update({ 
+                            total_distance_km: routeData.distance,
+                            estimated_duration_minutes: routeData.duration
+                        });
                     }
                 }
 
@@ -671,6 +680,7 @@ export class MissionMapPlannerWidget extends Component {
             const route = data.routes[0];
             const routeGeometry = decodePolyline(route.geometry);
             const routeDistance = route.distance / 1000;
+            const routeDuration = route.duration / 60; // Convert seconds to minutes
 
             const missionType = this.props.record.data.mission_type || 'delivery';
             const routeColor = missionType === 'pickup' ? '#17a2b8' : '#28a745';
@@ -684,16 +694,20 @@ export class MissionMapPlannerWidget extends Component {
 
             // Update both the record and the state for UI display
             this.state.totalDistance = routeDistance;
+            this.state.totalDuration = routeDuration;
             if (Math.abs(this.props.record.data.total_distance_km - routeDistance) > 0.01) {
                 // Use the new method to update distance with proper calculation method tracking
                 if (this.props.record.resId) {
                     this.props.record.model.orm.call(
                         "transport.mission",
                         "update_distance_from_widget",
-                        [this.props.record.resId, routeDistance]
+                        [this.props.record.resId, routeDistance, routeDuration]
                     );
                 } else {
-                    this.props.record.update({ total_distance_km: routeDistance });
+                    this.props.record.update({ 
+                        total_distance_km: routeDistance,
+                        estimated_duration_minutes: routeDuration
+                    });
                 }
             }
 

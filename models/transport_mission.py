@@ -54,11 +54,12 @@ class TransportMission(models.Model):
     ], string='Priority', default='1', tracking=True) # Default to Normal
     destination_progress = fields.Float(string="Destination Progress", compute='_compute_destination_progress', store=True, help="Progress of completed destinations for this mission.")
     total_distance_km = fields.Float(string="Total Distance (km)", compute='_compute_total_distance', store=True, help="Estimated total travel distance for the mission.")
+    estimated_duration_minutes = fields.Float(string="Estimated Duration (min)", compute='_compute_total_distance', store=True, default=0.0, help="Estimated total travel time for the mission in minutes.")
     distance_calculation_method = fields.Selection([
         ('haversine', 'Haversine (Straight Line)'),
         ('osrm', 'OSRM (Road Distance)'),
         ('cached', 'Cached Route')
-    ], string="Distance Calculation Method", default='haversine', help="Method used to calculate the total distance")
+    ], string="Distance Calculation Method", default='osrm', help="Method used to calculate the total distance")
 
     # --- All standard methods are correct ---
     @api.depends('source_latitude', 'source_longitude', 'destination_ids.latitude', 'destination_ids.longitude', 'destination_ids.sequence')
@@ -74,6 +75,7 @@ class TransportMission(models.Model):
                 continue
                 
             distance = 0.0
+            duration = 0.0
             calculation_method = 'osrm'
             
             if mission.source_latitude and mission.source_longitude:
@@ -92,6 +94,7 @@ class TransportMission(models.Model):
                     
                     if cached_route:
                         distance = cached_route.get('distance', 0.0)
+                        duration = cached_route.get('duration', 0.0)
                         # Mark as cached since we got it from cache
                         calculation_method = 'cached'
                     else:
@@ -100,6 +103,7 @@ class TransportMission(models.Model):
                             route_data = mission._calculate_and_cache_route(waypoints)
                             if route_data:
                                 distance = route_data.get('distance', 0.0)
+                                duration = route_data.get('duration', 0.0)
                                 # This is a fresh calculation, so mark appropriately
                                 if route_data.get('is_fallback'):
                                     calculation_method = 'haversine'
@@ -109,9 +113,11 @@ class TransportMission(models.Model):
                             _logger.warning(f"Failed to calculate route for mission {mission.name}: {e}")
                             # Only if OSRM completely fails, leave distance as 0
                             distance = 0.0
+                            duration = 0.0
                             calculation_method = 'osrm'
             
             mission.total_distance_km = distance
+            mission.estimated_duration_minutes = duration
             mission.distance_calculation_method = calculation_method
             
     @api.depends('destination_ids.is_completed')
@@ -242,12 +248,13 @@ class TransportMission(models.Model):
             }
         }
 
-    def update_distance_from_widget(self, distance_km):
-        """Update distance from the JavaScript widget with OSRM calculation"""
+    def update_distance_from_widget(self, distance_km, duration_minutes=0):
+        """Update distance and duration from the JavaScript widget with OSRM calculation"""
         self.ensure_one()
         # Set a flag to indicate this was set by widget
         self.with_context(widget_update=True).write({
             'total_distance_km': distance_km,
+            'estimated_duration_minutes': duration_minutes,
             'distance_calculation_method': 'osrm'
         })
         return True

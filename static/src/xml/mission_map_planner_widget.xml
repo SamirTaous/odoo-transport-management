@@ -161,6 +161,20 @@
                             </div>
                         </div>
                         <div class="tm_metric_card">
+                            <div class="tm_metric_icon"><i class="fa fa-clock"/></div>
+                            <div class="tm_metric_content">
+                                <span class="tm_metric_label">Estimated Time</span>
+                                <div class="tm_metric_value">
+                                    <span t-if="state.totalDuration >= 60">
+                                        <t t-esc="Math.floor(state.totalDuration / 60)"/>h <t t-esc="Math.round(state.totalDuration % 60)"/>min
+                                    </span>
+                                    <span t-else="">
+                                        <t t-esc="Math.round(state.totalDuration)"/> min
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tm_metric_card">
                              <div class="tm_metric_icon"><i class="fa fa-tasks"/></div>
                              <div class="tm_metric_content">
                                 <span class="tm_metric_label">Progress</span>

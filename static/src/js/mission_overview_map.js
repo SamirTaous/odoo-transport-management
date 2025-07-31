@@ -325,7 +325,52 @@ export class MissionOverviewMap extends Component {
     async drawMissionRoute(mission, layerGroup, colors) {
         if (!mission.destinations.length) return;
 
-        // Prepare points for OSRM
+        try {
+            // First try to get cached route data from backend
+            const routeData = await this.orm.call(
+                "transport.mission",
+                "get_cached_route_data",
+                [mission.id]
+            );
+
+            if (routeData && routeData.geometry) {
+                let routeGeometry;
+                
+                if (routeData.is_fallback) {
+                    // Handle fallback route (stored as JSON points)
+                    routeGeometry = JSON.parse(routeData.geometry);
+                } else {
+                    // Handle OSRM polyline geometry
+                    routeGeometry = decodePolyline(routeData.geometry);
+                }
+
+                // Create route polyline with mission-specific styling
+                const routeOptions = {
+                    color: colors.route,
+                    weight: mission.state === 'in_progress' ? 5 : 3,
+                    opacity: colors.opacity,
+                    dashArray: mission.state === 'confirmed' ? '10, 5' : null,
+                    className: `tm-route-${mission.mission_type} tm-state-${mission.state}`
+                };
+
+                // Add visual indicator for fallback routes
+                if (routeData.is_fallback) {
+                    routeOptions.dashArray = '5, 10';
+                    routeOptions.opacity = 0.5;
+                    routeOptions.className += ' tm-route-fallback';
+                }
+
+                const routeLine = L.polyline(routeGeometry, routeOptions);
+                layerGroup.addLayer(routeLine);
+                
+                console.log(`Drew cached route for mission ${mission.name} (${routeData.is_fallback ? 'fallback' : 'OSRM'})`);
+                return;
+            }
+        } catch (error) {
+            console.warn(`Failed to get cached route for mission ${mission.name}:`, error);
+        }
+
+        // Fallback: calculate route directly with OSRM
         const points = [[mission.source_longitude, mission.source_latitude]];
         mission.destinations
             .filter(dest => dest.latitude && dest.longitude)
@@ -361,11 +406,12 @@ export class MissionOverviewMap extends Component {
             });
 
             layerGroup.addLayer(routeLine);
+            console.log(`Drew fresh OSRM route for mission ${mission.name}`);
 
         } catch (error) {
             console.warn(`Failed to draw route for mission ${mission.name}:`, error);
             
-            // Fallback to straight lines
+            // Final fallback to straight lines
             const latLngPoints = points.map(p => [p[1], p[0]]);
             const fallbackRoute = L.polyline(latLngPoints, {
                 color: colors.route,
@@ -376,6 +422,7 @@ export class MissionOverviewMap extends Component {
             });
 
             layerGroup.addLayer(fallbackRoute);
+            console.log(`Drew fallback straight-line route for mission ${mission.name}`);
         }
     }
 

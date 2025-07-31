@@ -63,6 +63,7 @@
                     </field>
                     <field name="destination_progress"/>
                     <field name="total_distance_km"/>
+                    <field name="estimated_duration_minutes"/>
                     <field name="distance_calculation_method"/>
                     <field name="mission_type"/>
                     <field name="mission_date"/>
@@ -117,6 +118,7 @@
                 <field name="vehicle_id"/>
                 <field name="source_location"/>
                 <field name="total_distance_km" sum="Total Distance"/>
+                <field name="estimated_duration_minutes" string="Est. Duration (min)"/>
                 <field name="distance_calculation_method"/>
                 <field name="priority" widget="priority"/>
                 <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state in ('confirmed', 'in_progress')"/>

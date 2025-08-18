@@ -60,6 +60,16 @@ class TransportMission(models.Model):
         ('osrm', 'OSRM (Road Distance)'),
         ('cached', 'Cached Route')
     ], string="Distance Calculation Method", default='osrm', help="Method used to calculate the total distance")
+    
+    # Package summary fields
+    total_packages = fields.Integer(string="Total Packages", compute='_compute_package_summary', store=True)
+    total_weight = fields.Float(string="Total Weight (kg)", compute='_compute_package_summary', store=True, digits=(8, 2))
+    total_volume = fields.Float(string="Total Volume (m³)", compute='_compute_package_summary', store=True, digits=(8, 3))
+    
+    # Time constraint fields
+    earliest_delivery = fields.Datetime(string="Earliest Delivery", compute='_compute_time_constraints', store=True)
+    latest_delivery = fields.Datetime(string="Latest Delivery", compute='_compute_time_constraints', store=True)
+    has_time_constraints = fields.Boolean(string="Has Time Constraints", compute='_compute_time_constraints', store=True)
 
     # --- All standard methods are correct ---
     @api.depends('source_latitude', 'source_longitude', 'destination_ids.latitude', 'destination_ids.longitude', 'destination_ids.sequence')
@@ -129,6 +139,32 @@ class TransportMission(models.Model):
             else:
                 completed_count = len(mission.destination_ids.filtered(lambda d: d.is_completed))
                 mission.destination_progress = (completed_count / total_destinations) * 100
+
+    @api.depends('destination_ids.total_weight', 'destination_ids.total_volume', 'destination_ids.package_type')
+    def _compute_package_summary(self):
+        for mission in self:
+            # Count destinations as "packages" - could be pallets or individual package groups
+            mission.total_packages = len(mission.destination_ids)
+            mission.total_weight = sum(mission.destination_ids.mapped('total_weight'))
+            mission.total_volume = sum(mission.destination_ids.mapped('total_volume'))
+
+    @api.depends('destination_ids.expected_arrival_time')
+    def _compute_time_constraints(self):
+        for mission in self:
+            destinations_with_times = mission.destination_ids.filtered('expected_arrival_time')
+            
+            if destinations_with_times:
+                mission.has_time_constraints = True
+                
+                # Find earliest and latest expected times
+                expected_times = destinations_with_times.mapped('expected_arrival_time')
+                
+                mission.earliest_delivery = min(expected_times) if expected_times else False
+                mission.latest_delivery = max(expected_times) if expected_times else False
+            else:
+                mission.has_time_constraints = False
+                mission.earliest_delivery = False
+                mission.latest_delivery = False
 
     @api.model_create_multi
     def create(self, vals_list):

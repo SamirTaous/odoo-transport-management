@@ -1,5 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Form View for Transport Package -->
+    <record id="view_transport_package_form" model="ir.ui.view">
+        <field name="name">transport.package.form</field>
+        <field name="model">transport.package</field>
+        <field name="arch" type="xml">
+            <form string="Package">
+                <sheet>
+                    <group>
+                        <group string="Package Details">
+                            <field name="name"/>
+                            <field name="weight"/>
+                            <field name="volume" readonly="1"/>
+                        </group>
+                        <group string="Dimensions (cm)">
+                            <field name="length"/>
+                            <field name="width"/>
+                            <field name="height"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View for Transport Destination -->
+    <record id="view_transport_destination_tree" model="ir.ui.view">
+        <field name="name">transport.destination.tree</field>
+        <field name="model">transport.destination</field>
+        <field name="arch" type="xml">
+            <tree string="Destinations" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="location"/>
+                <field name="expected_arrival_time"/>
+                <field name="service_duration"/>
+                <field name="package_type"/>
+                <field name="total_weight"/>
+                <field name="total_volume"/>
+                <field name="requires_signature"/>
+                <field name="is_completed"/>
+            </tree>
+        </field>
+    </record>
+
     <!-- Form View for Transport Destination -->
     <record id="view_transport_destination_form" model="ir.ui.view">
         <field name="name">transport.destination.form</field>
@@ -7,14 +50,62 @@
         <field name="arch" type="xml">
             <form string="Destination">
                 <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="location" placeholder="Destination Address"/>
+                        </h1>
+                    </div>
+                    
                     <group>
-                        <field name="location"/>
-                        <field name="latitude"/>
-                        <field name="longitude"/>
+                        <group string="Location Details">
+                            <field name="latitude"/>
+                            <field name="longitude"/>
+                            <field name="is_completed" string="Mark as Completed"/>
+                        </group>
+                        <group string="Time &amp; Service">
+                            <field name="expected_arrival_time"/>
+                            <field name="service_duration"/>
+                            <field name="requires_signature"/>
+                        </group>
                     </group>
+                    
                     <group>
-                        <field name="is_completed" string="Mark as Completed"/>
+                        <group string="Package Type">
+                            <field name="package_type" widget="radio"/>
+                        </group>
+                        <group string="Totals">
+                            <field name="total_weight" readonly="1"/>
+                            <field name="total_volume" readonly="1"/>
+                        </group>
                     </group>
+                    
+                    <!-- Pallet Information -->
+                    <group string="Pallet Information" attrs="{'invisible': [('package_type', '!=', 'pallet')]}">
+                        <group>
+                            <field name="pallet_width" attrs="{'required': [('package_type', '=', 'pallet')]}"/>
+                            <field name="pallet_height" attrs="{'required': [('package_type', '=', 'pallet')]}"/>
+                        </group>
+                        <group>
+                            <field name="pallet_weight" attrs="{'required': [('package_type', '=', 'pallet')]}"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Individual Packages -->
+                    <notebook attrs="{'invisible': [('package_type', '!=', 'individual')]}">
+                        <page string="Packages">
+                            <field name="package_ids">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="length"/>
+                                    <field name="width"/>
+                                    <field name="height"/>
+                                    <field name="weight"/>
+                                    <field name="volume" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -27,11 +118,7 @@
         <field name="arch" type="xml">
             <form string="Transport Mission" class="o_form_nosheet">
                 <header>
-                    <!-- START: ADDED/MODIFIED BUTTONS -->
-                    <button name="action_optimize_route" string="Test API Connection" type="object" class="btn-secondary"/>
-                    <button name="action_recalculate_distance" string="Fix Distance" type="object" class="btn-warning"/>
-                    <!-- END: ADDED/MODIFIED BUTTONS -->
-
+                    <button name="action_optimize_route" string="Optimize Route" type="object" class="btn-secondary"/>
                     <button name="action_confirm" string="Confirm" type="object" class="btn-primary" data-hotkey="v" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
                     <button name="action_start_mission" string="Start Mission" type="object" class="btn-primary" data-hotkey="s" attrs="{'invisible': [('state', '!=', 'confirmed')]}"/>
                     <button name="action_done" string="Mark as Done" type="object" class="btn-primary" data-hotkey="d" attrs="{'invisible': [('state', '!=', 'in_progress')]}"/>
@@ -57,14 +144,27 @@
                         <tree>
                             <field name="sequence"/>
                             <field name="location"/>
-                            <field name="latitude"/>
-                            <field name="longitude"/>
+                            <field name="expected_arrival_time"/>
+                            <field name="service_duration"/>
+                            <field name="package_type"/>
+                            <field name="total_weight"/>
+                            <field name="total_volume"/>
+                            <field name="requires_signature"/>
+                            <field name="is_completed"/>
+                            <field name="latitude" invisible="1"/>
+                            <field name="longitude" invisible="1"/>
                         </tree>
                     </field>
                     <field name="destination_progress"/>
                     <field name="total_distance_km"/>
                     <field name="estimated_duration_minutes"/>
                     <field name="distance_calculation_method"/>
+                    <field name="total_packages"/>
+                    <field name="total_weight"/>
+                    <field name="total_volume"/>
+                    <field name="has_time_constraints"/>
+                    <field name="earliest_delivery"/>
+                    <field name="latest_delivery"/>
                     <field name="mission_type"/>
                     <field name="mission_date"/>
                     <field name="driver_id"/>
@@ -87,9 +187,14 @@
                 <field name="vehicle_id"/>
                 <field name="state"/>
                 <field name="priority"/>
+                <field name="total_packages"/>
+                <field name="total_weight"/>
+                <field name="has_time_constraints"/>
+                <field name="earliest_delivery"/>
+                <field name="latest_delivery"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div t-attf-class="oe_kanban_global_click tm-kanban-card tm-card-state-{{record.state.raw_value}}">
+                        <div t-attf-class="oe_kanban_global_click tm-kanban-card tm-card-state-{{record.state.raw_value}} {{record.has_time_constraints.raw_value ? 'tm-has-constraints' : ''}}">
                             <div class="tm_kanban_header">
                                 <h6><field name="name"/></h6>
                                 <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state in ('confirmed', 'in_progress')" decoration-muted="state == 'cancelled'"/>
@@ -98,6 +203,10 @@
                                 <div class="tm_kanban_row"><i class="fa fa-calendar me-2"/><span><field name="mission_date"/></span></div>
                                 <div class="tm_kanban_row"><i class="fa fa-user me-2"/><span><field name="driver_id"/></span></div>
                                 <div class="tm_kanban_row"><i class="fa fa-truck me-2"/><span><field name="vehicle_id"/></span></div>
+                                <div class="tm_kanban_row"><i class="fa fa-cube me-2"/><span><field name="total_packages"/> packages (<field name="total_weight"/> kg)</span></div>
+                                <t t-if="record.has_time_constraints.raw_value">
+                                    <div class="tm_kanban_row tm_time_constraint"><i class="fa fa-clock-o me-2"/><span>Time constraints</span></div>
+                                </t>
                                 <field name="priority" widget="priority"/>
                             </div>
                         </div>
@@ -111,15 +220,20 @@
         <field name="name">transport.mission.tree</field>
         <field name="model">transport.mission</field>
         <field name="arch" type="xml">
-            <tree decoration-success="state == 'done'" decoration-muted="state == 'cancelled'" decoration-bf="priority == '1'">
+            <tree decoration-success="state == 'done'" decoration-muted="state == 'cancelled'" decoration-bf="priority == '1'" decoration-warning="has_time_constraints == True">
                 <field name="name"/>
                 <field name="mission_date"/>
                 <field name="driver_id" widget="many2one_avatar"/>
                 <field name="vehicle_id"/>
                 <field name="source_location"/>
+                <field name="total_packages" sum="Total Packages"/>
+                <field name="total_weight" sum="Total Weight"/>
                 <field name="total_distance_km" sum="Total Distance"/>
                 <field name="estimated_duration_minutes" string="Est. Duration (min)"/>
-                <field name="distance_calculation_method"/>
+                <field name="has_time_constraints" string="Time Constraints"/>
+                <field name="earliest_delivery"/>
+                <field name="latest_delivery"/>
+                <field name="distance_calculation_method" invisible="1"/>
                 <field name="priority" widget="priority"/>
                 <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state in ('confirmed', 'in_progress')"/>
             </tree>
@@ -132,6 +246,8 @@
         <field name="view_mode">kanban,tree,form</field>
         <field name="context">{'search_default_active_missions': 1}</field>
     </record>
+
+
 
     <!-- Simple method to fix distances -->
     <record id="action_fix_all_distances" model="ir.actions.server">

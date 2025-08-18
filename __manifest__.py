@@ -31,8 +31,9 @@
     'assets': {
         'web.assets_backend': [
 
-            # Stylesheet File
+            # Stylesheet Files
             'transport_management/static/src/scss/styles.scss',
+            'transport_management/static/src/css/transport_mission.css',
 
             # Leaflet Library
             'transport_management/static/lib/leaflet/leaflet.css',

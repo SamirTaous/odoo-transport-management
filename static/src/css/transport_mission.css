@@ -1,0 +1,29 @@
+/* Transport Mission Styling */
+
+.tm-kanban-card.tm-has-constraints {
+    border-left: 4px solid #ff9800;
+}
+
+.tm_time_constraint {
+    color: #ff9800;
+    font-weight: bold;
+}
+
+.tm_kanban_row {
+    margin-bottom: 4px;
+}
+
+.tm_kanban_row i {
+    width: 16px;
+    text-align: center;
+}
+
+/* Destination form styling */
+.oe_title h1 input {
+    font-size: 1.2em;
+}
+
+/* Mission form styling */
+.tm_mission_form {
+    min-height: 600px;
+}

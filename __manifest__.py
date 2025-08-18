@@ -6,6 +6,7 @@
     'author': "Samir Taous",
     'category': 'Operations/Transport',
     'depends': [
+        'web',
         'base', 
         'fleet',  # For the 'fleet.vehicle' model
         'mail',   # For the chatter and activity features

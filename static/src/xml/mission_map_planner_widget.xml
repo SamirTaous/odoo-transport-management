@@ -244,19 +244,43 @@
                                 </div>
                             </div>
                             
+                                
                             <div class="tm_config_item">
                                 <label class="tm_config_label">Driver</label>
                                 <div class="tm_config_value">
-                                    <div class="tm_driver_display">
-                                        <t t-if="props.record.data.driver_id">
-                                            <div class="tm_driver_avatar">
-                                                <i class="fa fa-user"/>
+                                    <div class="tm_dropdown_container">
+                                        <div class="tm_driver_display tm_clickable_field" t-on-click="toggleDriverDropdown">
+                                            <t t-if="props.record.data.driver_id">
+                                                <div class="tm_driver_avatar">
+                                                    <i class="fa fa-user"/>
+                                                </div>
+                                                <span><t t-esc="props.record.data.driver_id[1] || 'Select Driver'"/></span>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="text-muted">Select Driver</span>
+                                            </t>
+                                            <i class="fa fa-chevron-down ms-auto"/>
+                                        </div>
+                                        <div class="tm_dropdown_menu" t-if="state.showDriverDropdown">
+                                            <div class="tm_dropdown_search">
+                                                <input type="text" placeholder="Search drivers..." 
+                                                       t-model="state.driverSearch" 
+                                                       t-on-input="filterDrivers"/>
                                             </div>
-                                            <span><t t-esc="props.record.data.driver_id[1] || 'Select Driver'"/></span>
-                                        </t>
-                                        <t t-else="">
-                                            <span class="text-muted">Select Driver</span>
-                                        </t>
+                                            <div class="tm_dropdown_options">
+                                                <t t-foreach="state.filteredDrivers" t-as="driver" t-key="driver.id">
+                                                    <div class="tm_dropdown_option" t-on-click="() => this.selectDriver(driver)">
+                                                        <div class="tm_driver_avatar">
+                                                            <i class="fa fa-user"/>
+                                                        </div>
+                                                        <span><t t-esc="driver.name"/></span>
+                                                    </div>
+                                                </t>
+                                                <div t-if="!state.filteredDrivers.length" class="tm_dropdown_empty">
+                                                    No drivers found
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -264,12 +288,35 @@
                             <div class="tm_config_item">
                                 <label class="tm_config_label">Vehicle</label>
                                 <div class="tm_config_value">
-                                    <div class="tm_vehicle_display">
-                                        <i class="fa fa-truck me-2"/>
-                                        <span><t t-esc="props.record.data.vehicle_id and props.record.data.vehicle_id[1] or 'Select Vehicle'"/></span>
+                                    <div class="tm_dropdown_container">
+                                        <div class="tm_vehicle_display tm_clickable_field" t-on-click="toggleVehicleDropdown">
+                                            <i class="fa fa-truck me-2"/>
+                                            <span><t t-esc="props.record.data.vehicle_id and props.record.data.vehicle_id[1] or 'Select Vehicle'"/></span>
+                                            <i class="fa fa-chevron-down ms-auto"/>
+                                        </div>
+                                        <div class="tm_dropdown_menu" t-if="state.showVehicleDropdown">
+                                            <div class="tm_dropdown_search">
+                                                <input type="text" placeholder="Search vehicles..." 
+                                                       t-model="state.vehicleSearch" 
+                                                       t-on-input="filterVehicles"/>
+                                            </div>
+                                            <div class="tm_dropdown_options">
+                                                <t t-foreach="state.filteredVehicles" t-as="vehicle" t-key="vehicle.id">
+                                                    <div class="tm_dropdown_option" t-on-click="() => this.selectVehicle(vehicle)">
+                                                        <i class="fa fa-truck me-2"/>
+                                                        <span><t t-esc="vehicle.name"/></span>
+                                                    </div>
+                                                </t>
+                                                <div t-if="!state.filteredVehicles.length" class="tm_dropdown_empty">
+                                                    No vehicles found
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+  
                             
                             <div class="tm_config_item">
                                 <label class="tm_config_label">Priority</label>

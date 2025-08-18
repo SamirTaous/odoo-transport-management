@@ -137,6 +137,38 @@
                     </div>
                 </div>
                 
+                <!-- Source Information Section -->
+                <div class="o_form_sheet_bg">
+                    <group string="Source Information" class="tm_source_group">
+                        <group col="4">
+                            <field name="mission_date"/>
+                            <field name="driver_id"/>
+                            <field name="vehicle_id"/>
+                            <field name="source_location"/>
+                        </group>
+                    </group>
+                </div>
+                
+                <!-- Destinations Section -->
+                <div class="o_form_sheet_bg">
+                    <separator string="Destinations"/>
+                    <field name="destination_ids" nolabel="1">
+                        <tree string="Destinations" editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="location"/>
+                            <field name="expected_arrival_time" widget="datetime"/>
+                            <field name="estimated_arrival_time" readonly="1"/>
+                            <field name="estimated_departure_time" readonly="1"/>
+                            <field name="service_duration"/>
+                            <field name="package_type"/>
+                            <field name="total_weight"/>
+                            <field name="total_volume"/>
+                            <field name="requires_signature"/>
+                            <field name="is_completed"/>
+                        </tree>
+                    </field>
+                </div>
+                
                 <!-- Hidden fields for the widget -->
                 <div class="oe_hide">
                     <field name="name"/>

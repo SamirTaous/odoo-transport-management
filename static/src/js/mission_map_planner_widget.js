@@ -3,9 +3,10 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
+
 const { Component, onMounted, onWillUnmount, onPatched, onWillUpdateProps, useRef, useState } = owl;
 
-// Helper function to calculate osrm distance 
+// ... (your decodePolyline function remains the same)
 function decodePolyline(encoded) {
     let index = 0, len = encoded.length;
     let lat = 0, lng = 0;
@@ -33,8 +34,12 @@ function decodePolyline(encoded) {
     return array;
 }
 
+
 export class MissionMapPlannerWidget extends Component {
+    static components = {};
+
     setup() {
+        // ... (the rest of your setup() method remains exactly the same)
         this.mapContainer = useRef("mapContainer");
         this.notification = useService("notification");
 
@@ -49,11 +54,20 @@ export class MissionMapPlannerWidget extends Component {
             destinations: [],
             totalDistance: 0,
             totalDuration: 0,
+            showDriverDropdown: false,
+            showVehicleDropdown: false,
+            drivers: [],
+            vehicles: [],
+            filteredDrivers: [],
+            filteredVehicles: [],
+            driverSearch: '',
+            vehicleSearch: '',
         });
 
         onMounted(() => {
             console.log("MissionMapPlannerWidget mounted");
             this.initializeMap();
+            this.loadDriversAndVehicles();
         });
 
         // --- CHANGED: onWillUpdateProps now ONLY syncs state. No map operations here. ---
@@ -84,6 +98,7 @@ export class MissionMapPlannerWidget extends Component {
         this.syncStateFromRecord(this.props.record);
     }
 
+    // ... (All other methods like initializeMap, syncStateFromRecord, etc. remain unchanged)
     async initializeMap() {
         if (this.map || !this.mapContainer.el) return;
 
@@ -882,6 +897,107 @@ export class MissionMapPlannerWidget extends Component {
         } catch (error) {
             console.error('Error optimizing route:', error);
             this.notification.add("Failed to optimize route", { type: "danger" });
+        }
+    }
+
+    async loadDriversAndVehicles() {
+        try {
+            // Load drivers
+            const drivers = await this.env.services.orm.searchRead(
+                'res.partner',
+                [['is_company', '=', false]],
+                ['id', 'name'],
+                { limit: 100, order: 'name' }
+            );
+            
+            // Load vehicles
+            const vehicles = await this.env.services.orm.searchRead(
+                'transport.vehicle',
+                [],
+                ['id', 'name'],
+                { limit: 100, order: 'name' }
+            );
+
+            this.state.drivers = drivers;
+            this.state.vehicles = vehicles;
+            this.state.filteredDrivers = drivers;
+            this.state.filteredVehicles = vehicles;
+        } catch (error) {
+            console.error('Error loading drivers and vehicles:', error);
+        }
+    }
+
+    toggleDriverDropdown() {
+        this.state.showDriverDropdown = !this.state.showDriverDropdown;
+        this.state.showVehicleDropdown = false; // Close vehicle dropdown
+        if (this.state.showDriverDropdown) {
+            this.state.driverSearch = '';
+            this.state.filteredDrivers = this.state.drivers;
+        }
+    }
+
+    toggleVehicleDropdown() {
+        this.state.showVehicleDropdown = !this.state.showVehicleDropdown;
+        this.state.showDriverDropdown = false; // Close driver dropdown
+        if (this.state.showVehicleDropdown) {
+            this.state.vehicleSearch = '';
+            this.state.filteredVehicles = this.state.vehicles;
+        }
+    }
+
+    filterDrivers() {
+        const search = this.state.driverSearch.toLowerCase();
+        this.state.filteredDrivers = this.state.drivers.filter(driver => 
+            driver.name.toLowerCase().includes(search)
+        );
+    }
+
+    filterVehicles() {
+        const search = this.state.vehicleSearch.toLowerCase();
+        this.state.filteredVehicles = this.state.vehicles.filter(vehicle => 
+            vehicle.name.toLowerCase().includes(search)
+        );
+    }
+
+    async selectDriver(driver) {
+        try {
+            console.log('Selecting driver:', driver);
+            
+            // For Many2one fields, we need to pass [id, name] tuple
+            const driverValue = [driver.id, driver.name];
+            
+            await this.props.record.update({
+                driver_id: driverValue
+            });
+            
+            this.state.showDriverDropdown = false;
+            this.notification.add(`Driver "${driver.name}" selected successfully`, { type: "success" });
+            
+            console.log('Driver updated, new record data:', this.props.record.data);
+        } catch (error) {
+            console.error('Error selecting driver:', error);
+            this.notification.add("Failed to select driver", { type: "danger" });
+        }
+    }
+
+    async selectVehicle(vehicle) {
+        try {
+            console.log('Selecting vehicle:', vehicle);
+            
+            // For Many2one fields, we need to pass [id, name] tuple
+            const vehicleValue = [vehicle.id, vehicle.name];
+            
+            await this.props.record.update({
+                vehicle_id: vehicleValue
+            });
+            
+            this.state.showVehicleDropdown = false;
+            this.notification.add(`Vehicle "${vehicle.name}" selected successfully`, { type: "success" });
+            
+            console.log('Vehicle updated, new record data:', this.props.record.data);
+        } catch (error) {
+            console.error('Error selecting vehicle:', error);
+            this.notification.add("Failed to select vehicle", { type: "danger" });
         }
     }
 }

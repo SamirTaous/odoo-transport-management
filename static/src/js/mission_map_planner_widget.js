@@ -1000,6 +1000,72 @@ export class MissionMapPlannerWidget extends Component {
             this.notification.add("Failed to select vehicle", { type: "danger" });
         }
     }
+
+    formatDateForInput(dateValue) {
+        if (!dateValue) {
+            return '';
+        }
+        
+        // Handle Luxon DateTime object
+        if (dateValue && dateValue.isLuxonDateTime) {
+            return dateValue.toFormat('yyyy-MM-dd');
+        }
+        
+        // Handle regular Date object
+        if (dateValue instanceof Date) {
+            return dateValue.toISOString().split('T')[0];
+        }
+        
+        // Handle string dates
+        if (typeof dateValue === 'string') {
+            const date = new Date(dateValue);
+            if (!isNaN(date.getTime())) {
+                return date.toISOString().split('T')[0];
+            }
+        }
+        
+        return '';
+    }
+
+    async onMissionDateChange(event) {
+        try {
+            const dateString = event.target.value;
+            console.log('Date changed to:', dateString);
+            
+            if (dateString) {
+                // Get the current mission_date to see its structure
+                const currentDate = this.props.record.data.mission_date;
+                console.log('Current date structure:', currentDate);
+                
+                // Try to create a similar Luxon DateTime object
+                if (currentDate && currentDate.isLuxonDateTime) {
+                    // Use the same timezone and locale as the current date
+                    const newDate = currentDate.set({
+                        year: parseInt(dateString.split('-')[0]),
+                        month: parseInt(dateString.split('-')[1]),
+                        day: parseInt(dateString.split('-')[2])
+                    });
+                    
+                    console.log('Created new Luxon date:', newDate);
+                    
+                    await this.props.record.update({
+                        mission_date: newDate
+                    });
+                } else {
+                    // Fallback to simple date string
+                    await this.props.record.update({
+                        mission_date: dateString
+                    });
+                }
+                
+                this.notification.add("Mission date updated successfully", { type: "success" });
+                console.log('Mission date updated, new record data:', this.props.record.data);
+            }
+        } catch (error) {
+            console.error('Error updating mission date:', error);
+            this.notification.add("Failed to update mission date", { type: "danger" });
+        }
+    }
 }
 
 MissionMapPlannerWidget.template = "transport_management.MissionMapPlannerWidget";

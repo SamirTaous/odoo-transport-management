@@ -240,7 +240,8 @@
                                 <label class="tm_config_label">Mission Date</label>
                                 <div class="tm_config_value">
                                     <input type="date" class="form-control" 
-                                           t-att-value="props.record.data.mission_date"/>
+                                           t-att-value="formatDateForInput(props.record.data.mission_date)"
+                                           t-on-change="onMissionDateChange"/>
                                 </div>
                             </div>
                             

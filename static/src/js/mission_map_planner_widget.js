@@ -155,7 +155,15 @@ export class MissionMapPlannerWidget extends Component {
                     location: rec.data.location || `${rec.data.latitude?.toFixed(4)}, ${rec.data.longitude?.toFixed(4)}`,
                     latitude: rec.data.latitude,
                     longitude: rec.data.longitude,
-                    sequence: rec.data.sequence || 1
+                    sequence: rec.data.sequence || 1,
+                    expected_arrival_time: rec.data.expected_arrival_time,
+                    estimated_arrival_time: rec.data.estimated_arrival_time,
+                    estimated_departure_time: rec.data.estimated_departure_time,
+                    service_duration: rec.data.service_duration || 0,
+                    package_type: rec.data.package_type,
+                    total_weight: rec.data.total_weight || 0,
+                    total_volume: rec.data.total_volume || 0,
+                    requires_signature: rec.data.requires_signature
                 }))
                 .filter(dest => dest.latitude && dest.longitude)
                 .sort((a, b) => a.sequence - b.sequence);
@@ -774,15 +782,7 @@ export class MissionMapPlannerWidget extends Component {
         this.drawRoute();
     }
 
-    /**
-     * Handles changes for the Mission Date input.
-     * @param {Event} ev The browser event.
-     */
-    onMissionDateChange(ev) {
-        // Odoo expects 'YYYY-MM-DD' or false. An empty input should clear the date.
-        const value = ev.target.value || false;
-        this._updateRecord('mission_date', value);
-    }
+
 
     /**
      * Handles changes for the Priority radio buttons.

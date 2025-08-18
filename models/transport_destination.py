@@ -22,6 +22,10 @@ class TransportDestination(models.Model):
     expected_arrival_time = fields.Datetime(string='Expected Arrival Time')
     service_duration = fields.Float(string='Service Duration (minutes)', default=15.0, help="Time needed to complete service at this destination")
     
+    # Computed time fields
+    estimated_arrival_time = fields.Datetime(string='Estimated Arrival Time', compute='_compute_estimated_times', store=True, help="Calculated arrival time based on route and previous stops")
+    estimated_departure_time = fields.Datetime(string='Estimated Departure Time', compute='_compute_estimated_times', store=True, help="Estimated departure time after service")
+    
     # Delivery requirements - simplified
     requires_signature = fields.Boolean(string='Requires Signature', default=False)
     
@@ -59,6 +63,68 @@ class TransportDestination(models.Model):
                 # Sum individual packages
                 destination.total_volume = sum(destination.package_ids.mapped('volume'))
                 destination.total_weight = sum(destination.package_ids.mapped('weight'))
+    
+    @api.depends('mission_id.mission_date', 'mission_id.estimated_duration_minutes', 'sequence', 'service_duration')
+    def _compute_estimated_times(self):
+        for destination in self:
+            if not destination.mission_id or not destination.mission_id.mission_date:
+                destination.estimated_arrival_time = False
+                destination.estimated_departure_time = False
+                continue
+            
+            from datetime import datetime, timedelta
+            
+            # Default to 8 AM on mission date
+            mission_date = destination.mission_id.mission_date
+            # Convert mission date to datetime (assume 8 AM start)
+            if isinstance(mission_date, str):
+                mission_datetime = datetime.strptime(mission_date, '%Y-%m-%d').replace(hour=8)
+            else:
+                mission_datetime = datetime.combine(mission_date, datetime.min.time().replace(hour=8))
+            
+            # Calculate cumulative time to reach this destination
+            cumulative_minutes = 0
+            
+            # Get all previous destinations (including this one) sorted by sequence
+            previous_destinations = destination.mission_id.destination_ids.filtered(
+                lambda d: d.sequence <= destination.sequence
+            ).sorted('sequence')
+            
+            # Calculate time based on route segments and service times
+            if destination.mission_id.estimated_duration_minutes and len(previous_destinations) > 0:
+                # Distribute travel time proportionally among destinations
+                total_destinations = len(destination.mission_id.destination_ids)
+                if total_destinations > 0:
+                    travel_time_per_segment = destination.mission_id.estimated_duration_minutes / total_destinations
+                    
+                    # Add travel time for each segment up to this destination
+                    cumulative_minutes += travel_time_per_segment * destination.sequence
+                    
+                    # Add service time for all previous destinations (not including current)
+                    for prev_dest in previous_destinations:
+                        if prev_dest.sequence < destination.sequence:
+                            cumulative_minutes += prev_dest.service_duration or 0
+            
+            # Calculate estimated arrival and departure times
+            destination.estimated_arrival_time = mission_datetime + timedelta(minutes=cumulative_minutes)
+            destination.estimated_departure_time = destination.estimated_arrival_time + timedelta(minutes=destination.service_duration or 0)
+    
+    @api.constrains('expected_arrival_time')
+    def _check_future_time(self):
+        from datetime import datetime
+        
+        for destination in self:
+            if destination.expected_arrival_time:
+                # Use naive datetime for comparison (Odoo stores datetimes as naive UTC)
+                now = datetime.utcnow()
+                expected_time = destination.expected_arrival_time
+                
+                # Convert to naive datetime if timezone-aware
+                if expected_time.tzinfo is not None:
+                    expected_time = expected_time.replace(tzinfo=None)
+                
+                if expected_time < now:
+                    raise ValidationError("Expected arrival time cannot be in the past.")
     
     @api.constrains('pallet_width', 'pallet_height', 'pallet_weight', 'service_duration')
     def _check_positive_values(self):

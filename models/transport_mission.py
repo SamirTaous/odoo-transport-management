@@ -148,19 +148,24 @@ class TransportMission(models.Model):
             mission.total_weight = sum(mission.destination_ids.mapped('total_weight'))
             mission.total_volume = sum(mission.destination_ids.mapped('total_volume'))
 
-    @api.depends('destination_ids.expected_arrival_time')
+    @api.depends('destination_ids.expected_arrival_time', 'destination_ids.estimated_arrival_time')
     def _compute_time_constraints(self):
         for mission in self:
-            destinations_with_times = mission.destination_ids.filtered('expected_arrival_time')
+            destinations_with_times = mission.destination_ids.filtered(lambda d: d.expected_arrival_time or d.estimated_arrival_time)
             
             if destinations_with_times:
                 mission.has_time_constraints = True
                 
-                # Find earliest and latest expected times
-                expected_times = destinations_with_times.mapped('expected_arrival_time')
+                # Find earliest and latest times (prefer expected over estimated)
+                all_times = []
+                for dest in destinations_with_times:
+                    if dest.expected_arrival_time:
+                        all_times.append(dest.expected_arrival_time)
+                    elif dest.estimated_arrival_time:
+                        all_times.append(dest.estimated_arrival_time)
                 
-                mission.earliest_delivery = min(expected_times) if expected_times else False
-                mission.latest_delivery = max(expected_times) if expected_times else False
+                mission.earliest_delivery = min(all_times) if all_times else False
+                mission.latest_delivery = max(all_times) if all_times else False
             else:
                 mission.has_time_constraints = False
                 mission.earliest_delivery = False

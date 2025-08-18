@@ -175,6 +175,24 @@
                             </div>
                         </div>
                         <div class="tm_metric_card">
+                            <div class="tm_metric_icon"><i class="fa fa-weight-hanging"/></div>
+                            <div class="tm_metric_content">
+                                <span class="tm_metric_label">Total Weight</span>
+                                <div class="tm_metric_value">
+                                    <span><t t-esc="(props.record.data.total_weight || 0).toFixed(1)"/> kg</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tm_metric_card">
+                            <div class="tm_metric_icon"><i class="fa fa-cube"/></div>
+                            <div class="tm_metric_content">
+                                <span class="tm_metric_label">Total Volume</span>
+                                <div class="tm_metric_value">
+                                    <span><t t-esc="(props.record.data.total_volume || 0).toFixed(2)"/> m³</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tm_metric_card">
                              <div class="tm_metric_icon"><i class="fa fa-tasks"/></div>
                              <div class="tm_metric_content">
                                 <span class="tm_metric_label">Progress</span>
@@ -222,8 +240,7 @@
                                 <label class="tm_config_label">Mission Date</label>
                                 <div class="tm_config_value">
                                     <input type="date" class="form-control" 
-                                           t-att-value="props.record.data.mission_date"
-                                           t-on-change="onMissionDateChange"/>
+                                           t-att-value="props.record.data.mission_date"/>
                                 </div>
                             </div>
                             
@@ -314,6 +331,49 @@
                                         <div class="tm_location_info">
                                             <span class="tm_location_address"><t t-esc="dest.location"/></span>
                                             <small class="tm_location_coords"><t t-esc="dest.latitude.toFixed(4)"/>, <t t-esc="dest.longitude.toFixed(4)"/></small>
+                                            
+                                            <!-- Compact Time and Package Info -->
+                                            <div class="tm_destination_details">
+                                                <!-- Show estimated arrival time (calculated) -->
+                                                <t t-if="dest.estimated_arrival_time">
+                                                    <span class="tm_detail_item tm_time_info tm_estimated_time">
+                                                        <i class="fa fa-clock"/>
+                                                        Est: <t t-esc="new Date(dest.estimated_arrival_time).toLocaleString('en-GB', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'})"/>
+                                                        <t t-if="dest.service_duration > 0">
+                                                            (+<t t-esc="dest.service_duration"/>min)
+                                                        </t>
+                                                    </span>
+                                                </t>
+                                                
+                                                <!-- Show expected arrival time if different from estimated -->
+                                                <t t-if="dest.expected_arrival_time and dest.expected_arrival_time !== dest.estimated_arrival_time">
+                                                    <span class="tm_detail_item tm_time_info tm_expected_time">
+                                                        <i class="fa fa-calendar-check"/>
+                                                        Target: <t t-esc="new Date(dest.expected_arrival_time).toLocaleString('en-GB', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'})"/>
+                                                    </span>
+                                                </t>
+                                                
+                                                <t t-if="dest.package_type">
+                                                    <span class="tm_detail_item tm_package_info">
+                                                        <i t-if="dest.package_type === 'pallet'" class="fa fa-pallet-alt"/>
+                                                        <i t-else="" class="fa fa-boxes"/>
+                                                        <t t-esc="dest.package_type === 'pallet' ? 'Pallet' : 'Packages'"/>
+                                                        <t t-if="dest.total_weight > 0">
+                                                            - <t t-esc="dest.total_weight.toFixed(1)"/>kg
+                                                        </t>
+                                                        <t t-if="dest.total_volume > 0">
+                                                            - <t t-esc="dest.total_volume.toFixed(2)"/>m³
+                                                        </t>
+                                                    </span>
+                                                </t>
+                                                
+                                                <t t-if="dest.requires_signature">
+                                                    <span class="tm_detail_item tm_signature_required">
+                                                        <i class="fa fa-signature"/>
+                                                        Signature Required
+                                                    </span>
+                                                </t>
+                                            </div>
                                         </div>
                                         <div class="tm_location_actions">
                                             <button type="button" class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeDestinationByLocalId(dest.localId)">

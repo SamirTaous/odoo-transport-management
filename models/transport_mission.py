@@ -43,7 +43,7 @@ class TransportMission(models.Model):
     source_longitude = fields.Float(string='Source Longitude', digits=(10, 7))
     destination_ids = fields.One2many('transport.destination', 'mission_id', string='Destinations')
     driver_id = fields.Many2one('res.partner', string='Driver', tracking=True, domain=[('is_company', '=', False)])
-    vehicle_id = fields.Many2one('transport.vehicle', string='Vehicle', tracking=True)
+    vehicle_id = fields.Many2one('truck.vehicle', string='Vehicle', tracking=True, ondelete='set null')
     state = fields.Selection([('draft', 'Draft'), ('confirmed', 'Confirmed'), ('in_progress', 'In Progress'), ('done', 'Done'), ('cancelled', 'Cancelled')], default='draft', string='Status', tracking=True)
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
     notes = fields.Text(string='Internal Notes', tracking=True)

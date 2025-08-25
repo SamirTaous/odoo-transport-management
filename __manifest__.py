@@ -11,6 +11,7 @@
         'fleet',  # For the 'fleet.vehicle' model
         'mail',   # For the chatter and activity features
         'base_geolocalize',
+        'truck_maintenance',  # For truck vehicle management
     ],
     'data': [
         # 1. Security (Load first)
@@ -21,7 +22,7 @@
         # 3. Actions (Load before views that reference them)
         'views/actions.xml',
         # 4. Views (UI)
-        'views/transport_vehicle_views.xml',
+
         'views/transport_mission_views.xml',
         'views/route_cache_views.xml',
         'views/menus.xml',

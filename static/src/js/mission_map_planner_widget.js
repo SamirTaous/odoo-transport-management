@@ -912,7 +912,7 @@ export class MissionMapPlannerWidget extends Component {
             
             // Load vehicles
             const vehicles = await this.env.services.orm.searchRead(
-                'transport.vehicle',
+                'truck.vehicle',
                 [],
                 ['id', 'name'],
                 { limit: 100, order: 'name' }

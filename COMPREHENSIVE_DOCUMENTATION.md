@@ -51,14 +51,12 @@ transport_management/
 │   ├── __init__.py
 │   ├── transport_mission.py     # Core mission model
 │   ├── transport_destination.py # Destination management
-│   ├── transport_vehicle.py     # Vehicle management
 │   ├── ai_analyst_service.py    # AI integration service
 │   └── route_cache.py          # Route caching system
 ├── views/                       # User interface definitions
 │   ├── actions.xml             # Action definitions
 │   ├── menus.xml               # Menu structure
 │   ├── transport_mission_views.xml
-│   ├── transport_vehicle_views.xml
 │   └── route_cache_views.xml
 ├── security/                    # Access control
 │   └── ir.model.access.csv     # Model permissions
@@ -104,7 +102,7 @@ source_longitude = fields.Float()       # GPS coordinates
 
 # Relationships
 driver_id = fields.Many2one('res.partner')      # Assigned driver
-vehicle_id = fields.Many2one('transport.vehicle') # Assigned vehicle
+vehicle_id = fields.Many2one('truck.vehicle') # Assigned vehicle (from truck_maintenance module)
 destination_ids = fields.One2many()     # List of destinations
 
 # Computed Fields
@@ -146,9 +144,9 @@ longitude = fields.Float()                         # GPS coordinates
 is_completed = fields.Boolean()                    # Completion status
 ```
 
-### 3. Transport Vehicle (`transport.vehicle`)
+### 3. Vehicle Integration
 
-Enhanced vehicle management with mission tracking.
+Vehicle management has been moved to the separate `truck_maintenance` module. Transport missions now reference `truck.vehicle` for vehicle assignments.
 
 #### Fields
 ```python
@@ -199,9 +197,10 @@ Service class for AI-powered route optimization.
 |-------|-------|------|-------|--------|--------|
 | transport.mission | base.group_user | ✓ | ✓ | ✓ | ✓ |
 | transport.destination | base.group_user | ✓ | ✓ | ✓ | ✓ |
-| transport.vehicle | base.group_user | ✓ | ✓ | ✓ | ✓ |
 | transport.route.cache | base.group_user | ✓ | ✓ | ✓ | ✗ |
 | transport.route.cache | base.group_system | ✓ | ✓ | ✓ | ✓ |
+
+**Note**: Vehicle management (`truck.vehicle`) is now handled by the separate `truck_maintenance` module.
 
 ### Security Features
 - **Role-based Access**: Different permissions for users vs administrators

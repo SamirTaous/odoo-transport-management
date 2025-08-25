@@ -23,13 +23,7 @@
         action="action_transport_mission_overview_simple"
         sequence="15"/>
 
-    <!-- Menu Item for Trucks -->
-    <menuitem
-        id="menu_transport_vehicle"
-        name="Trucks"
-        parent="menu_transport_root"
-        action="action_transport_vehicle"
-        sequence="20"/>
+
 
     <!-- Configuration Submenu -->
     <menuitem

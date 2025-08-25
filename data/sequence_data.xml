@@ -11,13 +11,6 @@
             <field name="company_id" eval="False"/>
         </record>
 
-        <!-- Sequence for Transport Trucks -->
-        <record id="seq_transport_vehicle" model="ir.sequence">
-            <field name="name">Transport Truck Sequence</field>
-            <field name="code">transport.vehicle.sequence</field>
-            <field name="prefix">TRK/</field>
-            <field name="padding">4</field>
-            <field name="company_id" eval="False"/>
-        </record>
+
     </data>
 </odoo>

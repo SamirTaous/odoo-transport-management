@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View for Transport Cost Parameters -->
+    <record id="view_transport_cost_parameters_form" model="ir.ui.view">
+        <field name="name">transport.cost.parameters.form</field>
+        <field name="model">transport.cost.parameters</field>
+        <field name="arch" type="xml">
+            <form string="Transport Cost Parameters">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Cost Parameter Set Name"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="General Settings">
+                            <field name="active"/>
+                            <field name="currency_id"/>
+                            <field name="company_id"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Mission Costs">
+                            <group>
+                                <group string="Base Costs">
+                                    <field name="base_mission_cost"/>
+                                    <field name="insurance_cost_per_mission"/>
+                                </group>
+                                <group string="Variable Costs">
+                                    <field name="cost_per_km"/>
+                                    <field name="cost_per_hour"/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <page string="Fuel &amp; Driver">
+                            <group>
+                                <group string="Fuel Costs">
+                                    <field name="fuel_price_per_liter"/>
+                                </group>
+                                <group string="Driver Costs">
+                                    <field name="driver_cost_per_hour"/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <page string="Additional Costs">
+                            <group>
+                                <group string="Road Costs">
+                                    <field name="toll_cost_per_km"/>
+                                </group>
+                                <group string="Maintenance">
+                                    <field name="maintenance_cost_per_km"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View for Transport Cost Parameters -->
+    <record id="view_transport_cost_parameters_tree" model="ir.ui.view">
+        <field name="name">transport.cost.parameters.tree</field>
+        <field name="model">transport.cost.parameters</field>
+        <field name="arch" type="xml">
+            <tree string="Transport Cost Parameters">
+                <field name="name"/>
+                <field name="active"/>
+                <field name="base_mission_cost"/>
+                <field name="cost_per_km"/>
+                <field name="fuel_price_per_liter"/>
+                <field name="driver_cost_per_hour"/>
+                <field name="currency_id"/>
+                <field name="company_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action for Transport Cost Parameters -->
+    <record id="action_transport_cost_parameters" model="ir.actions.act_window">
+        <field name="name">Cost Parameters</field>
+        <field name="res_model">transport.cost.parameters</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first cost parameter set!
+            </p>
+            <p>
+                Cost parameters define the pricing structure for transport missions,
+                including fuel costs, driver rates, and other operational expenses.
+            </p>
+        </field>
+    </record>
+</odoo>

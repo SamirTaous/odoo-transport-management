@@ -70,6 +70,24 @@ class TransportMission(models.Model):
     earliest_delivery = fields.Datetime(string="Earliest Delivery", compute='_compute_time_constraints', store=True)
     latest_delivery = fields.Datetime(string="Latest Delivery", compute='_compute_time_constraints', store=True)
     has_time_constraints = fields.Boolean(string="Has Time Constraints", compute='_compute_time_constraints', store=True)
+    
+    # Cost calculation fields
+    cost_parameters_id = fields.Many2one('transport.cost.parameters', string='Cost Parameters', 
+                                        default=lambda self: self.env['transport.cost.parameters'].get_default_parameters())
+    total_cost = fields.Monetary(string="Total Mission Cost", compute='_compute_mission_cost', store=True, currency_field='currency_id')
+    base_cost = fields.Monetary(string="Base Cost", compute='_compute_mission_cost', store=True, currency_field='currency_id')
+    distance_cost = fields.Monetary(string="Distance Cost", compute='_compute_mission_cost', store=True, currency_field='currency_id')
+    time_cost = fields.Monetary(string="Time Cost", compute='_compute_mission_cost', store=True, currency_field='currency_id')
+    fuel_cost = fields.Monetary(string="Fuel Cost", compute='_compute_mission_cost', store=True, currency_field='currency_id')
+    driver_cost = fields.Monetary(string="Driver Cost", compute='_compute_mission_cost', store=True, currency_field='currency_id')
+    vehicle_cost = fields.Monetary(string="Vehicle Cost", compute='_compute_mission_cost', store=True, currency_field='currency_id')
+    other_costs = fields.Monetary(string="Other Costs", compute='_compute_mission_cost', store=True, currency_field='currency_id')
+    currency_id = fields.Many2one('res.currency', string='Currency', default=lambda self: self._get_mad_currency())
+    
+    def _get_mad_currency(self):
+        """Get MAD currency or fallback to company currency"""
+        mad_currency = self.env['res.currency'].search([('name', '=', 'MAD')], limit=1)
+        return mad_currency if mad_currency else self.env.company.currency_id
 
     # --- All standard methods are correct ---
     @api.depends('source_latitude', 'source_longitude', 'destination_ids.latitude', 'destination_ids.longitude', 'destination_ids.sequence')
@@ -171,6 +189,55 @@ class TransportMission(models.Model):
                 mission.earliest_delivery = False
                 mission.latest_delivery = False
 
+    @api.depends('total_distance_km', 'estimated_duration_minutes', 'vehicle_id', 'cost_parameters_id')
+    def _compute_mission_cost(self):
+        for mission in self:
+            if not mission.cost_parameters_id:
+                mission.cost_parameters_id = self.env['transport.cost.parameters'].get_default_parameters()
+            
+            params = mission.cost_parameters_id
+            distance_km = mission.total_distance_km or 0
+            duration_hours = (mission.estimated_duration_minutes or 0) / 60
+            
+            # Base cost
+            mission.base_cost = params.base_mission_cost + params.insurance_cost_per_mission
+            
+            # Distance-based costs
+            mission.distance_cost = distance_km * params.cost_per_km
+            
+            # Time-based costs
+            mission.time_cost = duration_hours * params.cost_per_hour
+            
+            # Driver costs
+            mission.driver_cost = duration_hours * params.driver_cost_per_hour
+            
+            # Fuel costs (using vehicle-specific consumption if available)
+            fuel_consumption_per_100km = 0
+            if mission.vehicle_id and mission.vehicle_id.fuel_consumption:
+                fuel_consumption_per_100km = mission.vehicle_id.fuel_consumption
+            else:
+                # Default fuel consumption if no vehicle or no consumption data
+                fuel_consumption_per_100km = 25.0  # L/100km default for trucks
+            
+            fuel_needed = (distance_km / 100) * fuel_consumption_per_100km
+            mission.fuel_cost = fuel_needed * params.fuel_price_per_liter
+            
+            # Vehicle-specific costs (rental cost if applicable)
+            mission.vehicle_cost = 0
+            if mission.vehicle_id and mission.vehicle_id.ownership_type == 'rented' and mission.vehicle_id.rental_cost_per_day:
+                # Calculate rental cost based on mission duration (minimum 1 day)
+                days = max(1, duration_hours / 24)
+                mission.vehicle_cost = days * mission.vehicle_id.rental_cost_per_day
+            
+            # Other costs (tolls, maintenance)
+            toll_cost = distance_km * params.toll_cost_per_km
+            maintenance_cost = distance_km * params.maintenance_cost_per_km
+            mission.other_costs = toll_cost + maintenance_cost
+            
+            # Total cost
+            mission.total_cost = (mission.base_cost + mission.distance_cost + mission.time_cost + 
+                                mission.fuel_cost + mission.driver_cost + mission.vehicle_cost + mission.other_costs)
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -190,6 +257,12 @@ class TransportMission(models.Model):
             for mission in self:
                 if mission.source_latitude and mission.source_longitude and mission.destination_ids:
                     mission._compute_total_distance()
+        
+        # If vehicle or cost parameters changed, recalculate costs
+        if any(field in vals for field in ['vehicle_id', 'cost_parameters_id']):
+            for mission in self:
+                mission._compute_mission_cost()
+        
         return result
 
     def action_confirm(self): self.write({'state': 'confirmed'})

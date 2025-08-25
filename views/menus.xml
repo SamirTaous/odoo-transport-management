@@ -32,6 +32,14 @@
         parent="menu_transport_root"
         sequence="30"/>
 
+    <!-- Cost Parameters Menu -->
+    <menuitem
+        id="menu_cost_parameters"
+        name="Cost Parameters"
+        parent="menu_transport_config"
+        action="action_transport_cost_parameters"
+        sequence="5"/>
+
     <!-- Route Cache Menu -->
     <menuitem
         id="menu_route_cache"

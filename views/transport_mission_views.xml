@@ -208,6 +208,16 @@
                     <field name="vehicle_id"/>
                     <field name="priority"/>
                     <field name="notes"/>
+                    <field name="cost_parameters_id"/>
+                    <field name="total_cost"/>
+                    <field name="base_cost"/>
+                    <field name="distance_cost"/>
+                    <field name="time_cost"/>
+                    <field name="fuel_cost"/>
+                    <field name="driver_cost"/>
+                    <field name="vehicle_cost"/>
+                    <field name="other_costs"/>
+                    <field name="currency_id"/>
                 </div>
             </form>
         </field>
@@ -326,6 +336,7 @@
                 <field name="total_packages" sum="Total Packages"/>
                 <field name="total_weight" sum="Total Weight"/>
                 <field name="total_distance_km" sum="Total Distance"/>
+                <field name="total_cost" sum="Total Cost"/>
                 <field name="estimated_duration_minutes" string="Est. Duration (min)"/>
                 <field name="has_time_constraints" string="Time Constraints"/>
                 <field name="earliest_delivery"/>

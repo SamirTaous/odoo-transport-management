@@ -309,12 +309,96 @@
     text-align: center;
 }
 
-/* Metrics grid adjustment for 5 cards */
+/* Metrics grid adjustment for 6 cards including cost */
 .tm_metrics_grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 12px;
     margin-bottom: 20px;
+}
+
+/* Base metric card styling */
+.tm_metric_card {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.tm_metric_card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.tm_metric_icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.tm_metric_icon i {
+    font-size: 16px;
+    color: #6c757d;
+}
+
+.tm_metric_content {
+    flex: 1;
+}
+
+.tm_metric_label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.tm_metric_value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #495057;
+    line-height: 1.2;
+}
+
+/* Cost card styling - Morocco theme */
+.tm_cost_card {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: 2px solid #28a745;
+}
+
+.tm_cost_card .tm_metric_icon {
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tm_cost_card .tm_metric_label {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+}
+
+.tm_cost_card .tm_metric_value {
+    color: white;
+    font-weight: 700;
+    font-size: 1.1em;
 }
 
 /* Source Information Group Styling */
@@ -484,4 +568,99 @@
         border-right: none;
         border-bottom: 1px solid #f1f3f4;
     }
+}
+/* Cost Breakdown Section - Widget Design Match */
+.tm_cost_breakdown_modern {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.tm_cost_row {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.tm_cost_row:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.tm_cost_icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #28a745;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.tm_cost_icon i {
+    color: white;
+    font-size: 14px;
+}
+
+.tm_cost_per_km_icon {
+    background: #17a2b8;
+}
+
+.tm_cost_label {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tm_cost_amount {
+    font-size: 16px;
+    font-weight: 700;
+    color: #28a745;
+    text-align: right;
+}
+
+/* Total Cost Row Styling */
+.tm_cost_total_row {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: 2px solid #28a745;
+    margin-top: 8px;
+}
+
+.tm_cost_total_row .tm_cost_icon {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.tm_cost_total_row .tm_cost_label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+}
+
+.tm_cost_total_row .tm_cost_amount {
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+}/* 
+Cost Section Header */
+.tm_cost_section h4 {
+    color: #28a745;
+    font-weight: 600;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e8f5f3;
+}
+
+.tm_cost_section h4 i {
+    color: #28a745;
 }

@@ -54,6 +54,16 @@ export class MissionMapPlannerWidget extends Component {
             destinations: [],
             totalDistance: 0,
             totalDuration: 0,
+            totalCost: 0,
+            costBreakdown: {
+                baseCost: 0,
+                distanceCost: 0,
+                timeCost: 0,
+                fuelCost: 0,
+                driverCost: 0,
+                vehicleCost: 0,
+                otherCosts: 0
+            },
             showDriverDropdown: false,
             showVehicleDropdown: false,
             drivers: [],
@@ -186,9 +196,22 @@ export class MissionMapPlannerWidget extends Component {
             this.state.destinations = [];
         }
 
+        // Sync cost data
+        this.state.totalCost = record.data.total_cost || 0;
+        this.state.costBreakdown = {
+            baseCost: record.data.base_cost || 0,
+            distanceCost: record.data.distance_cost || 0,
+            timeCost: record.data.time_cost || 0,
+            fuelCost: record.data.fuel_cost || 0,
+            driverCost: record.data.driver_cost || 0,
+            vehicleCost: record.data.vehicle_cost || 0,
+            otherCosts: record.data.other_costs || 0
+        };
+
         console.log("State synced:", {
             source: this.state.source,
-            destinations: this.state.destinations
+            destinations: this.state.destinations,
+            totalCost: this.state.totalCost
         });
     }
 

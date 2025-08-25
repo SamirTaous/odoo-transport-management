@@ -2,6 +2,7 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_transport_mission,transport.mission access,model_transport_mission,base.group_user,1,1,1,1
 access_transport_destination,transport.destination access,model_transport_destination,base.group_user,1,1,1,1
 access_transport_package,transport.package access,model_transport_package,base.group_user,1,1,1,1
+access_transport_cost_parameters,transport.cost.parameters access,model_transport_cost_parameters,base.group_user,1,1,1,1
 
 access_transport_route_cache,transport.route.cache access,model_transport_route_cache,base.group_user,1,1,1,0
 access_transport_route_cache_admin,transport.route.cache admin access,model_transport_route_cache,base.group_system,1,1,1,1

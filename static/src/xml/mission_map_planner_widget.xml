@@ -151,6 +151,15 @@
                     </div>
                     
                     <div class="tm_metrics_grid">
+                        <div class="tm_metric_card tm_cost_card">
+                            <div class="tm_metric_icon"><i class="fa fa-dollar-sign"/></div>
+                            <div class="tm_metric_content">
+                                <span class="tm_metric_label">Total Cost</span>
+                                <div class="tm_metric_value">
+                                    <span><t t-esc="state.totalCost.toFixed(2)"/> DH</span>
+                                </div>
+                            </div>
+                        </div>
                         <div class="tm_metric_card">
                             <div class="tm_metric_icon"><i class="fa fa-route"/></div>
                             <div class="tm_metric_content">
@@ -472,6 +481,67 @@
                                     </div>
                                 </div>
                             </t>
+                        </div>
+                    </div>
+
+                    <!-- Cost Breakdown Section -->
+                    <div class="tm_form_section tm_cost_section" t-if="state.totalCost > 0">
+                        <h4><i class="fa fa-calculator me-2 text-success"/>Cost Breakdown</h4>
+                        <div class="tm_cost_breakdown_modern">
+                            <!-- Fuel Cost -->
+                            <div class="tm_cost_row" t-if="state.costBreakdown.fuelCost > 0">
+                                <div class="tm_cost_icon">
+                                    <i class="fa fa-gas-pump"/>
+                                </div>
+                                <div class="tm_cost_label">Fuel Cost</div>
+                                <div class="tm_cost_amount">
+                                    <t t-esc="state.costBreakdown.fuelCost.toFixed(2)"/> DH
+                                </div>
+                            </div>
+                            
+                            <!-- Driver Cost -->
+                            <div class="tm_cost_row" t-if="state.costBreakdown.driverCost > 0">
+                                <div class="tm_cost_icon">
+                                    <i class="fa fa-user"/>
+                                </div>
+                                <div class="tm_cost_label">Driver Cost</div>
+                                <div class="tm_cost_amount">
+                                    <t t-esc="state.costBreakdown.driverCost.toFixed(2)"/> DH
+                                </div>
+                            </div>
+                            
+                            <!-- Maintenance &amp; Tolls -->
+                            <div class="tm_cost_row" t-if="state.costBreakdown.otherCosts > 0">
+                                <div class="tm_cost_icon">
+                                    <i class="fa fa-wrench"/>
+                                </div>
+                                <div class="tm_cost_label">Maintenance &amp; Tolls</div>
+                                <div class="tm_cost_amount">
+                                    <t t-esc="state.costBreakdown.otherCosts.toFixed(2)"/> DH
+                                </div>
+                            </div>
+                            
+                            <!-- Total Cost -->
+                            <div class="tm_cost_row tm_cost_total_row">
+                                <div class="tm_cost_icon">
+                                    <i class="fa fa-calculator"/>
+                                </div>
+                                <div class="tm_cost_label">Total Cost</div>
+                                <div class="tm_cost_amount tm_total_amount">
+                                    <t t-esc="state.totalCost.toFixed(2)"/> DH
+                                </div>
+                            </div>
+                            
+                            <!-- Cost per KM -->
+                            <div class="tm_cost_row" t-if="state.totalDistance > 0">
+                                <div class="tm_cost_icon tm_cost_per_km_icon">
+                                    <i class="fa fa-road"/>
+                                </div>
+                                <div class="tm_cost_label">Cost per KM</div>
+                                <div class="tm_cost_amount">
+                                    <t t-esc="(state.totalCost / state.totalDistance).toFixed(2)"/> DH
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

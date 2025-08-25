@@ -19,11 +19,13 @@
         # 2. Data (Sequences, etc.)
         'data/sequence_data.xml',
         'data/ir_config_parameter_data.xml',
+        'data/cost_parameters_data.xml',
         # 3. Actions (Load before views that reference them)
         'views/actions.xml',
         # 4. Views (UI)
 
         'views/transport_mission_views.xml',
+        'views/transport_cost_parameters_views.xml',
         'views/route_cache_views.xml',
         'views/menus.xml',
     ],

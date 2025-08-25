@@ -156,40 +156,55 @@ class TransportVehicle(models.Model):
             else:
                 vehicle.rental_status = 'Unknown'
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        for vals in vals_list:
-            if vals.get('name', 'New') == 'New':
-                vals['name'] = self.env['ir.sequence'].next_by_code('transport.vehicle.sequence') or 'New'
-        return super().create(vals_list)
-    
     @api.constrains('rental_start_date', 'rental_end_date', 'ownership_type')
     def _check_rental_dates(self):
         for vehicle in self:
             if vehicle.ownership_type == 'rented':
-                if not vehicle.rental_start_date or not vehicle.rental_end_date:
-                    raise ValidationError("Rental start date and end date are required for rented trucks.")
-                if vehicle.rental_start_date >= vehicle.rental_end_date:
-                    raise ValidationError("Rental end date must be after start date.")
+                if vehicle.rental_start_date and vehicle.rental_end_date:
+                    if vehicle.rental_start_date >= vehicle.rental_end_date:
+                        raise ValidationError("Rental end date must be after start date.")
     
     @api.constrains('max_payload', 'cargo_volume')
     def _check_capacity_values(self):
         for vehicle in self:
-            if vehicle.max_payload <= 0:
+            if vehicle.max_payload and vehicle.max_payload <= 0:
                 raise ValidationError("Maximum payload must be greater than 0.")
-            if vehicle.cargo_volume <= 0:
+            if vehicle.cargo_volume and vehicle.cargo_volume <= 0:
                 raise ValidationError("Cargo volume must be greater than 0.")
-    
-    @api.constrains('subcontractor_id', 'ownership_type')
-    def _check_subcontractor(self):
-        for vehicle in self:
-            if vehicle.ownership_type == 'subcontracted' and not vehicle.subcontractor_id:
-                raise ValidationError("Subcontractor company is required for subcontracted trucks.")
     
     @api.onchange('cargo_length', 'cargo_width', 'cargo_height')
     def _onchange_cargo_dimensions(self):
         if self.cargo_length and self.cargo_width and self.cargo_height:
             self.cargo_volume = self.cargo_length * self.cargo_width * self.cargo_height
+    
+    def write(self, vals):
+        # Validate ownership-specific requirements on save
+        result = super().write(vals)
+        for vehicle in self:
+            if vehicle.ownership_type == 'rented':
+                if not vehicle.rental_start_date or not vehicle.rental_end_date:
+                    raise ValidationError("Rental start date and end date are required for rented trucks.")
+            elif vehicle.ownership_type == 'subcontracted':
+                if not vehicle.subcontractor_id:
+                    raise ValidationError("Subcontractor company is required for subcontracted trucks.")
+        return result
+    
+    @api.model_create_multi
+    def create(self, vals_list):
+        # Set sequence and validate ownership-specific requirements
+        for vals in vals_list:
+            if vals.get('name', 'New') == 'New':
+                vals['name'] = self.env['ir.sequence'].next_by_code('transport.vehicle.sequence') or 'New'
+            
+            # Validate ownership-specific requirements
+            if vals.get('ownership_type') == 'rented':
+                if not vals.get('rental_start_date') or not vals.get('rental_end_date'):
+                    raise ValidationError("Rental start date and end date are required for rented trucks.")
+            elif vals.get('ownership_type') == 'subcontracted':
+                if not vals.get('subcontractor_id'):
+                    raise ValidationError("Subcontractor company is required for subcontracted trucks.")
+        
+        return super().create(vals_list)
         
     def action_view_missions(self):
         return {

@@ -8,6 +8,8 @@
                 <header>
                     <field name="is_available" invisible="1"/>
                     <button name="action_confirm_truck" string="Confirm Truck" type="object" class="oe_highlight" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <button string="Save &amp; Close" special="save" class="btn-primary"/>
+                    <button string="Discard" special="cancel"/>
                     <div class="alert alert-warning" role="alert" attrs="{'invisible': [('is_available', '=', True)]}">
                         <strong>Warning:</strong> This truck is currently not available.
                     </div>
@@ -102,8 +104,8 @@
                         <page string="Ownership &amp; Rental" name="ownership" attrs="{'invisible': [('ownership_type', '=', 'owned')]}">
                             <group attrs="{'invisible': [('ownership_type', '!=', 'rented')]}">
                                 <group string="Rental Information">
-                                    <field name="rental_start_date" required="1" attrs="{'required': [('ownership_type', '=', 'rented')]}"/>
-                                    <field name="rental_end_date" required="1" attrs="{'required': [('ownership_type', '=', 'rented')]}"/>
+                                    <field name="rental_start_date" attrs="{'required': [('ownership_type', '=', 'rented')]}"/>
+                                    <field name="rental_end_date" attrs="{'required': [('ownership_type', '=', 'rented')]}"/>
                                     <field name="rental_cost_per_day" string="Daily Rental Cost"/>
                                     <field name="currency_id" invisible="1"/>
                                 </group>
@@ -113,7 +115,7 @@
                             </group>
                             <group attrs="{'invisible': [('ownership_type', '!=', 'subcontracted')]}">
                                 <group string="Subcontractor Information">
-                                    <field name="subcontractor_id" string="Subcontractor Company" required="1" attrs="{'required': [('ownership_type', '=', 'subcontracted')]}"/>
+                                    <field name="subcontractor_id" string="Subcontractor Company" attrs="{'required': [('ownership_type', '=', 'subcontracted')]}"/>
                                 </group>
                             </group>
                         </page>

@@ -1,5 +1,243 @@
 /* Transport Mission Styling */
 
+/* Enhanced Kanban Card Design (inspired by truck maintenance) */
+.o_transport_management .tm-kanban-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+    position: relative;
+}
+
+.o_transport_management .tm-kanban-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.o_transport_management .tm_kanban_body {
+    padding: 12px;
+}
+
+.o_transport_management .tm_kanban_row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.o_transport_management .tm_kanban_row i {
+    width: 16px;
+    margin-right: 8px;
+    color: #6c757d;
+}
+
+.o_transport_management .text-success {
+    color: #28a745 !important;
+}
+
+.o_transport_management .text-warning {
+    color: #ffc107 !important;
+}
+
+.o_transport_management .text-danger {
+    color: #dc3545 !important;
+}
+
+/* Mission State Distinctions */
+
+/* Draft Missions - Gray theme */
+.o_transport_management .tm-kanban-card.mission-draft {
+    border-left: 5px solid #6c757d;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.o_transport_management .tm-kanban-card.mission-draft::before {
+    content: "DRAFT";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #6c757d;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+}
+
+/* Confirmed Missions - Blue theme */
+.o_transport_management .tm-kanban-card.mission-confirmed {
+    border-left: 5px solid #007bff;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+}
+
+.o_transport_management .tm-kanban-card.mission-confirmed::before {
+    content: "CONFIRMED";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #007bff;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+}
+
+/* In Progress Missions - Green theme */
+.o_transport_management .tm-kanban-card.mission-in_progress {
+    border-left: 5px solid #28a745;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fff8 100%);
+}
+
+.o_transport_management .tm-kanban-card.mission-in_progress::before {
+    content: "IN PROGRESS";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #28a745;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+}
+
+/* Done Missions - Success theme */
+.o_transport_management .tm-kanban-card.mission-done {
+    border-left: 5px solid #20c997;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
+}
+
+.o_transport_management .tm-kanban-card.mission-done::before {
+    content: "COMPLETED";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #20c997;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+}
+
+/* Cancelled Missions - Red theme */
+.o_transport_management .tm-kanban-card.mission-cancelled {
+    border-left: 5px solid #dc3545;
+    background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+}
+
+.o_transport_management .tm-kanban-card.mission-cancelled::before {
+    content: "CANCELLED";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #dc3545;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+}
+
+/* Urgent Missions (with time constraints) */
+.o_transport_management .tm-kanban-card.mission-urgent {
+    box-shadow: 0 2px 4px rgba(255,152,0,0.3);
+}
+
+.o_transport_management .tm-kanban-card.mission-urgent:hover {
+    box-shadow: 0 4px 8px rgba(255,152,0,0.4);
+}
+
+/* Mission state badges in kanban body */
+.o_transport_management .mission-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 12px;
+    margin-top: 4px;
+}
+
+.o_transport_management .mission-badge.draft {
+    background-color: #e9ecef;
+    color: #495057;
+    border: 1px solid #ced4da;
+}
+
+.o_transport_management .mission-badge.confirmed {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    border: 1px solid #bbdefb;
+}
+
+.o_transport_management .mission-badge.in_progress {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+.o_transport_management .mission-badge.done {
+    background-color: #e0f2f1;
+    color: #00695c;
+    border: 1px solid #b2dfdb;
+}
+
+.o_transport_management .mission-badge.cancelled {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+/* Mission avatar styling */
+.mission-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 20px;
+    margin: 8px auto;
+}
+
+/* Mission icons */
+.mission-icon {
+    margin-right: 4px;
+}
+
+.mission-icon.draft {
+    color: #6c757d;
+}
+
+.mission-icon.confirmed {
+    color: #007bff;
+}
+
+.mission-icon.in_progress {
+    color: #28a745;
+}
+
+.mission-icon.done {
+    color: #20c997;
+}
+
+.mission-icon.cancelled {
+    color: #dc3545;
+}
+
+/* Legacy styles for backward compatibility */
 .tm-kanban-card.tm-has-constraints {
     border-left: 4px solid #ff9800;
 }
@@ -7,15 +245,6 @@
 .tm_time_constraint {
     color: #ff9800;
     font-weight: bold;
-}
-
-.tm_kanban_row {
-    margin-bottom: 4px;
-}
-
-.tm_kanban_row i {
-    width: 16px;
-    text-align: center;
 }
 
 /* Destination form styling */

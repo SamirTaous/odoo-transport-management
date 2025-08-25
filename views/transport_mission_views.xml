@@ -226,25 +226,85 @@
                 <field name="priority"/>
                 <field name="total_packages"/>
                 <field name="total_weight"/>
+                <field name="total_distance_km"/>
+                <field name="estimated_duration_minutes"/>
                 <field name="has_time_constraints"/>
                 <field name="earliest_delivery"/>
                 <field name="latest_delivery"/>
+                <field name="mission_type"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div t-attf-class="oe_kanban_global_click tm-kanban-card tm-card-state-{{record.state.raw_value}} {{record.has_time_constraints.raw_value ? 'tm-has-constraints' : ''}}">
-                            <div class="tm_kanban_header">
-                                <h6><field name="name"/></h6>
-                                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state in ('confirmed', 'in_progress')" decoration-muted="state == 'cancelled'"/>
+                        <div t-attf-class="oe_kanban_global_click tm-kanban-card mission-#{record.state.raw_value} #{record.has_time_constraints.raw_value ? 'mission-urgent' : ''}">
+                            <div class="o_kanban_image">
+                                <div class="mission-avatar">
+                                    <i class="fa fa-route"/>
+                                </div>
+                                <div class="o_kanban_image_fill_top" t-if="record.has_time_constraints.raw_value" style="background-color: rgba(255,152,0,0.1);">
+                                    <i class="fa fa-clock-o text-warning" title="Time Constraints"/>
+                                </div>
+                                <div class="o_kanban_image_fill_top" t-if="record.state.raw_value == 'cancelled'" style="background-color: rgba(220,53,69,0.1);">
+                                    <i class="fa fa-times text-danger" title="Cancelled"/>
+                                </div>
                             </div>
                             <div class="tm_kanban_body">
-                                <div class="tm_kanban_row"><i class="fa fa-calendar me-2"/><span><field name="mission_date"/></span></div>
-                                <div class="tm_kanban_row"><i class="fa fa-user me-2"/><span><field name="driver_id"/></span></div>
-                                <div class="tm_kanban_row"><i class="fa fa-truck me-2"/><span><field name="vehicle_id"/></span></div>
-                                <div class="tm_kanban_row"><i class="fa fa-cube me-2"/><span><field name="total_packages"/> packages (<field name="total_weight"/> kg)</span></div>
-                                <t t-if="record.has_time_constraints.raw_value">
-                                    <div class="tm_kanban_row tm_time_constraint"><i class="fa fa-clock-o me-2"/><span>Time constraints</span></div>
-                                </t>
-                                <field name="priority" widget="priority"/>
+                                <strong><field name="name"/></strong>
+                                <div class="text-muted"><field name="mission_date"/></div>
+                                <div class="text-muted small">
+                                    <field name="mission_type" t-if="record.mission_type.value"/>
+                                </div>
+                                
+                                <!-- State Badge -->
+                                <div t-attf-class="mission-badge #{record.state.raw_value}">
+                                    <i t-if="record.state.raw_value == 'draft'" class="fa fa-edit mission-icon"/>
+                                    <i t-if="record.state.raw_value == 'confirmed'" class="fa fa-check mission-icon"/>
+                                    <i t-if="record.state.raw_value == 'in_progress'" class="fa fa-play mission-icon"/>
+                                    <i t-if="record.state.raw_value == 'done'" class="fa fa-check-circle mission-icon"/>
+                                    <i t-if="record.state.raw_value == 'cancelled'" class="fa fa-times-circle mission-icon"/>
+                                    <span t-if="record.state.raw_value == 'draft'">Draft</span>
+                                    <span t-if="record.state.raw_value == 'confirmed'">Confirmed</span>
+                                    <span t-if="record.state.raw_value == 'in_progress'">In Progress</span>
+                                    <span t-if="record.state.raw_value == 'done'">Completed</span>
+                                    <span t-if="record.state.raw_value == 'cancelled'">Cancelled</span>
+                                </div>
+                                
+                                <hr class="mt-2 mb-2"/>
+                                
+                                <div class="tm_kanban_row">
+                                    <i class="fa fa-user"/>
+                                    <span><field name="driver_id"/></span>
+                                </div>
+                                
+                                <div class="tm_kanban_row">
+                                    <i class="fa fa-truck"/>
+                                    <span><field name="vehicle_id"/></span>
+                                </div>
+                                
+                                <div class="tm_kanban_row">
+                                    <i class="fa fa-cube"/>
+                                    <span><field name="total_packages"/> packages</span>
+                                </div>
+                                
+                                <div class="tm_kanban_row">
+                                    <i class="fa fa-weight"/>
+                                    <span><field name="total_weight"/> kg</span>
+                                </div>
+                                
+                                <div class="tm_kanban_row" t-if="record.total_distance_km.value">
+                                    <i class="fa fa-road"/>
+                                    <span><field name="total_distance_km"/> km</span>
+                                </div>
+                                
+                                <!-- Priority indicator -->
+                                <div t-if="record.priority.raw_value == '1'" class="tm_kanban_row">
+                                    <i class="fa fa-exclamation-triangle text-warning"/>
+                                    <span class="text-warning">High Priority</span>
+                                </div>
+                                
+                                <!-- Time constraints info -->
+                                <div t-if="record.has_time_constraints.raw_value" class="tm_kanban_row">
+                                    <i class="fa fa-clock-o text-warning"/>
+                                    <span class="small text-warning">Time Constraints</span>
+                                </div>
                             </div>
                         </div>
                     </t>

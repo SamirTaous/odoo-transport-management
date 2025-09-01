@@ -33,10 +33,6 @@ class TransportMission(models.Model):
 
     # --- All fields are correct ---
     name = fields.Char(string='Reference', required=True, copy=False, readonly=True, default=lambda self: _('New'))
-    mission_type = fields.Selection([
-        ('pickup', 'Pickup Mission'),
-        ('delivery', 'Delivery Mission')
-    ], string='Mission Type', required=True, default='pickup', tracking=True)
     mission_date = fields.Date(string='Date', required=True, tracking=True, default=fields.Date.context_today)
     source_location = fields.Char(string='Source Location', tracking=True)
     source_latitude = fields.Float(string='Source Latitude', digits=(10, 7))
@@ -65,6 +61,11 @@ class TransportMission(models.Model):
     total_packages = fields.Integer(string="Total Packages", compute='_compute_package_summary', store=True)
     total_weight = fields.Float(string="Total Weight (kg)", compute='_compute_package_summary', store=True, digits=(8, 2))
     total_volume = fields.Float(string="Total Volume (m³)", compute='_compute_package_summary', store=True, digits=(8, 3))
+    
+    # Mission type summary fields
+    pickup_count = fields.Integer(string="Pickup Destinations", compute='_compute_mission_type_summary', store=True)
+    delivery_count = fields.Integer(string="Delivery Destinations", compute='_compute_mission_type_summary', store=True)
+    mission_type_summary = fields.Char(string="Mission Type Summary", compute='_compute_mission_type_summary', store=True)
     
     # Time constraint fields
     earliest_delivery = fields.Datetime(string="Earliest Delivery", compute='_compute_time_constraints', store=True)
@@ -165,6 +166,24 @@ class TransportMission(models.Model):
             mission.total_packages = len(mission.destination_ids)
             mission.total_weight = sum(mission.destination_ids.mapped('total_weight'))
             mission.total_volume = sum(mission.destination_ids.mapped('total_volume'))
+
+    @api.depends('destination_ids.mission_type')
+    def _compute_mission_type_summary(self):
+        for mission in self:
+            pickup_destinations = mission.destination_ids.filtered(lambda d: d.mission_type == 'pickup')
+            delivery_destinations = mission.destination_ids.filtered(lambda d: d.mission_type == 'delivery')
+            
+            mission.pickup_count = len(pickup_destinations)
+            mission.delivery_count = len(delivery_destinations)
+            
+            # Create a summary string
+            summary_parts = []
+            if mission.pickup_count > 0:
+                summary_parts.append(f"{mission.pickup_count} Pickup{'s' if mission.pickup_count > 1 else ''}")
+            if mission.delivery_count > 0:
+                summary_parts.append(f"{mission.delivery_count} Deliver{'ies' if mission.delivery_count > 1 else 'y'}")
+            
+            mission.mission_type_summary = " + ".join(summary_parts) if summary_parts else "No Destinations"
 
     @api.depends('destination_ids.expected_arrival_time', 'destination_ids.estimated_arrival_time')
     def _compute_time_constraints(self):

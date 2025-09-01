@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="transport_management.MissionMapPlannerWidget" owl="1">
-        <div class="tm_main_container" t-att-class="'tm-mission-' + (props.record.data.mission_type || 'delivery')">
+        <div class="tm_main_container tm-mission-mixed">
             <!-- LEFT COLUMN: Interactive Map -->
             <div class="tm_map_column">
                 <div class="tm_map_panel">
@@ -141,11 +141,9 @@
                     <div class="tm_title_section">
                         <h1><t t-esc="props.record.data.name or 'New Mission'"/></h1>
                         <div class="tm_mission_type_badge">
-                            <span t-if="props.record.data.mission_type === 'pickup'" class="badge badge-info tm_pickup_badge">
-                                <i class="fa fa-arrow-up me-1"/>Pickup Mission
-                            </span>
-                            <span t-elif="props.record.data.mission_type === 'delivery'" class="badge badge-success tm_delivery_badge">
-                                <i class="fa fa-arrow-down me-1"/>Delivery Mission
+                            <span class="badge badge-primary tm_mixed_badge">
+                                <i class="fa fa-route me-1"/>
+                                <t t-esc="props.record.data.mission_type_summary || 'Mixed Mission'"/>
                             </span>
                         </div>
                     </div>
@@ -222,25 +220,20 @@
                         <h4><i class="fa fa-cog me-2 text-info"/>Mission Configuration</h4>
                         <div class="tm_config_grid">
                             <div class="tm_config_item">
-                                <label class="tm_config_label">Mission Type</label>
+                                <label class="tm_config_label">Mission Summary</label>
                                 <div class="tm_config_value">
-                                    <div class="tm_radio_group">
-                                        <label class="tm_radio_option">
-                                            <input type="radio" name="mission_type" value="pickup" 
-                                                   t-att-checked="props.record.data.mission_type === 'pickup'"
-                                                   t-on-change="onMissionTypeChange"/>
-                                            <span class="tm_radio_label">
-                                                <i class="fa fa-arrow-up me-1"/>Pickup
-                                            </span>
-                                        </label>
-                                        <label class="tm_radio_option">
-                                            <input type="radio" name="mission_type" value="delivery" 
-                                                   t-att-checked="props.record.data.mission_type === 'delivery'"
-                                                   t-on-change="onMissionTypeChange"/>
-                                            <span class="tm_radio_label">
-                                                <i class="fa fa-arrow-down me-1"/>Delivery
-                                            </span>
-                                        </label>
+                                    <div class="tm_mission_summary">
+                                        <span class="badge badge-info me-2" t-if="props.record.data.pickup_count > 0">
+                                            <i class="fa fa-arrow-up me-1"/>
+                                            <t t-esc="props.record.data.pickup_count"/> Pickup<t t-if="props.record.data.pickup_count > 1">s</t>
+                                        </span>
+                                        <span class="badge badge-success" t-if="props.record.data.delivery_count > 0">
+                                            <i class="fa fa-arrow-down me-1"/>
+                                            <t t-esc="props.record.data.delivery_count"/> Deliver<t t-if="props.record.data.delivery_count > 1">ies</t><t t-else="">y</t>
+                                        </span>
+                                        <span class="text-muted" t-if="!props.record.data.pickup_count and !props.record.data.delivery_count">
+                                            No destinations configured
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -383,12 +376,38 @@
                         <div class="tm_destinations_list">
                             <t t-if="state.destinations.length > 0">
                                 <t t-foreach="state.destinations" t-as="dest" t-key="dest.localId">
-                                    <div class="tm_location_item tm_destination_item">
+                                    <div class="tm_location_item tm_destination_item" t-att-class="'tm-dest-' + (dest.mission_type || 'delivery')">
                                         <div class="tm_destination_number"><t t-esc="dest.sequence"/></div>
+                                        <div class="tm_destination_type_icon">
+                                            <i t-if="dest.mission_type === 'pickup'" class="fa fa-arrow-up text-info" title="Pickup"/>
+                                            <i t-else="" class="fa fa-arrow-down text-success" title="Delivery"/>
+                                        </div>
                                         <div class="tm_location_info">
                                             <span class="tm_location_address"><t t-esc="dest.location"/></span>
                                             <small class="tm_location_coords"><t t-esc="dest.latitude.toFixed(4)"/>, <t t-esc="dest.longitude.toFixed(4)"/></small>
                                             
+                                            <!-- Mission Type Selection -->
+                                            <div class="tm_destination_type_selector">
+                                                <div class="tm_type_radio_group">
+                                                    <label class="tm_type_option tm_type_pickup" t-att-class="{'active': dest.mission_type === 'pickup'}">
+                                                        <input type="radio" t-att-name="'dest_type_' + dest.localId" value="pickup" 
+                                                               t-att-checked="dest.mission_type === 'pickup'"
+                                                               t-on-change="(ev) => this.onDestinationTypeChange(dest.localId, ev.target.value)"/>
+                                                        <span class="tm_type_label">
+                                                            <i class="fa fa-arrow-up me-1"/>Pickup
+                                                        </span>
+                                                    </label>
+                                                    <label class="tm_type_option tm_type_delivery" t-att-class="{'active': dest.mission_type === 'delivery'}">
+                                                        <input type="radio" t-att-name="'dest_type_' + dest.localId" value="delivery" 
+                                                               t-att-checked="dest.mission_type === 'delivery' || !dest.mission_type"
+                                                               t-on-change="(ev) => this.onDestinationTypeChange(dest.localId, ev.target.value)"/>
+                                                        <span class="tm_type_label">
+                                                            <i class="fa fa-arrow-down me-1"/>Delivery
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </div>
+
                                             <!-- Compact Time and Package Info -->
                                             <div class="tm_destination_details">
                                                 <!-- Show estimated arrival time (calculated) -->

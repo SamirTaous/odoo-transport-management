@@ -181,6 +181,7 @@ export class MissionMapPlannerWidget extends Component {
                     latitude: rec.data.latitude,
                     longitude: rec.data.longitude,
                     sequence: rec.data.sequence || 1,
+                    mission_type: rec.data.mission_type || 'delivery',
                     expected_arrival_time: rec.data.expected_arrival_time,
                     estimated_arrival_time: rec.data.estimated_arrival_time,
                     estimated_departure_time: rec.data.estimated_departure_time,
@@ -236,7 +237,7 @@ export class MissionMapPlannerWidget extends Component {
                 });
             } else {
                 this.sourceMarker.setLatLng(latLng);
-                // FIXED: Update the source marker icon when mission type changes
+                // Update the source marker icon
                 this.sourceMarker.setIcon(this.createMarkerIcon('blue'));
             }
             this.sourceMarker.bindPopup(`...`).getPopup().setContent(`
@@ -255,7 +256,7 @@ export class MissionMapPlannerWidget extends Component {
             const latLng = [dest.latitude, dest.longitude];
             const marker = L.marker(latLng, {
                 draggable: true,
-                icon: this.createMarkerIcon('red', dest.sequence)
+                icon: this.createMarkerIcon('red', dest.sequence, dest.mission_type)
             }).addTo(this.map);
 
             marker.localId = dest.localId;
@@ -284,23 +285,24 @@ export class MissionMapPlannerWidget extends Component {
         });
     }
 
-    createMarkerIcon(color, number = null) {
+    createMarkerIcon(color, number = null, destinationType = null) {
         const isSource = color === 'blue';
-        const missionType = this.props.record.data.mission_type || 'delivery';
 
         let missionTypeClass;
 
         if (isSource) {
-            missionTypeClass = missionType === 'pickup' ? 'tm-pickup-source' : 'tm-delivery-source';
+            missionTypeClass = 'tm-mixed-source';
         } else {
-            missionTypeClass = missionType === 'pickup' ? 'tm-pickup-destination' : 'tm-delivery-destination';
+            // Use destination type if provided, otherwise default to delivery
+            const destType = destinationType || 'delivery';
+            missionTypeClass = destType === 'pickup' ? 'tm-pickup-destination' : 'tm-delivery-destination';
         }
 
         let html;
 
         if (isSource) {
-            // Source marker with compact design
-            const sourceIcon = missionType === 'pickup' ? '🏭' : '📦';
+            // Source marker with compact design - use mixed icon for source
+            const sourceIcon = '🚛'; // Truck icon for source
             html = `
                 <div class="tm-compact-marker ${missionTypeClass}">
                     <div class="tm-marker-pin">
@@ -310,7 +312,8 @@ export class MissionMapPlannerWidget extends Component {
             `;
         } else {
             // Destination marker with compact design and number
-            const destinationIcon = missionType === 'pickup' ? '📤' : '📥';
+            const destType = destinationType || 'delivery';
+            const destinationIcon = destType === 'pickup' ? '📤' : '📥';
             html = `
                 <div class="tm-compact-marker ${missionTypeClass}">
                     <div class="tm-marker-pin">
@@ -375,6 +378,7 @@ export class MissionMapPlannerWidget extends Component {
                 latitude: lat,
                 longitude: lng,
                 sequence: newSequence,
+                mission_type: 'delivery', // Default to delivery for new destinations
             });
 
             this.notification.add(`Destination ${newSequence} added`, { type: "success" });
@@ -666,8 +670,8 @@ export class MissionMapPlannerWidget extends Component {
                     routeGeometry = decodePolyline(routeData.geometry);
                 }
 
-                const missionType = this.props.record.data.mission_type || 'delivery';
-                const routeColor = missionType === 'pickup' ? '#17a2b8' : '#28a745';
+                // Use a mixed color for routes since destinations can have different types
+                const routeColor = '#6f42c1'; // Purple for mixed missions
 
                 const routeOptions = {
                     className: 'tm-route-line',
@@ -728,8 +732,8 @@ export class MissionMapPlannerWidget extends Component {
             const routeDistance = route.distance / 1000;
             const routeDuration = route.duration / 60; // Convert seconds to minutes
 
-            const missionType = this.props.record.data.mission_type || 'delivery';
-            const routeColor = missionType === 'pickup' ? '#17a2b8' : '#28a745';
+            // Use a mixed color for routes since destinations can have different types
+            const routeColor = '#6f42c1'; // Purple for mixed missions
 
             this.routeLayer = L.polyline(routeGeometry, {
                 className: 'tm-route-line',
@@ -779,8 +783,8 @@ export class MissionMapPlannerWidget extends Component {
             // Clear route before adding fallback route
             this.clearRoute();
 
-            const missionType = this.props.record.data.mission_type || 'delivery';
-            const fallbackColor = missionType === 'pickup' ? '#6f42c1' : '#dc3545';
+            // Use a consistent fallback color for mixed missions
+            const fallbackColor = '#dc3545'; // Red for fallback routes
 
             const latLngPoints = points.map(p => [p[1], p[0]]);
             this.routeLayer = L.polyline(latLngPoints, {
@@ -808,17 +812,7 @@ export class MissionMapPlannerWidget extends Component {
         }
     }
 
-    /**
-     * Handles changes for the Mission Type radio buttons.
-     * @param {Event} ev The browser event.
-     */
-    async onMissionTypeChange(ev) {
-        await this._updateRecord('mission_type', ev.target.value);
-        // Refresh markers to reflect the new mission type styling
-        this.updateMarkers();
-        // Also update the route color to match the new mission type
-        this.drawRoute();
-    }
+
 
 
 
@@ -828,6 +822,38 @@ export class MissionMapPlannerWidget extends Component {
      */
     onPriorityChange(ev) {
         this._updateRecord('priority', ev.target.value);
+    }
+
+    /**
+     * Handles changes for destination mission type.
+     * @param {string} localId The local ID of the destination.
+     * @param {string} missionType The new mission type ('pickup' or 'delivery').
+     */
+    async onDestinationTypeChange(localId, missionType) {
+        // Find the destination in our local state
+        const destination = this.state.destinations.find(d => d.localId === localId);
+        if (!destination) return;
+
+        // Update local state
+        destination.mission_type = missionType;
+
+        // Update the destination record in Odoo
+        if (destination.id) {
+            try {
+                await this.orm.write('transport.destination', [destination.id], {
+                    mission_type: missionType
+                });
+                
+                // Refresh the mission record to update computed fields
+                await this.props.record.load();
+                
+                // Update markers to reflect the new type
+                this.updateMarkers();
+                
+            } catch (error) {
+                console.error('Failed to update destination mission type:', error);
+            }
+        }
     }
 
     /**

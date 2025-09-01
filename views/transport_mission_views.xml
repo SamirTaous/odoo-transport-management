@@ -31,6 +31,7 @@
         <field name="arch" type="xml">
             <tree string="Destinations" editable="bottom">
                 <field name="sequence" widget="handle"/>
+                <field name="mission_type" widget="badge" decoration-info="mission_type == 'pickup'" decoration-success="mission_type == 'delivery'"/>
                 <field name="location"/>
                 <field name="estimated_arrival_time" readonly="1"/>
                 <field name="expected_arrival_time" widget="datetime"/>
@@ -58,7 +59,8 @@
                     </div>
                     
                     <group>
-                        <group string="Location Details">
+                        <group string="Destination Details">
+                            <field name="mission_type" widget="radio"/>
                             <field name="latitude"/>
                             <field name="longitude"/>
                             <field name="is_completed" string="Mark as Completed"/>
@@ -155,6 +157,7 @@
                     <field name="destination_ids" nolabel="1">
                         <tree string="Destinations" editable="bottom">
                             <field name="sequence" widget="handle"/>
+                            <field name="mission_type" widget="badge" decoration-info="mission_type == 'pickup'" decoration-success="mission_type == 'delivery'"/>
                             <field name="location"/>
                             <field name="expected_arrival_time" widget="datetime"/>
                             <field name="estimated_arrival_time" readonly="1"/>
@@ -180,6 +183,7 @@
                             <field name="sequence"/>
                             <field name="location"/>
                             <field name="expected_arrival_time"/>
+                            <field name="mission_type"/>
                             <field name="estimated_arrival_time"/>
                             <field name="estimated_departure_time"/>
                             <field name="service_duration"/>
@@ -202,7 +206,9 @@
                     <field name="has_time_constraints"/>
                     <field name="earliest_delivery"/>
                     <field name="latest_delivery"/>
-                    <field name="mission_type"/>
+                    <field name="mission_type_summary"/>
+                    <field name="pickup_count"/>
+                    <field name="delivery_count"/>
                     <field name="mission_date"/>
                     <field name="driver_id"/>
                     <field name="vehicle_id"/>
@@ -241,7 +247,9 @@
                 <field name="has_time_constraints"/>
                 <field name="earliest_delivery"/>
                 <field name="latest_delivery"/>
-                <field name="mission_type"/>
+                <field name="mission_type_summary"/>
+                <field name="pickup_count"/>
+                <field name="delivery_count"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div t-attf-class="oe_kanban_global_click tm-kanban-card mission-#{record.state.raw_value} #{record.has_time_constraints.raw_value ? 'mission-urgent' : ''}">
@@ -260,7 +268,7 @@
                                 <strong><field name="name"/></strong>
                                 <div class="text-muted"><field name="mission_date"/></div>
                                 <div class="text-muted small">
-                                    <field name="mission_type" t-if="record.mission_type.value"/>
+                                    <field name="mission_type_summary" t-if="record.mission_type_summary.value"/>
                                 </div>
                                 
                                 <!-- State Badge -->
@@ -333,6 +341,9 @@
                 <field name="driver_id" widget="many2one_avatar"/>
                 <field name="vehicle_id"/>
                 <field name="source_location"/>
+                <field name="mission_type_summary"/>
+                <field name="pickup_count" string="Pickups"/>
+                <field name="delivery_count" string="Deliveries"/>
                 <field name="total_packages" sum="Total Packages"/>
                 <field name="total_weight" sum="Total Weight"/>
                 <field name="total_distance_km" sum="Total Distance"/>

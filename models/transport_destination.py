@@ -10,6 +10,12 @@ class TransportDestination(models.Model):
     mission_id = fields.Many2one('transport.mission', string='Mission', required=True, ondelete='cascade')
     sequence = fields.Integer(string='Sequence', default=10)
     
+    # Mission type moved from mission to destination level
+    mission_type = fields.Selection([
+        ('pickup', 'Pickup'),
+        ('delivery', 'Delivery')
+    ], string='Type', required=True, default='delivery', tracking=True)
+    
     # The 'location' field is now the human-readable address, often set by the map
     location = fields.Char(string='Destination Address', required=True)
     is_completed = fields.Boolean(string="Completed", default=False)

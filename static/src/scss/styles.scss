@@ -3264,3 +3264,140 @@ $delivery-light: rgba(40, 167, 69, 0.1);
         }
     }
 }
+// Mixe
+d mission styling
+.tm-mission-mixed {
+    .tm_mixed_badge {
+        background-color: #6f42c1 !important;
+        color: white !important;
+    }
+    
+    .tm_mission_summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+    }
+}
+
+// Destination type specific marker styling
+.tm-mixed-source {
+    background-color: #6f42c1 !important;
+    border-color: #5a2d91 !important;
+}
+
+.tm-pickup-destination {
+    background-color: #17a2b8 !important;
+    border-color: #138496 !important;
+}
+
+.tm-delivery-destination {
+    background-color: #28a745 !important;
+    border-color: #1e7e34 !important;
+}// 
+Destination type selector styling
+.tm_destination_type_selector {
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    border: 1px solid #e9ecef;
+}
+
+.tm_type_radio_group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tm_type_option {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.375rem 0.75rem;
+    background-color: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0;
+
+    input[type="radio"] {
+        display: none;
+    }
+
+    .tm_type_label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+    }
+
+    &:hover {
+        background-color: #f8f9fa;
+        border-color: #adb5bd;
+    }
+
+    &.active {
+        border-color: #0d6efd;
+        background-color: #e7f1ff;
+        
+        .tm_type_label {
+            color: #0d6efd;
+        }
+    }
+}
+
+.tm_type_pickup.active {
+    border-color: #17a2b8;
+    background-color: #d1ecf1;
+    
+    .tm_type_label {
+        color: #17a2b8;
+    }
+}
+
+.tm_type_delivery.active {
+    border-color: #28a745;
+    background-color: #d4edda;
+    
+    .tm_type_label {
+        color: #28a745;
+    }
+}// Destination type icon styling
+.tm_destination_type_icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    margin-right: 0.5rem;
+    
+    i {
+        font-size: 0.875rem;
+    }
+}
+
+.tm_location_item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    
+    &.tm-dest-pickup {
+        .tm_destination_type_icon {
+            background-color: #d1ecf1;
+            border-color: #17a2b8;
+        }
+    }
+    
+    &.tm-dest-delivery {
+        .tm_destination_type_icon {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+    }
+}

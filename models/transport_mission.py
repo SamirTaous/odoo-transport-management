@@ -61,6 +61,7 @@ class TransportMission(models.Model):
     total_packages = fields.Integer(string="Total Packages", compute='_compute_package_summary', store=True)
     total_weight = fields.Float(string="Total Weight (kg)", compute='_compute_package_summary', store=True, digits=(8, 2))
     total_volume = fields.Float(string="Total Volume (m³)", compute='_compute_package_summary', store=True, digits=(8, 3))
+    starting_weight = fields.Float(string="Starting Weight (kg)", digits=(8, 2), help="Initial weight of the truck before loading any cargo")
     
     # Mission type summary fields
     pickup_count = fields.Integer(string="Pickup Destinations", compute='_compute_mission_type_summary', store=True)

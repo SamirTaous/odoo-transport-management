@@ -210,6 +210,32 @@
                                </div>
                              </div>
                         </div>
+                        <div class="tm_metric_card tm_capacity_card" t-att-class="{'tm_capacity_exceeded': state.hasCapacityExceeded}">
+                             <div class="tm_metric_icon"><i class="fa fa-balance-scale"/></div>
+                             <div class="tm_metric_content">
+                                <span class="tm_metric_label">Capacity Status</span>
+                                <div class="tm_capacity_status">
+                                    <div class="tm_capacity_bar">
+                                        <div class="tm_capacity_weight">
+                                            <small>Weight: <t t-esc="(state.startingWeight + (props.record.data.total_weight || 0)).toFixed(1)"/>/<t t-esc="state.maxWeight.toFixed(0)"/> kg</small>
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar" 
+                                                     t-att-class="{'bg-danger': state.maxWeight > 0 and (state.startingWeight + (props.record.data.total_weight || 0)) > state.maxWeight, 'bg-success': state.maxWeight > 0 and (state.startingWeight + (props.record.data.total_weight || 0)) &lt;= state.maxWeight}" 
+                                                     t-attf-style="width: {{state.maxWeight > 0 ? Math.min(100, ((state.startingWeight + (props.record.data.total_weight || 0)) / state.maxWeight) * 100) : 0}}%;"/>
+                                            </div>
+                                        </div>
+                                        <div class="tm_capacity_volume">
+                                            <small>Volume: <t t-esc="(props.record.data.total_volume || 0).toFixed(2)"/>/<t t-esc="state.maxVolume.toFixed(2)"/> m³</small>
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar" 
+                                                     t-att-class="{'bg-danger': state.maxVolume > 0 and (props.record.data.total_volume || 0) > state.maxVolume, 'bg-success': state.maxVolume > 0 and (props.record.data.total_volume || 0) &lt;= state.maxVolume}" 
+                                                     t-attf-style="width: {{state.maxVolume > 0 ? Math.min(100, ((props.record.data.total_volume || 0) / state.maxVolume) * 100) : 0}}%;"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                             </div>
+                        </div>
                     </div>
                 </div>
 
@@ -346,6 +372,16 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="tm_config_item">
+                                <label class="tm_config_label">Starting Weight (kg)</label>
+                                <div class="tm_config_value">
+                                    <input type="number" class="form-control" step="0.1" min="0"
+                                           t-att-value="props.record.data.starting_weight || 0"
+                                           t-on-change="onStartingWeightChange"
+                                           placeholder="Enter starting weight"/>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -462,6 +498,101 @@
                             <div t-else="" class="tm_empty_destinations">
                                 <i class="fa fa-map-signs fa-2x text-muted"/>
                                 <p>Right-click on map to add destinations</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weight and Volume Progression Section -->
+                    <div class="tm_form_section" t-if="state.destinations.length > 0 and (state.maxWeight > 0 or state.maxVolume > 0)">
+                        <h4>
+                            <i class="fa fa-chart-line me-2 text-info"/>
+                            Capacity Progression
+                            <span t-if="state.hasCapacityExceeded" class="badge badge-danger ms-2">
+                                <i class="fa fa-exclamation-triangle me-1"/>Capacity Exceeded
+                            </span>
+                        </h4>
+                        <div class="tm_capacity_progression">
+                            <div class="tm_progression_header">
+                                <div class="tm_truck_limits">
+                                    <span class="tm_limit_item">
+                                        <i class="fa fa-weight-hanging"/>
+                                        Max Weight: <strong><t t-esc="state.maxWeight.toFixed(0)"/> kg</strong>
+                                    </span>
+                                    <span class="tm_limit_item">
+                                        <i class="fa fa-cube"/>
+                                        Max Volume: <strong><t t-esc="state.maxVolume.toFixed(2)"/> m³</strong>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="tm_progression_list">
+                                <t t-foreach="state.weightProgression" t-as="step" t-key="step.step">
+                                    <div class="tm_progression_step" t-att-class="{'tm_step_exceeded': step.exceededWeight or step.exceededVolume, 'tm_step_start': step.type === 'start', 'tm_step_pickup': step.type === 'pickup', 'tm_step_delivery': step.type === 'delivery'}">
+                                        <div class="tm_step_number">
+                                            <t t-if="step.type === 'start'">
+                                                <i class="fa fa-play"/>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-esc="step.step"/>
+                                            </t>
+                                        </div>
+                                        <div class="tm_step_info">
+                                            <div class="tm_step_location">
+                                                <span class="tm_location_name"><t t-esc="step.location"/></span>
+                                                <t t-if="step.type !== 'start'">
+                                                    <span class="tm_step_type" t-att-class="'tm_type_' + step.type">
+                                                        <i t-if="step.type === 'pickup'" class="fa fa-arrow-up"/>
+                                                        <i t-else="" class="fa fa-arrow-down"/>
+                                                        <t t-esc="step.type.charAt(0).toUpperCase() + step.type.slice(1)"/>
+                                                    </span>
+                                                </t>
+                                            </div>
+                                            <div class="tm_step_capacity">
+                                                <div class="tm_capacity_item">
+                                                    <span class="tm_capacity_label">Load:</span>
+                                                    <span class="tm_capacity_value" t-att-class="{'tm_exceeded': step.exceededWeight}">
+                                                        <t t-esc="step.weight.toFixed(1)"/> kg
+                                                        <t t-if="step.weightChange !== 0">
+                                                            <span class="tm_change" t-att-class="{'tm_change_positive': step.weightChange > 0, 'tm_change_negative': step.weightChange &lt; 0}">
+                                                                (<t t-if="step.weightChange > 0">+</t><t t-esc="step.weightChange.toFixed(1)"/>)
+                                                            </span>
+                                                        </t>
+                                                    </span>
+                                                </div>
+                                                <div class="tm_capacity_item">
+                                                    <span class="tm_capacity_label">Remaining:</span>
+                                                    <span class="tm_capacity_remaining">
+                                                        <t t-esc="step.remainingWeight.toFixed(0)"/> kg, <t t-esc="step.remainingVolume.toFixed(1)"/> m³
+                                                    </span>
+                                                </div>
+                                                <div class="tm_capacity_item">
+                                                    <span class="tm_capacity_label">Volume:</span>
+                                                    <span class="tm_capacity_value" t-att-class="{'tm_exceeded': step.exceededVolume}">
+                                                        <t t-esc="step.volume.toFixed(2)"/> m³
+                                                        <t t-if="step.volumeChange !== 0">
+                                                            <span class="tm_change" t-att-class="{'tm_change_positive': step.volumeChange > 0, 'tm_change_negative': step.volumeChange &lt; 0}">
+                                                                (<t t-if="step.volumeChange > 0">+</t><t t-esc="step.volumeChange.toFixed(2)"/>)
+                                                            </span>
+                                                        </t>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <t t-if="step.exceededWeight or step.exceededVolume">
+                                                <div class="tm_capacity_warning">
+                                                    <i class="fa fa-exclamation-triangle"/>
+                                                    <t t-if="step.exceededWeight and step.exceededVolume">
+                                                        Weight and volume limits exceeded!
+                                                    </t>
+                                                    <t t-elif="step.exceededWeight">
+                                                        Weight limit exceeded!
+                                                    </t>
+                                                    <t t-else="">
+                                                        Volume limit exceeded!
+                                                    </t>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </t>
                             </div>
                         </div>
                     </div>

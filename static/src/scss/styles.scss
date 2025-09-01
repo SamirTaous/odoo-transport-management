@@ -3432,3 +3432,226 @@ Destination type selector styling .tm_destination_type_selector {
         }
     }
 }
+// === Capacity Progression Styles ===
+.tm_capacity_progression {
+    .tm_progression_header {
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        
+        .tm_truck_limits {
+            display: flex;
+            gap: 20px;
+            
+            .tm_limit_item {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                font-size: 0.9em;
+                
+                i {
+                    color: #6c757d;
+                }
+            }
+        }
+    }
+    
+    .tm_progression_list {
+        .tm_progression_step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border-left: 4px solid #dee2e6;
+            background: #fff;
+            transition: all 0.2s ease;
+            
+            &.tm_step_start {
+                border-left-color: #007bff;
+                background: #f8f9ff;
+            }
+            
+            &.tm_step_pickup {
+                border-left-color: #17a2b8;
+                background: #f0fdff;
+            }
+            
+            &.tm_step_delivery {
+                border-left-color: #28a745;
+                background: #f8fff9;
+            }
+            
+            &.tm_step_exceeded {
+                border-left-color: #dc3545;
+                background: #fff5f5;
+                box-shadow: 0 2px 8px rgba(220, 53, 69, 0.15);
+            }
+            
+            .tm_step_number {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: #e9ecef;
+                color: #495057;
+                font-weight: 600;
+                font-size: 0.9em;
+                flex-shrink: 0;
+                
+                .tm_step_start & {
+                    background: #007bff;
+                    color: white;
+                }
+                
+                .tm_step_pickup & {
+                    background: #17a2b8;
+                    color: white;
+                }
+                
+                .tm_step_delivery & {
+                    background: #28a745;
+                    color: white;
+                }
+                
+                .tm_step_exceeded & {
+                    background: #dc3545;
+                    color: white;
+                }
+            }
+            
+            .tm_step_info {
+                flex: 1;
+                
+                .tm_step_location {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    margin-bottom: 8px;
+                    
+                    .tm_location_name {
+                        font-weight: 500;
+                        color: #212529;
+                    }
+                    
+                    .tm_step_type {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 4px;
+                        padding: 2px 8px;
+                        border-radius: 12px;
+                        font-size: 0.75em;
+                        font-weight: 500;
+                        
+                        &.tm_type_pickup {
+                            background: #d1ecf1;
+                            color: #0c5460;
+                        }
+                        
+                        &.tm_type_delivery {
+                            background: #d4edda;
+                            color: #155724;
+                        }
+                    }
+                }
+                
+                .tm_step_capacity {
+                    display: flex;
+                    gap: 20px;
+                    
+                    .tm_capacity_item {
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        
+                        .tm_capacity_label {
+                            font-size: 0.85em;
+                            color: #6c757d;
+                            font-weight: 500;
+                        }
+                        
+                        .tm_capacity_value {
+                            font-weight: 600;
+                            color: #212529;
+                            
+                            &.tm_exceeded {
+                                color: #dc3545;
+                                font-weight: 700;
+                            }
+                            
+                            .tm_change {
+                                font-size: 0.85em;
+                                margin-left: 4px;
+                                
+                                &.tm_change_positive {
+                                    color: #17a2b8;
+                                }
+                                
+                                &.tm_change_negative {
+                                    color: #28a745;
+                                }
+                            }
+                        }
+                        
+                        .tm_capacity_remaining {
+                            font-weight: 500;
+                            color: #28a745;
+                            font-size: 0.9em;
+                        }
+                    }
+                }
+                
+                .tm_capacity_warning {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    margin-top: 8px;
+                    padding: 6px 10px;
+                    background: #f8d7da;
+                    color: #721c24;
+                    border-radius: 4px;
+                    font-size: 0.85em;
+                    font-weight: 500;
+                    
+                    i {
+                        color: #dc3545;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.tm_capacity_card {
+    &.tm_capacity_exceeded {
+        border-color: #dc3545 !important;
+        background: #fff5f5 !important;
+        
+        .tm_metric_icon {
+            color: #dc3545 !important;
+        }
+    }
+    
+    .tm_capacity_status {
+        .tm_capacity_bar {
+            .tm_capacity_weight,
+            .tm_capacity_volume {
+                margin-bottom: 8px;
+                
+                &:last-child {
+                    margin-bottom: 0;
+                }
+                
+                small {
+                    display: block;
+                    margin-bottom: 4px;
+                    font-weight: 500;
+                }
+            }
+        }
+    }
+}

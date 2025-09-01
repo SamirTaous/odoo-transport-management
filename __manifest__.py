@@ -1,6 +1,6 @@
 {
     'name': "Transport Management",
-    'version': '16.0.2.0.0',
+    'version': '16.0.3.0.0',
     'summary': "Manage transport missions, drivers, and vehicles.",
     'description': "A module to manage transport operations, including mission planning and status tracking.",
     'author': "Samir Taous",

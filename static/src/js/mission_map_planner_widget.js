@@ -50,6 +50,11 @@ export class MissionMapPlannerWidget extends Component {
         this.routeLayer = null;
         this.routeUpdateTimeout = null;
 
+        // Capacity progression optimization tracking
+        this._lastDestinationCount = 0;
+        this._lastMaxWeight = 0;
+        this._lastStartingWeight = 0;
+
         this.state = useState({
             source: null,
             destinations: [],
@@ -73,6 +78,13 @@ export class MissionMapPlannerWidget extends Component {
             filteredVehicles: [],
             driverSearch: '',
             vehicleSearch: '',
+            // Weight and volume progression tracking
+            startingWeight: 0,
+            weightProgression: [],
+            volumeProgression: [],
+            maxWeight: 0,
+            maxVolume: 0,
+            hasCapacityExceeded: false,
         });
 
         onMounted(() => {
@@ -93,6 +105,15 @@ export class MissionMapPlannerWidget extends Component {
             try {
                 this.updateMarkers();
                 this.drawRoute();
+                // Only recalculate capacity if destinations actually changed
+                if (this._lastDestinationCount !== this.state.destinations.length ||
+                    this._lastMaxWeight !== this.state.maxWeight ||
+                    this._lastStartingWeight !== this.state.startingWeight) {
+                    this.calculateCapacityProgression();
+                    this._lastDestinationCount = this.state.destinations.length;
+                    this._lastMaxWeight = this.state.maxWeight;
+                    this._lastStartingWeight = this.state.startingWeight;
+                }
             } catch (error) {
                 console.error("Error in onPatched:", error);
             }
@@ -210,10 +231,25 @@ export class MissionMapPlannerWidget extends Component {
             otherCosts: record.data.other_costs || 0
         };
 
+        // Sync vehicle capacity data
+        const vehicleData = record.data.vehicle_id;
+        if (vehicleData && vehicleData.length > 0) {
+            // Get vehicle capacity from the related record - but don't await it to avoid blocking
+            this.loadVehicleCapacity(vehicleData[0]).catch(console.error);
+        } else {
+            this.state.maxWeight = 0;
+            this.state.maxVolume = 0;
+        }
+
+        // Sync starting weight
+        this.state.startingWeight = record.data.starting_weight || 0;
+
         console.log("State synced:", {
             source: this.state.source,
             destinations: this.state.destinations,
-            totalCost: this.state.totalCost
+            totalCost: this.state.totalCost,
+            maxWeight: this.state.maxWeight,
+            maxVolume: this.state.maxVolume
         });
     }
 
@@ -304,11 +340,11 @@ export class MissionMapPlannerWidget extends Component {
             // Destination markers with intuitive icons
             const destType = destinationType || 'delivery';
             const markerClass = destType === 'pickup' ? 'tm-pickup-marker' : 'tm-delivery-marker';
-            
+
             // Pickup: Upload/collection icon
             // Delivery: Download/drop-off icon
             const markerIcon = destType === 'pickup' ? '<i class="fa fa-upload"></i>' : '<i class="fa fa-download"></i>';
-            
+
             html = `
                 <div class="tm-logistics-marker ${markerClass}">
                     <div class="tm-marker-number">${number}</div>
@@ -968,11 +1004,11 @@ export class MissionMapPlannerWidget extends Component {
                 { limit: 100, order: 'name' }
             );
 
-            // Load vehicles
+            // Load vehicles with capacity information
             const vehicles = await this.orm.searchRead(
                 'truck.vehicle',
                 [],
-                ['id', 'name'],
+                ['id', 'name', 'max_payload', 'cargo_volume'],
                 { limit: 100, order: 'name' }
             );
 
@@ -983,6 +1019,92 @@ export class MissionMapPlannerWidget extends Component {
         } catch (error) {
             console.error('Error loading drivers and vehicles:', error);
         }
+    }
+
+    async loadVehicleCapacity(vehicleId) {
+        try {
+            const vehicleData = await this.orm.read('truck.vehicle', [vehicleId], ['max_payload', 'cargo_volume']);
+            if (vehicleData && vehicleData.length > 0) {
+                this.state.maxWeight = vehicleData[0].max_payload || 0;
+                this.state.maxVolume = vehicleData[0].cargo_volume || 0;
+            }
+        } catch (error) {
+            console.error('Error loading vehicle capacity:', error);
+            this.state.maxWeight = 0;
+            this.state.maxVolume = 0;
+        }
+    }
+
+    calculateCapacityProgression() {
+        const progression = [];
+        let currentWeight = this.state.startingWeight;
+        let currentVolume = 0;
+        let hasExceeded = false;
+
+        // Starting point
+        const startingWeightCapacityUsed = this.state.maxWeight > 0 ? (currentWeight / this.state.maxWeight) * 100 : 0;
+        const startingVolumeCapacityUsed = this.state.maxVolume > 0 ? (currentVolume / this.state.maxVolume) * 100 : 0;
+
+        progression.push({
+            step: 0,
+            location: 'Starting Point',
+            weight: currentWeight,
+            volume: currentVolume,
+            remainingWeight: Math.max(0, this.state.maxWeight - currentWeight),
+            remainingVolume: Math.max(0, this.state.maxVolume - currentVolume),
+            weightCapacityUsed: startingWeightCapacityUsed,
+            volumeCapacityUsed: startingVolumeCapacityUsed,
+            weightChange: 0,
+            volumeChange: 0,
+            type: 'start',
+            exceededWeight: this.state.maxWeight > 0 && currentWeight > this.state.maxWeight,
+            exceededVolume: this.state.maxVolume > 0 && currentVolume > this.state.maxVolume
+        });
+
+        // Process each destination in sequence order
+        const sortedDestinations = [...this.state.destinations].sort((a, b) => a.sequence - b.sequence);
+
+        sortedDestinations.forEach((dest, index) => {
+            const weightChange = dest.mission_type === 'pickup' ? dest.total_weight : -dest.total_weight;
+            const volumeChange = dest.mission_type === 'pickup' ? dest.total_volume : -dest.total_volume;
+
+            currentWeight += weightChange;
+            currentVolume += volumeChange;
+
+            // Ensure weight and volume don't go negative
+            currentWeight = Math.max(0, currentWeight);
+            currentVolume = Math.max(0, currentVolume);
+
+            const exceededWeight = this.state.maxWeight > 0 && currentWeight > this.state.maxWeight;
+            const exceededVolume = this.state.maxVolume > 0 && currentVolume > this.state.maxVolume;
+
+            if (exceededWeight || exceededVolume) {
+                hasExceeded = true;
+            }
+
+            const weightCapacityUsed = this.state.maxWeight > 0 ? (currentWeight / this.state.maxWeight) * 100 : 0;
+            const volumeCapacityUsed = this.state.maxVolume > 0 ? (currentVolume / this.state.maxVolume) * 100 : 0;
+
+            progression.push({
+                step: index + 1,
+                location: dest.location,
+                weight: currentWeight,
+                volume: currentVolume,
+                remainingWeight: Math.max(0, this.state.maxWeight - currentWeight),
+                remainingVolume: Math.max(0, this.state.maxVolume - currentVolume),
+                weightCapacityUsed: weightCapacityUsed,
+                volumeCapacityUsed: volumeCapacityUsed,
+                weightChange: weightChange,
+                volumeChange: volumeChange,
+                type: dest.mission_type,
+                exceededWeight: exceededWeight,
+                exceededVolume: exceededVolume,
+                destinationId: dest.localId
+            });
+        });
+
+        this.state.weightProgression = progression;
+        this.state.hasCapacityExceeded = hasExceeded;
     }
 
     toggleDriverDropdown() {
@@ -1049,6 +1171,10 @@ export class MissionMapPlannerWidget extends Component {
                 vehicle_id: vehicleValue
             });
 
+            // Update vehicle capacity data
+            this.state.maxWeight = vehicle.max_payload || 0;
+            this.state.maxVolume = vehicle.cargo_volume || 0;
+
             this.state.showVehicleDropdown = false;
             this.notification.add(`Vehicle "${vehicle.name}" selected successfully`, { type: "success" });
 
@@ -1056,6 +1182,19 @@ export class MissionMapPlannerWidget extends Component {
         } catch (error) {
             console.error('Error selecting vehicle:', error);
             this.notification.add("Failed to select vehicle", { type: "danger" });
+        }
+    }
+
+    async onStartingWeightChange(event) {
+        const startingWeight = parseFloat(event.target.value) || 0;
+        try {
+            await this.props.record.update({
+                starting_weight: startingWeight
+            });
+            this.state.startingWeight = startingWeight;
+        } catch (error) {
+            console.error('Error updating starting weight:', error);
+            this.notification.add("Failed to update starting weight", { type: "danger" });
         }
     }
 

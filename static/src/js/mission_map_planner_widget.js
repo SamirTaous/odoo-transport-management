@@ -42,6 +42,7 @@ export class MissionMapPlannerWidget extends Component {
         // ... (the rest of your setup() method remains exactly the same)
         this.mapContainer = useRef("mapContainer");
         this.notification = useService("notification");
+        this.orm = useService("orm");
 
         this.map = null;
         this.sourceMarker = null;
@@ -395,10 +396,14 @@ export class MissionMapPlannerWidget extends Component {
             const recordToUpdate = this.props.record.data.destination_ids.records.find(rec => rec.id === localId);
 
             if (recordToUpdate) {
+                // Preserve the existing mission_type when updating location
+                const currentMissionType = recordToUpdate.data.mission_type || 'delivery';
+
                 await recordToUpdate.update({
                     location: address,
                     latitude: lat,
-                    longitude: lng
+                    longitude: lng,
+                    mission_type: currentMissionType, // Preserve the mission type
                 });
 
                 this.notification.add("Destination updated", { type: "success" });
@@ -633,7 +638,7 @@ export class MissionMapPlannerWidget extends Component {
                         [this.props.record.resId, 0, 0]
                     );
                 } else {
-                    this.props.record.update({ 
+                    this.props.record.update({
                         total_distance_km: 0,
                         estimated_duration_minutes: 0
                     });
@@ -660,7 +665,7 @@ export class MissionMapPlannerWidget extends Component {
             if (routeData) {
                 // Use cached route
                 let routeGeometry;
-                
+
                 if (routeData.is_fallback) {
                     // Handle fallback route (stored as JSON points)
                     const cachedPoints = JSON.parse(routeData.geometry);
@@ -701,7 +706,7 @@ export class MissionMapPlannerWidget extends Component {
                             [this.props.record.resId, routeData.distance, routeData.duration]
                         );
                     } else {
-                        this.props.record.update({ 
+                        this.props.record.update({
                             total_distance_km: routeData.distance,
                             estimated_duration_minutes: routeData.duration
                         });
@@ -754,7 +759,7 @@ export class MissionMapPlannerWidget extends Component {
                         [this.props.record.resId, routeDistance, routeDuration]
                     );
                 } else {
-                    this.props.record.update({ 
+                    this.props.record.update({
                         total_distance_km: routeDistance,
                         estimated_duration_minutes: routeDuration
                     });
@@ -762,7 +767,7 @@ export class MissionMapPlannerWidget extends Component {
             }
 
             console.log("Calculated new OSRM route");
-            
+
             // Also trigger backend recalculation to ensure consistency
             if (this.props.record.resId) {
                 this.props.record.model.orm.call(
@@ -830,29 +835,39 @@ export class MissionMapPlannerWidget extends Component {
      * @param {string} missionType The new mission type ('pickup' or 'delivery').
      */
     async onDestinationTypeChange(localId, missionType) {
-        // Find the destination in our local state
-        const destination = this.state.destinations.find(d => d.localId === localId);
-        if (!destination) return;
+        try {
+            console.log("Changing destination type:", { localId, missionType });
 
-        // Update local state
-        destination.mission_type = missionType;
-
-        // Update the destination record in Odoo
-        if (destination.id) {
-            try {
-                await this.orm.write('transport.destination', [destination.id], {
-                    mission_type: missionType
-                });
-                
-                // Refresh the mission record to update computed fields
-                await this.props.record.load();
-                
-                // Update markers to reflect the new type
-                this.updateMarkers();
-                
-            } catch (error) {
-                console.error('Failed to update destination mission type:', error);
+            // Find the destination record in the relationship
+            const list = this.props.record.data.destination_ids;
+            if (!list || !list.records) {
+                console.error("No destination list found");
+                return;
             }
+
+            const recordToUpdate = list.records.find(rec => rec && rec.id === localId);
+            if (!recordToUpdate) {
+                console.error("Destination record not found for localId:", localId);
+                return;
+            }
+
+            // Update the destination record through the relationship
+            await recordToUpdate.update({
+                mission_type: missionType
+            });
+
+            console.log("Destination mission type updated successfully");
+            this.notification.add(`Mission type changed to ${missionType}`, { type: "success" });
+
+            // The state will be automatically updated through onWillUpdateProps/onPatched
+            // But we can also manually trigger a marker update to ensure immediate visual feedback
+            setTimeout(() => {
+                this.updateMarkers();
+            }, 100);
+
+        } catch (error) {
+            console.error('Failed to update destination mission type:', error);
+            this.notification.add("Failed to update mission type", { type: "danger" });
         }
     }
 
@@ -952,15 +967,15 @@ export class MissionMapPlannerWidget extends Component {
     async loadDriversAndVehicles() {
         try {
             // Load drivers
-            const drivers = await this.env.services.orm.searchRead(
+            const drivers = await this.orm.searchRead(
                 'res.partner',
                 [['is_company', '=', false]],
                 ['id', 'name'],
                 { limit: 100, order: 'name' }
             );
-            
+
             // Load vehicles
-            const vehicles = await this.env.services.orm.searchRead(
+            const vehicles = await this.orm.searchRead(
                 'truck.vehicle',
                 [],
                 ['id', 'name'],
@@ -996,14 +1011,14 @@ export class MissionMapPlannerWidget extends Component {
 
     filterDrivers() {
         const search = this.state.driverSearch.toLowerCase();
-        this.state.filteredDrivers = this.state.drivers.filter(driver => 
+        this.state.filteredDrivers = this.state.drivers.filter(driver =>
             driver.name.toLowerCase().includes(search)
         );
     }
 
     filterVehicles() {
         const search = this.state.vehicleSearch.toLowerCase();
-        this.state.filteredVehicles = this.state.vehicles.filter(vehicle => 
+        this.state.filteredVehicles = this.state.vehicles.filter(vehicle =>
             vehicle.name.toLowerCase().includes(search)
         );
     }
@@ -1011,17 +1026,17 @@ export class MissionMapPlannerWidget extends Component {
     async selectDriver(driver) {
         try {
             console.log('Selecting driver:', driver);
-            
+
             // For Many2one fields, we need to pass [id, name] tuple
             const driverValue = [driver.id, driver.name];
-            
+
             await this.props.record.update({
                 driver_id: driverValue
             });
-            
+
             this.state.showDriverDropdown = false;
             this.notification.add(`Driver "${driver.name}" selected successfully`, { type: "success" });
-            
+
             console.log('Driver updated, new record data:', this.props.record.data);
         } catch (error) {
             console.error('Error selecting driver:', error);
@@ -1032,17 +1047,17 @@ export class MissionMapPlannerWidget extends Component {
     async selectVehicle(vehicle) {
         try {
             console.log('Selecting vehicle:', vehicle);
-            
+
             // For Many2one fields, we need to pass [id, name] tuple
             const vehicleValue = [vehicle.id, vehicle.name];
-            
+
             await this.props.record.update({
                 vehicle_id: vehicleValue
             });
-            
+
             this.state.showVehicleDropdown = false;
             this.notification.add(`Vehicle "${vehicle.name}" selected successfully`, { type: "success" });
-            
+
             console.log('Vehicle updated, new record data:', this.props.record.data);
         } catch (error) {
             console.error('Error selecting vehicle:', error);
@@ -1054,17 +1069,17 @@ export class MissionMapPlannerWidget extends Component {
         if (!dateValue) {
             return '';
         }
-        
+
         // Handle Luxon DateTime object
         if (dateValue && dateValue.isLuxonDateTime) {
             return dateValue.toFormat('yyyy-MM-dd');
         }
-        
+
         // Handle regular Date object
         if (dateValue instanceof Date) {
             return dateValue.toISOString().split('T')[0];
         }
-        
+
         // Handle string dates
         if (typeof dateValue === 'string') {
             const date = new Date(dateValue);
@@ -1072,7 +1087,7 @@ export class MissionMapPlannerWidget extends Component {
                 return date.toISOString().split('T')[0];
             }
         }
-        
+
         return '';
     }
 
@@ -1080,12 +1095,12 @@ export class MissionMapPlannerWidget extends Component {
         try {
             const dateString = event.target.value;
             console.log('Date changed to:', dateString);
-            
+
             if (dateString) {
                 // Get the current mission_date to see its structure
                 const currentDate = this.props.record.data.mission_date;
                 console.log('Current date structure:', currentDate);
-                
+
                 // Try to create a similar Luxon DateTime object
                 if (currentDate && currentDate.isLuxonDateTime) {
                     // Use the same timezone and locale as the current date
@@ -1094,9 +1109,9 @@ export class MissionMapPlannerWidget extends Component {
                         month: parseInt(dateString.split('-')[1]),
                         day: parseInt(dateString.split('-')[2])
                     });
-                    
+
                     console.log('Created new Luxon date:', newDate);
-                    
+
                     await this.props.record.update({
                         mission_date: newDate
                     });
@@ -1106,7 +1121,7 @@ export class MissionMapPlannerWidget extends Component {
                         mission_date: dateString
                     });
                 }
-                
+
                 this.notification.add("Mission date updated successfully", { type: "success" });
                 console.log('Mission date updated, new record data:', this.props.record.data);
             }

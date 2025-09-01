@@ -60,62 +60,65 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
 }
 
-// === 3. Compact Map Marker Styling ===
-.tm-custom-marker {
+// === 3. Logistics Map Marker Styling ===
+.tm-logistics-custom-marker {
     background: transparent !important;
     border: none !important;
+    box-shadow: none !important;
 }
 
-.tm-compact-marker {
-    position: relative;
-    width: 40px;
-    height: 50px;
+// Remove all possible Leaflet marker backgrounds and borders
+.leaflet-marker-icon {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.leaflet-div-icon {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+// Base logistics marker styling
+.tm-logistics-marker {
     display: flex;
-    flex-direction: column;
     align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    position: relative;
 
     &:hover {
-        transform: scale(1.1);
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        transform: scale(1.15);
     }
 }
 
-// Pin-style marker base
-.tm-marker-pin {
+// Circular marker container
+.tm-marker-circle {
     width: 32px;
     height: 32px;
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    position: relative;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: 3px solid white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+// Icon inside the circle
+.tm-marker-icon {
+    font-size: 1rem;
+    line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
 
-    // Pin tip shadow
-    &::after {
-        content: '';
-        position: absolute;
-        bottom: -8px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 4px solid transparent;
-        border-right: 4px solid transparent;
-        border-top: 6px solid rgba(0, 0, 0, 0.1);
-        z-index: -1;
+    i {
+        font-size: 1rem;
+        line-height: 1;
     }
-}
-
-// Icon inside the pin (rotated back to normal)
-.tm-marker-icon {
-    font-size: 1rem;
-    transform: rotate(45deg);
-    z-index: 2;
 }
 
 // Number badge for destinations
@@ -128,52 +131,77 @@ $tm-card-hover-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     border-radius: 50%;
     background: white;
     color: #333;
-    font-weight: 800;
+    font-weight: 900;
     font-size: 0.7rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid white;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-    z-index: 3;
-    transform: rotate(45deg);
+    border: 2px solid #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    z-index: 10;
 }
 
-// PICKUP MISSION STYLING
-.tm-pickup-source {
-    .tm-marker-pin {
-        background: linear-gradient(135deg, #17a2b8, #138496);
+// SOURCE MARKER - Starting point (neutral gray)
+.tm-source-marker {
+    .tm-marker-circle {
+        background: linear-gradient(135deg, #6c757d, #495057);
+        border-color: white;
+    }
+
+    .tm-marker-icon {
+        color: white;
+    }
+
+    &:hover .tm-marker-circle {
+        background: linear-gradient(135deg, #495057, #343a40);
     }
 }
 
-.tm-pickup-destination {
-    .tm-marker-pin {
-        background: linear-gradient(135deg, #6f42c1, #5a32a3);
+// PICKUP MARKER - Collection point (info blue - matches Odoo decoration-info)
+.tm-pickup-marker {
+    .tm-marker-circle {
+        background: linear-gradient(135deg, #17a2b8, #138496);
+        border-color: white;
+    }
+
+    .tm-marker-icon {
+        color: white;
     }
 
     .tm-marker-number {
         background: linear-gradient(135deg, #17a2b8, #138496);
         color: white;
+        border-color: #138496;
+    }
+
+    &:hover .tm-marker-circle {
+        background: linear-gradient(135deg, #138496, #117a8b);
     }
 }
 
-// DELIVERY MISSION STYLING
-.tm-delivery-source {
-    .tm-marker-pin {
+// DELIVERY MARKER - Drop-off point (success green - matches Odoo decoration-success)
+.tm-delivery-marker {
+    .tm-marker-circle {
         background: linear-gradient(135deg, #28a745, #20c997);
+        border-color: white;
     }
-}
 
-.tm-delivery-destination {
-    .tm-marker-pin {
-        background: linear-gradient(135deg, #6f42c1, #5a32a3);
+    .tm-marker-icon {
+        color: white;
     }
 
     .tm-marker-number {
         background: linear-gradient(135deg, #28a745, #20c997);
-        color: #333;
+        color: white;
+        border-color: #20c997;
+    }
+
+    &:hover .tm-marker-circle {
+        background: linear-gradient(135deg, #20c997, #1e7e34);
     }
 }
+
+// Old pin-style marker styling removed - now using truck-themed markers
 
 // Delivery status indicators
 .tm-marker-status {
@@ -3264,14 +3292,14 @@ $delivery-light: rgba(40, 167, 69, 0.1);
         }
     }
 }
+
 // Mixe
-d mission styling
-.tm-mission-mixed {
+d mission styling .tm-mission-mixed {
     .tm_mixed_badge {
         background-color: #6f42c1 !important;
         color: white !important;
     }
-    
+
     .tm_mission_summary {
         display: flex;
         flex-wrap: wrap;
@@ -3294,9 +3322,10 @@ d mission styling
 .tm-delivery-destination {
     background-color: #28a745 !important;
     border-color: #1e7e34 !important;
-}// 
-Destination type selector styling
-.tm_destination_type_selector {
+}
+
+// 
+Destination type selector styling .tm_destination_type_selector {
     margin: 0.5rem 0;
     padding: 0.5rem;
     background-color: #f8f9fa;
@@ -3342,7 +3371,7 @@ Destination type selector styling
     &.active {
         border-color: #0d6efd;
         background-color: #e7f1ff;
-        
+
         .tm_type_label {
             color: #0d6efd;
         }
@@ -3352,7 +3381,7 @@ Destination type selector styling
 .tm_type_pickup.active {
     border-color: #17a2b8;
     background-color: #d1ecf1;
-    
+
     .tm_type_label {
         color: #17a2b8;
     }
@@ -3361,11 +3390,13 @@ Destination type selector styling
 .tm_type_delivery.active {
     border-color: #28a745;
     background-color: #d4edda;
-    
+
     .tm_type_label {
         color: #28a745;
     }
-}// Destination type icon styling
+}
+
+// Destination type icon styling
 .tm_destination_type_icon {
     display: flex;
     align-items: center;
@@ -3376,7 +3407,7 @@ Destination type selector styling
     background-color: #f8f9fa;
     border: 1px solid #dee2e6;
     margin-right: 0.5rem;
-    
+
     i {
         font-size: 0.875rem;
     }
@@ -3386,14 +3417,14 @@ Destination type selector styling
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
-    
+
     &.tm-dest-pickup {
         .tm_destination_type_icon {
             background-color: #d1ecf1;
             border-color: #17a2b8;
         }
     }
-    
+
     &.tm-dest-delivery {
         .tm_destination_type_icon {
             background-color: #d4edda;

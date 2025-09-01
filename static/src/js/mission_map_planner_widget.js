@@ -289,47 +289,41 @@ export class MissionMapPlannerWidget extends Component {
     createMarkerIcon(color, number = null, destinationType = null) {
         const isSource = color === 'blue';
 
-        let missionTypeClass;
-
-        if (isSource) {
-            missionTypeClass = 'tm-mixed-source';
-        } else {
-            // Use destination type if provided, otherwise default to delivery
-            const destType = destinationType || 'delivery';
-            missionTypeClass = destType === 'pickup' ? 'tm-pickup-destination' : 'tm-delivery-destination';
-        }
-
         let html;
 
         if (isSource) {
-            // Source marker with compact design - use mixed icon for source
-            const sourceIcon = '🚛'; // Truck icon for source
+            // Source marker - Truck depot (starting point)
             html = `
-                <div class="tm-compact-marker ${missionTypeClass}">
-                    <div class="tm-marker-pin">
-                        <div class="tm-marker-icon">${sourceIcon}</div>
+                <div class="tm-logistics-marker tm-source-marker">
+                    <div class="tm-marker-circle">
+                        <div class="tm-marker-icon"><i class="fa fa-truck"></i></div>
                     </div>
                 </div>
             `;
         } else {
-            // Destination marker with compact design and number
+            // Destination markers with intuitive icons
             const destType = destinationType || 'delivery';
-            const destinationIcon = destType === 'pickup' ? '📤' : '📥';
+            const markerClass = destType === 'pickup' ? 'tm-pickup-marker' : 'tm-delivery-marker';
+            
+            // Pickup: Upload/collection icon
+            // Delivery: Download/drop-off icon
+            const markerIcon = destType === 'pickup' ? '<i class="fa fa-upload"></i>' : '<i class="fa fa-download"></i>';
+            
             html = `
-                <div class="tm-compact-marker ${missionTypeClass}">
-                    <div class="tm-marker-pin">
-                        <div class="tm-marker-number">${number}</div>
-                        <div class="tm-marker-icon">${destinationIcon}</div>
+                <div class="tm-logistics-marker ${markerClass}">
+                    <div class="tm-marker-number">${number}</div>
+                    <div class="tm-marker-circle">
+                        <div class="tm-marker-icon">${markerIcon}</div>
                     </div>
                 </div>
             `;
         }
 
         return L.divIcon({
-            className: 'tm-custom-marker',
+            className: 'tm-logistics-custom-marker',
             html: html,
-            iconSize: [40, 50],
-            iconAnchor: [20, 45]
+            iconSize: [40, 40],
+            iconAnchor: [20, 20] // Center the marker on the actual location
         });
     }
 

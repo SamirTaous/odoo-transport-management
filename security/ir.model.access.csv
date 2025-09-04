@@ -6,3 +6,5 @@ access_transport_cost_parameters,transport.cost.parameters access,model_transpor
 
 access_transport_route_cache,transport.route.cache access,model_transport_route_cache,base.group_user,1,1,1,0
 access_transport_route_cache_admin,transport.route.cache admin access,model_transport_route_cache,base.group_system,1,1,1,1
+access_bulk_mission_wizard,bulk.mission.wizard access,model_bulk_mission_wizard,base.group_user,1,1,1,1
+access_bulk_mission_preview,bulk.mission.preview access,model_bulk_mission_preview,base.group_user,1,1,1,1

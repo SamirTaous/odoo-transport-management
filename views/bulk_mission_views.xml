@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Bulk Mission Wizard Form View -->
+    <record id="view_bulk_mission_wizard_form" model="ir.ui.view">
+        <field name="name">bulk.mission.wizard.form</field>
+        <field name="model">bulk.mission.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Bulk Mission Creation" class="o_form_nosheet">
+                <div class="o_form_sheet_bg">
+                    <div class="bulk-mission-wizard-container">
+                        <!-- Header Section -->
+                        <div class="bulk-mission-wizard-header">
+                            <h2><i class="fa fa-route me-2"/>Bulk Mission Creation</h2>
+                            <p class="text-muted">Create multiple transport missions efficiently using the interactive map planner.</p>
+                        </div>
+                        
+                        <!-- Configuration Section -->
+                        <div class="bulk-mission-config-section">
+                            <h4><i class="fa fa-cog me-2"/>Default Configuration</h4>
+                            <group>
+                                <group string="Basic Information">
+                                    <field name="name"/>
+                                    <field name="mission_date"/>
+                                </group>
+                                <group string="Default Assignments">
+                                    <field name="driver_id"/>
+                                    <field name="vehicle_id"/>
+                                    <field name="priority"/>
+                                </group>
+                            </group>
+                            
+                            <group>
+                                <group string="Creation Options">
+                                    <field name="auto_optimize_routes"/>
+                                    <field name="create_confirmed"/>
+                                </group>
+                            </group>
+                        </div>
+                        
+                        <!-- Mission Planner Widget -->
+                        <div class="bulk-mission-planner-section">
+                            <h4><i class="fa fa-map me-2"/>Mission Planner</h4>
+                            <field name="mission_templates" widget="bulk_mission_widget"/>
+                        </div>
+                        
+                        <!-- Hidden field for mission templates -->
+                        <field name="mission_templates" invisible="1"/>
+                    </div>
+                </div>
+                
+                <footer>
+                    <button name="action_preview_missions" string="Preview Missions" type="object" class="btn-secondary"/>
+                    <button name="action_create_missions" string="Create Missions" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Bulk Mission Preview Tree View -->
+    <record id="view_bulk_mission_preview_tree" model="ir.ui.view">
+        <field name="name">bulk.mission.preview.tree</field>
+        <field name="model">bulk.mission.preview</field>
+        <field name="arch" type="xml">
+            <tree string="Mission Preview" create="false" edit="false" delete="false">
+                <field name="mission_number" string="Mission #"/>
+                <field name="source" string="Source Location"/>
+                <field name="destination_count" string="Destinations"/>
+                <field name="total_weight" string="Total Weight (kg)"/>
+                <field name="driver" string="Driver"/>
+                <field name="vehicle" string="Vehicle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action for Bulk Mission Creation -->
+    <record id="action_bulk_mission_wizard" model="ir.actions.act_window">
+        <field name="name">Bulk Mission Creation</field>
+        <field name="res_model">bulk.mission.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- Menu Item for Bulk Mission Creation -->
+    <menuitem id="menu_bulk_mission_creation"
+              name="Bulk Mission Creation"
+              parent="menu_transport_root"
+              action="action_bulk_mission_wizard"
+              sequence="12"/>
+
+</odoo>

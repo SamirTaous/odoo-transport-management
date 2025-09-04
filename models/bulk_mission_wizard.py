@@ -1,0 +1,172 @@
+# -*- coding: utf-8 -*-
+
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+import json
+import logging
+
+_logger = logging.getLogger(__name__)
+
+class BulkMissionWizard(models.TransientModel):
+    _name = 'bulk.mission.wizard'
+    _description = 'Bulk Mission Creation Wizard'
+
+    name = fields.Char(string='Batch Name', required=True, default=lambda self: _('Bulk Mission Batch'))
+    mission_date = fields.Date(string='Mission Date', required=True, default=fields.Date.context_today)
+    driver_id = fields.Many2one('res.partner', string='Default Driver', domain=[('is_company', '=', False)])
+    vehicle_id = fields.Many2one('truck.vehicle', string='Default Vehicle')
+    priority = fields.Selection([
+        ('0', 'Low'),
+        ('1', 'Normal'),
+        ('2', 'High')
+    ], string='Default Priority', default='1')
+    
+    # Mission template data
+    mission_templates = fields.Text(string='Mission Templates', default='[]')
+    
+    # Bulk creation settings
+    auto_optimize_routes = fields.Boolean(string='Auto-optimize Routes', default=True)
+    create_confirmed = fields.Boolean(string='Create as Confirmed', default=False)
+    
+    def get_mission_templates(self):
+        """Return parsed mission templates"""
+        try:
+            return json.loads(self.mission_templates or '[]')
+        except:
+            return []
+    
+    def set_mission_templates(self, templates):
+        """Set mission templates as JSON"""
+        self.mission_templates = json.dumps(templates)
+    
+    @api.model
+    def default_get(self, fields_list):
+        """Set default values"""
+        defaults = super().default_get(fields_list)
+        defaults['mission_templates'] = '[]'
+        return defaults
+    
+    def action_create_missions(self):
+        """Create multiple missions from templates"""
+        templates = self.get_mission_templates()
+        
+        if not templates:
+            raise UserError(_("No mission templates defined. Please add at least one mission."))
+        
+        created_missions = []
+        
+        for template in templates:
+            try:
+                # Create mission
+                mission_vals = {
+                    'mission_date': self.mission_date,
+                    'driver_id': template.get('driver_id') or self.driver_id.id,
+                    'vehicle_id': template.get('vehicle_id') or self.vehicle_id.id,
+                    'priority': template.get('priority') or self.priority,
+                    'source_location': template.get('source_location'),
+                    'source_latitude': template.get('source_latitude'),
+                    'source_longitude': template.get('source_longitude'),
+                    'notes': template.get('notes', ''),
+                }
+                
+                mission = self.env['transport.mission'].create(mission_vals)
+                
+                # Create destinations
+                destinations = template.get('destinations', [])
+                for dest_data in destinations:
+                    dest_vals = {
+                        'mission_id': mission.id,
+                        'location': dest_data.get('location'),
+                        'latitude': dest_data.get('latitude'),
+                        'longitude': dest_data.get('longitude'),
+                        'sequence': dest_data.get('sequence', 1),
+                        'mission_type': dest_data.get('mission_type', 'delivery'),
+                        'expected_arrival_time': dest_data.get('expected_arrival_time'),
+                        'service_duration': dest_data.get('service_duration', 0),
+                        'package_type': dest_data.get('package_type', 'individual'),
+                        'total_weight': dest_data.get('total_weight', 0),
+                        'total_volume': dest_data.get('total_volume', 0),
+                        'requires_signature': dest_data.get('requires_signature', False),
+                    }
+                    self.env['transport.destination'].create(dest_vals)
+                
+                # Auto-optimize route if requested
+                if self.auto_optimize_routes and len(destinations) > 1:
+                    try:
+                        mission.action_optimize_route()
+                    except Exception as e:
+                        _logger.warning(f"Failed to optimize route for mission {mission.name}: {e}")
+                
+                # Confirm mission if requested
+                if self.create_confirmed:
+                    mission.action_confirm()
+                
+                created_missions.append(mission)
+                
+            except Exception as e:
+                _logger.error(f"Failed to create mission from template: {e}")
+                raise UserError(_("Failed to create mission: %s") % str(e))
+        
+        # Return action to view created missions
+        if len(created_missions) == 1:
+            return {
+                'type': 'ir.actions.act_window',
+                'name': _('Created Mission'),
+                'res_model': 'transport.mission',
+                'res_id': created_missions[0].id,
+                'view_mode': 'form',
+                'target': 'current',
+            }
+        else:
+            return {
+                'type': 'ir.actions.act_window',
+                'name': _('Created Missions'),
+                'res_model': 'transport.mission',
+                'view_mode': 'tree,form',
+                'domain': [('id', 'in', [m.id for m in created_missions])],
+                'target': 'current',
+            }
+    
+    def action_preview_missions(self):
+        """Preview missions before creation"""
+        templates = self.get_mission_templates()
+        
+        if not templates:
+            raise UserError(_("No mission templates defined."))
+        
+        preview_data = []
+        for i, template in enumerate(templates, 1):
+            destinations = template.get('destinations', [])
+            preview_data.append({
+                'mission_number': i,
+                'source': template.get('source_location', 'Not set'),
+                'destination_count': len(destinations),
+                'total_weight': sum(d.get('total_weight', 0) for d in destinations),
+                'driver': template.get('driver_name') or (self.driver_id.name if self.driver_id else 'Default'),
+                'vehicle': template.get('vehicle_name') or (self.vehicle_id.name if self.vehicle_id else 'Default'),
+            })
+        
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Mission Preview'),
+            'res_model': 'bulk.mission.preview',
+            'view_mode': 'tree',
+            'target': 'new',
+            'context': {
+                'default_preview_data': json.dumps(preview_data),
+                'default_wizard_id': self.id,
+            }
+        }
+
+class BulkMissionPreview(models.TransientModel):
+    _name = 'bulk.mission.preview'
+    _description = 'Bulk Mission Preview'
+    
+    wizard_id = fields.Many2one('bulk.mission.wizard', string='Wizard')
+    preview_data = fields.Text(string='Preview Data')
+    mission_number = fields.Integer(string='Mission #')
+    source = fields.Char(string='Source Location')
+    destination_count = fields.Integer(string='Destinations')
+    total_weight = fields.Float(string='Total Weight (kg)')
+    driver = fields.Char(string='Driver')
+    vehicle = fields.Char(string='Vehicle')

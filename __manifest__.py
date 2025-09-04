@@ -24,6 +24,7 @@
         'views/actions.xml',
         # 4. Views (UI)
 
+        'views/bulk_mission_views.xml',
         'views/transport_mission_views.xml',
         'views/transport_cost_parameters_views.xml',
         'views/route_cache_views.xml',
@@ -46,6 +47,10 @@
             # Map Widget Files
             'transport_management/static/src/js/mission_map_planner_widget.js',
             'transport_management/static/src/xml/mission_map_planner_widget.xml',
+            
+            # Bulk Mission Widget Files
+            'transport_management/static/src/js/bulk_mission_widget.js',
+            'transport_management/static/src/xml/bulk_mission_widget.xml',
             
             # Overview Map Files
             'transport_management/static/src/js/mission_overview_simple.js',

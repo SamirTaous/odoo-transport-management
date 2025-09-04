@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="transport_management.BulkMissionWidget" owl="1">
+        <div class="bulk-mission-container">
+            <!-- LEFT COLUMN: Interactive Map -->
+            <div class="bulk-mission-map-column">
+                <div class="bulk-mission-map-panel">
+                    <div class="bulk-mission-map-header">
+                        <h3><i class="fa fa-map-marker-alt me-2"/>Bulk Mission Planner</h3>
+                        <div class="bulk-mission-map-controls">
+                            <button type="button" class="btn btn-sm btn-primary" t-on-click="addNewMission">
+                                <i class="fa fa-plus me-1"/>Add Mission
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-info ms-2" t-on-click="fitMapToAllMissions">
+                                <i class="fa fa-search me-1"/>Fit to View
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- The Map Container -->
+                    <div class="bulk-mission-interactive-map" t-ref="mapContainer">
+                        <!-- Leaflet map will be rendered here by JS -->
+                    </div>
+                    
+                    <!-- Map Instructions -->
+                    <div class="bulk-mission-map-instructions">
+                        <div class="bulk-mission-instruction-item">
+                            <i class="fa fa-mouse-pointer text-primary"/>
+                            <span>Click on map to set source for current mission</span>
+                        </div>
+                        <div class="bulk-mission-instruction-item">
+                            <i class="fa fa-plus-circle text-success"/>
+                            <span>Right-click to add destinations</span>
+                        </div>
+                        <div class="bulk-mission-instruction-item">
+                            <i class="fa fa-list text-info"/>
+                            <span>Select missions from the list to edit them</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Mission Management -->
+            <div class="bulk-mission-details-column">
+                <!-- Mission List -->
+                <div class="bulk-mission-list-section">
+                    <div class="bulk-mission-list-header">
+                        <h4><i class="fa fa-list me-2"/>Mission Templates</h4>
+                        <span class="badge badge-primary"><t t-esc="state.missions.length"/></span>
+                    </div>
+                    
+                    <div class="bulk-mission-list">
+                        <t t-if="state.missions.length === 0">
+                            <div class="bulk-mission-empty-state">
+                                <i class="fa fa-plus-circle fa-3x text-muted mb-3"/>
+                                <p class="text-muted">No mission templates yet.</p>
+                                <p class="text-muted small">Click "Add Mission" or click on the map to start.</p>
+                            </div>
+                        </t>
+                        
+                        <t t-foreach="state.missions" t-as="mission" t-key="mission.id">
+                            <div class="bulk-mission-item" 
+                                 t-att-class="{'active': mission_index === currentMissionIndex}"
+                                 t-on-click="() => this.selectMission(mission_index)">
+                                <div class="bulk-mission-item-header">
+                                    <div class="bulk-mission-item-title">
+                                        <strong><t t-esc="mission.name"/></strong>
+                                        <span class="badge badge-secondary ms-2">
+                                            <t t-esc="mission.destinations.length"/> dest.
+                                        </span>
+                                    </div>
+                                    <div class="bulk-mission-item-actions">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                                t-on-click.stop="() => this.duplicateMission(mission_index)"
+                                                title="Duplicate">
+                                            <i class="fa fa-copy"/>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger ms-1" 
+                                                t-on-click.stop="() => this.removeMission(mission_index)"
+                                                title="Remove">
+                                            <i class="fa fa-trash"/>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="bulk-mission-item-details">
+                                    <div class="bulk-mission-item-source">
+                                        <i class="fa fa-map-marker-alt text-primary me-1"/>
+                                        <span t-if="mission.source_location">
+                                            <t t-esc="mission.source_location.substring(0, 50)"/>
+                                            <t t-if="mission.source_location.length > 50">...</t>
+                                        </span>
+                                        <span t-else="" class="text-muted">No source set</span>
+                                    </div>
+                                    
+                                    <div class="bulk-mission-item-meta">
+                                        <span t-if="mission.driver_name" class="me-2">
+                                            <i class="fa fa-user me-1"/>
+                                            <t t-esc="mission.driver_name"/>
+                                        </span>
+                                        <span t-if="mission.vehicle_name">
+                                            <i class="fa fa-truck me-1"/>
+                                            <t t-esc="mission.vehicle_name"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Current Mission Details -->
+                <div t-if="state.currentMission" class="bulk-mission-details-section">
+                    <div class="bulk-mission-details-header">
+                        <h4><i class="fa fa-edit me-2"/>Edit Mission</h4>
+                    </div>
+                    
+                    <div class="bulk-mission-form">
+                        <!-- Mission Name -->
+                        <div class="bulk-mission-form-group">
+                            <label>Mission Name</label>
+                            <input type="text" class="form-control" 
+                                   t-att-value="state.currentMission.name"
+                                   t-on-change="(ev) => this.updateMissionField('name', ev.target.value)"/>
+                        </div>
+                        
+                        <!-- Driver Selection -->
+                        <div class="bulk-mission-form-group">
+                            <label>Driver</label>
+                            <div class="bulk-mission-dropdown-container">
+                                <div class="bulk-mission-dropdown-display" t-on-click="toggleDriverDropdown">
+                                    <span t-if="state.currentMission.driver_name">
+                                        <i class="fa fa-user me-2"/>
+                                        <t t-esc="state.currentMission.driver_name"/>
+                                    </span>
+                                    <span t-else="" class="text-muted">Select Driver</span>
+                                    <i class="fa fa-chevron-down ms-auto"/>
+                                </div>
+                                <div class="bulk-mission-dropdown-menu" t-if="state.showDriverDropdown">
+                                    <div class="bulk-mission-dropdown-search">
+                                        <input type="text" placeholder="Search drivers..." 
+                                               t-model="state.driverSearch" 
+                                               t-on-input="filterDrivers"/>
+                                    </div>
+                                    <div class="bulk-mission-dropdown-options">
+                                        <t t-foreach="state.filteredDrivers" t-as="driver" t-key="driver.id">
+                                            <div class="bulk-mission-dropdown-option" t-on-click="() => this.selectDriver(driver)">
+                                                <i class="fa fa-user me-2"/>
+                                                <span><t t-esc="driver.name"/></span>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Vehicle Selection -->
+                        <div class="bulk-mission-form-group">
+                            <label>Vehicle</label>
+                            <div class="bulk-mission-dropdown-container">
+                                <div class="bulk-mission-dropdown-display" t-on-click="toggleVehicleDropdown">
+                                    <span t-if="state.currentMission.vehicle_name">
+                                        <i class="fa fa-truck me-2"/>
+                                        <t t-esc="state.currentMission.vehicle_name"/>
+                                    </span>
+                                    <span t-else="" class="text-muted">Select Vehicle</span>
+                                    <i class="fa fa-chevron-down ms-auto"/>
+                                </div>
+                                <div class="bulk-mission-dropdown-menu" t-if="state.showVehicleDropdown">
+                                    <div class="bulk-mission-dropdown-search">
+                                        <input type="text" placeholder="Search vehicles..." 
+                                               t-model="state.vehicleSearch" 
+                                               t-on-input="filterVehicles"/>
+                                    </div>
+                                    <div class="bulk-mission-dropdown-options">
+                                        <t t-foreach="state.filteredVehicles" t-as="vehicle" t-key="vehicle.id">
+                                            <div class="bulk-mission-dropdown-option" t-on-click="() => this.selectVehicle(vehicle)">
+                                                <i class="fa fa-truck me-2"/>
+                                                <span><t t-esc="vehicle.name"/></span>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Priority -->
+                        <div class="bulk-mission-form-group">
+                            <label>Priority</label>
+                            <div class="bulk-mission-priority-group">
+                                <label class="bulk-mission-priority-option" t-att-class="{'active': state.currentMission.priority === '0'}">
+                                    <input type="radio" name="priority" value="0" 
+                                           t-att-checked="state.currentMission.priority === '0'"
+                                           t-on-change="(ev) => this.updateMissionField('priority', ev.target.value)"/>
+                                    <span>Low</span>
+                                </label>
+                                <label class="bulk-mission-priority-option" t-att-class="{'active': state.currentMission.priority === '1'}">
+                                    <input type="radio" name="priority" value="1" 
+                                           t-att-checked="state.currentMission.priority === '1'"
+                                           t-on-change="(ev) => this.updateMissionField('priority', ev.target.value)"/>
+                                    <span>Normal</span>
+                                </label>
+                                <label class="bulk-mission-priority-option" t-att-class="{'active': state.currentMission.priority === '2'}">
+                                    <input type="radio" name="priority" value="2" 
+                                           t-att-checked="state.currentMission.priority === '2'"
+                                           t-on-change="(ev) => this.updateMissionField('priority', ev.target.value)"/>
+                                    <span>High</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Notes -->
+                        <div class="bulk-mission-form-group">
+                            <label>Notes</label>
+                            <textarea class="form-control" rows="3" 
+                                      t-att-value="state.currentMission.notes"
+                                      t-on-change="(ev) => this.updateMissionField('notes', ev.target.value)"
+                                      placeholder="Mission notes..."/>
+                        </div>
+                        
+                        <!-- Source Location Display -->
+                        <div class="bulk-mission-form-group">
+                            <label>Source Location</label>
+                            <div class="bulk-mission-location-display">
+                                <div t-if="state.currentMission.source_location" class="bulk-mission-location-item">
+                                    <i class="fa fa-map-marker-alt text-primary me-2"/>
+                                    <span><t t-esc="state.currentMission.source_location"/></span>
+                                </div>
+                                <div t-else="" class="text-muted">
+                                    Click on the map to set source location
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Destinations List -->
+                        <div class="bulk-mission-form-group">
+                            <label>
+                                Destinations 
+                                <span class="badge badge-secondary ms-2">
+                                    <t t-esc="state.currentMission.destinations.length"/>
+                                </span>
+                            </label>
+                            
+                            <div class="bulk-mission-destinations-list">
+                                <t t-if="state.currentMission.destinations.length === 0">
+                                    <div class="text-muted text-center py-3">
+                                        Right-click on the map to add destinations
+                                    </div>
+                                </t>
+                                
+                                <t t-foreach="state.currentMission.destinations" t-as="dest" t-key="dest.id">
+                                    <div class="bulk-mission-destination-item">
+                                        <div class="bulk-mission-destination-header">
+                                            <span class="bulk-mission-destination-number"><t t-esc="dest.sequence"/></span>
+                                            <div class="bulk-mission-destination-info">
+                                                <div class="bulk-mission-destination-location">
+                                                    <t t-esc="dest.location"/>
+                                                </div>
+                                                <div class="bulk-mission-destination-meta">
+                                                    <span class="badge" t-att-class="dest.mission_type === 'pickup' ? 'badge-info' : 'badge-success'">
+                                                        <t t-esc="dest.mission_type"/>
+                                                    </span>
+                                                    <span class="ms-2 text-muted small">
+                                                        <t t-esc="dest.total_weight"/> kg
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                    t-on-click="() => this.removeDestination(currentMissionIndex, dest_index)">
+                                                <i class="fa fa-trash"/>
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Destination Details (Expandable) -->
+                                        <div class="bulk-mission-destination-details">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <label class="form-label small">Type</label>
+                                                    <select class="form-select form-select-sm" 
+                                                            t-att-value="dest.mission_type"
+                                                            t-on-change="(ev) => this.updateDestinationField(dest_index, 'mission_type', ev.target.value)">
+                                                        <option value="pickup">Pickup</option>
+                                                        <option value="delivery">Delivery</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label small">Weight (kg)</label>
+                                                    <input type="number" class="form-control form-control-sm" 
+                                                           t-att-value="dest.total_weight"
+                                                           t-on-change="(ev) => this.updateDestinationField(dest_index, 'total_weight', parseFloat(ev.target.value) || 0)"
+                                                           step="0.1" min="0"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

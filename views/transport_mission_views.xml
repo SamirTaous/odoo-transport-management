@@ -366,6 +366,22 @@
         <field name="context">{'search_default_active_missions': 1}</field>
     </record>
 
+    <!-- Add Bulk Creation Button to Mission Tree View -->
+    <record id="view_transport_mission_tree_with_bulk" model="ir.ui.view">
+        <field name="name">transport.mission.tree.bulk</field>
+        <field name="model">transport.mission</field>
+        <field name="inherit_id" ref="view_transport_mission_tree"/>
+        <field name="arch" type="xml">
+            <tree position="inside">
+                <header>
+                    <button name="%(action_bulk_mission_wizard)d" string="Bulk Create Missions" type="action" class="btn-primary"/>
+                </header>
+            </tree>
+        </field>
+    </record>
+
+
+
 
 
     <!-- Simple method to fix distances -->

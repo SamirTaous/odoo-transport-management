@@ -1057,9 +1057,12 @@ export class BulkMissionWidget extends Component {
             await this.displaySingleMission(i);
         }
 
-        // Select the first mission by default
+        // Update selection styles after all missions are displayed
+        this.updateMissionSelection();
+
+        // Fit map to selected mission without recursive call
         if (this.state.selectedMissionIndex >= 0) {
-            this.selectMission(this.state.selectedMissionIndex);
+            this.fitMapToMission(this.state.selectedMissionIndex);
         }
     }
 
@@ -1092,6 +1095,8 @@ export class BulkMissionWidget extends Component {
                 </div>
             `);
 
+            // Add mission index to marker for tracking
+            sourceMarker.missionIndex = missionIndex;
             this.missionMarkers.push(sourceMarker);
             sourceMarker.addTo(this.map);
         }
@@ -1115,6 +1120,8 @@ export class BulkMissionWidget extends Component {
                     </div>
                 `);
 
+                // Add mission index to marker for tracking
+                destMarker.missionIndex = missionIndex;
                 this.missionMarkers.push(destMarker);
                 destMarker.addTo(this.map);
             }
@@ -1124,73 +1131,190 @@ export class BulkMissionWidget extends Component {
         await this.calculateMissionRoute(missionIndex);
     }
 
-    // Calculate route for a mission using OSRM
+    // Calculate route for a mission using OSRM (same as single mission)
     async calculateMissionRoute(missionIndex) {
         const mission = this.state.aiMissions[missionIndex];
         if (!mission || !mission.source_location || !mission.destinations?.length) return;
 
         try {
-            // Build waypoints: source + all destinations
-            const waypoints = [
+            // Build waypoints: source + all destinations (same format as single mission)
+            const points = [
                 [mission.source_location.longitude, mission.source_location.latitude]
             ];
 
             mission.destinations.forEach(dest => {
                 if (dest.latitude && dest.longitude) {
-                    waypoints.push([dest.longitude, dest.latitude]);
+                    points.push([dest.longitude, dest.latitude]);
                 }
             });
 
-            if (waypoints.length < 2) return;
-
-            // Call OSRM API
-            const waypointsStr = waypoints.map(wp => `${wp[1]},${wp[0]}`).join(';');
-            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${waypointsStr}?overview=full&geometries=geojson&steps=true`;
+            if (points.length < 2) return;
 
             console.log(`🛣️ Calculating route for mission ${missionIndex + 1}...`);
 
+            // Call OSRM API (exact same as single mission)
+            const coordinates = points.map(p => p.join(',')).join(';');
+            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=polyline`;
+
             const response = await fetch(osrmUrl);
+            if (!response.ok) throw new Error(`OSRM request failed: ${response.statusText}`);
+            
             const data = await response.json();
 
-            if (data.code === 'Ok' && data.routes?.length > 0) {
-                const route = data.routes[0];
-                const missionColor = this.getMissionColor(missionIndex);
-                const isSelected = missionIndex === this.state.selectedMissionIndex;
-
-                // Create route polyline
-                const routeLine = L.geoJSON(route.geometry, {
-                    style: {
-                        color: missionColor,
-                        weight: isSelected ? 6 : 4,
-                        opacity: isSelected ? 0.9 : 0.6,
-                        dashArray: isSelected ? null : '10, 5'
-                    }
-                });
-
-                routeLine.bindPopup(`
-                    <div class="tm-route-popup">
-                        <h6><strong>Mission ${missionIndex + 1} Route</strong></h6>
-                        <p><i class="fa fa-route"></i> <strong>Distance:</strong> ${(route.distance / 1000).toFixed(1)} km</p>
-                        <p><i class="fa fa-clock"></i> <strong>Duration:</strong> ${Math.round(route.duration / 60)} minutes</p>
-                        <p><i class="fa fa-truck"></i> <strong>Vehicle:</strong> ${mission.assigned_vehicle?.vehicle_name}</p>
-                    </div>
-                `);
-
-                this.missionRoutes.push(routeLine);
-                routeLine.addTo(this.map);
-
-                // Update mission with calculated route data
-                mission.calculated_route = {
-                    distance_km: route.distance / 1000,
-                    duration_minutes: route.duration / 60,
-                    geometry: route.geometry
-                };
-
-                console.log(`✅ Route calculated for mission ${missionIndex + 1}: ${(route.distance / 1000).toFixed(1)}km, ${Math.round(route.duration / 60)}min`);
+            if (data.code !== "Ok" || !data.routes || data.routes.length === 0) {
+                throw new Error(data.message || "No route found by OSRM.");
             }
+
+            const route = data.routes[0];
+            const routeGeometry = this.decodePolyline(route.geometry); // Use same decode function
+            const routeDistance = route.distance / 1000; // Convert to km
+            const routeDuration = route.duration / 60; // Convert to minutes
+
+            const missionColor = this.getMissionColor(missionIndex);
+            const isSelected = missionIndex === this.state.selectedMissionIndex;
+
+            // Create route polyline (same style as single mission)
+            const routeLine = L.polyline(routeGeometry, {
+                className: 'tm-route-line',
+                color: missionColor,
+                weight: isSelected ? 6 : 4,
+                opacity: isSelected ? 0.8 : 0.6,
+                dashArray: isSelected ? null : '10, 5'
+            });
+
+            routeLine.bindPopup(`
+                <div class="tm-route-popup">
+                    <h6><strong>Mission ${missionIndex + 1} Route</strong></h6>
+                    <p><i class="fa fa-route"></i> <strong>Distance:</strong> ${routeDistance.toFixed(1)} km</p>
+                    <p><i class="fa fa-clock"></i> <strong>Duration:</strong> ${Math.round(routeDuration)} minutes</p>
+                    <p><i class="fa fa-truck"></i> <strong>Vehicle:</strong> ${mission.assigned_vehicle?.vehicle_name}</p>
+                </div>
+            `);
+
+            this.missionRoutes.push(routeLine);
+            routeLine.addTo(this.map);
+
+            // Update mission with calculated route data
+            mission.calculated_route = {
+                distance_km: routeDistance,
+                duration_minutes: routeDuration,
+                geometry: route.geometry
+            };
+
+            console.log(`✅ Route calculated for mission ${missionIndex + 1}: ${routeDistance.toFixed(1)}km, ${Math.round(routeDuration)}min`);
+
         } catch (error) {
             console.error(`❌ Failed to calculate route for mission ${missionIndex + 1}:`, error);
+            
+            // Create fallback straight line route (same as single mission fallback)
+            this.createFallbackRoute(missionIndex);
         }
+    }
+
+    // Decode polyline function (same as single mission)
+    decodePolyline(encoded) {
+        let index = 0, len = encoded.length;
+        let lat = 0, lng = 0;
+        let array = [];
+        while (index < len) {
+            let b, shift = 0, result = 0;
+            do {
+                b = encoded.charCodeAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+            lat += dlat;
+            shift = 0;
+            result = 0;
+            do {
+                b = encoded.charCodeAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
+            array.push([lat * 1e-5, lng * 1e-5]);
+        }
+        return array;
+    }
+
+    // Create fallback route when OSRM fails
+    createFallbackRoute(missionIndex) {
+        const mission = this.state.aiMissions[missionIndex];
+        if (!mission || !mission.source_location || !mission.destinations?.length) return;
+
+        try {
+            console.log(`🔄 Creating fallback route for mission ${missionIndex + 1}...`);
+
+            // Create straight line route
+            const points = [
+                [mission.source_location.latitude, mission.source_location.longitude]
+            ];
+
+            mission.destinations.forEach(dest => {
+                if (dest.latitude && dest.longitude) {
+                    points.push([dest.latitude, dest.longitude]);
+                }
+            });
+
+            const missionColor = this.getMissionColor(missionIndex);
+            const isSelected = missionIndex === this.state.selectedMissionIndex;
+
+            // Create fallback polyline with dashed style
+            const routeLine = L.polyline(points, {
+                className: 'tm-route-line tm-route-fallback',
+                color: missionColor,
+                weight: isSelected ? 6 : 4,
+                opacity: isSelected ? 0.6 : 0.4,
+                dashArray: '10, 5'
+            });
+
+            // Calculate approximate distance (straight line)
+            let totalDistance = 0;
+            for (let i = 1; i < points.length; i++) {
+                const dist = this.calculateDistance(points[i-1], points[i]);
+                totalDistance += dist;
+            }
+
+            const estimatedDuration = totalDistance * 1.5; // Rough estimate: 1.5 minutes per km
+
+            routeLine.bindPopup(`
+                <div class="tm-route-popup">
+                    <h6><strong>Mission ${missionIndex + 1} Route (Fallback)</strong></h6>
+                    <p><i class="fa fa-route"></i> <strong>Distance:</strong> ~${totalDistance.toFixed(1)} km</p>
+                    <p><i class="fa fa-clock"></i> <strong>Duration:</strong> ~${Math.round(estimatedDuration)} minutes</p>
+                    <p><i class="fa fa-exclamation-triangle"></i> <small>Approximate route (OSRM unavailable)</small></p>
+                </div>
+            `);
+
+            this.missionRoutes.push(routeLine);
+            routeLine.addTo(this.map);
+
+            // Update mission with fallback route data
+            mission.calculated_route = {
+                distance_km: totalDistance,
+                duration_minutes: estimatedDuration,
+                is_fallback: true
+            };
+
+            console.log(`⚠️ Fallback route created for mission ${missionIndex + 1}: ${totalDistance.toFixed(1)}km`);
+
+        } catch (error) {
+            console.error(`❌ Failed to create fallback route for mission ${missionIndex + 1}:`, error);
+        }
+    }
+
+    // Calculate distance between two points (Haversine formula)
+    calculateDistance(point1, point2) {
+        const R = 6371; // Earth's radius in km
+        const dLat = (point2[0] - point1[0]) * Math.PI / 180;
+        const dLon = (point2[1] - point1[1]) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(point1[0] * Math.PI / 180) * Math.cos(point2[0] * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
     }
 
     // Get color for mission (different color for each mission)
@@ -1260,13 +1384,40 @@ export class BulkMissionWidget extends Component {
     selectMission(missionIndex) {
         console.log(`🎯 Selecting mission ${missionIndex + 1}`);
 
+        // Update selected mission index
         this.state.selectedMissionIndex = missionIndex;
 
-        // Refresh mission display to update selection
-        this.displayAIMissionsOnMap();
+        // Update visual selection without full redraw
+        this.updateMissionSelection();
 
         // Fit map to selected mission
         this.fitMapToMission(missionIndex);
+    }
+
+    // Update mission selection visually without full redraw
+    updateMissionSelection() {
+        // Update route styles
+        this.missionRoutes.forEach((route, index) => {
+            const isSelected = index === this.state.selectedMissionIndex;
+            const missionColor = this.getMissionColor(index);
+            
+            route.setStyle({
+                color: missionColor,
+                weight: isSelected ? 6 : 4,
+                opacity: isSelected ? 0.8 : 0.6,
+                dashArray: isSelected ? null : '10, 5'
+            });
+        });
+
+        // Update marker styles using the missionIndex property
+        this.missionMarkers.forEach((marker) => {
+            if (marker.missionIndex !== undefined) {
+                const isSelected = marker.missionIndex === this.state.selectedMissionIndex;
+                
+                // Update z-index for selection
+                marker.setZIndexOffset(isSelected ? 1000 : 0);
+            }
+        });
     }
 
     // Fit map to a specific mission

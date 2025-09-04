@@ -825,9 +825,31 @@ export class BulkMissionWidget extends Component {
 
     // AI Optimization
     async optimizeWithAI() {
+        console.log("🤖 AI Optimize button clicked from widget!");
+        
         if (this.state.sources.length === 0 && this.state.destinations.length === 0) {
             this.notification.add("Please add sources and destinations before optimizing", { type: "warning" });
             return;
+        }
+
+        // Debug: Log current destination data to check cargo information
+        console.log("🔍 Current destinations before AI optimization:");
+        this.state.destinations.forEach((dest, index) => {
+            console.log(`Destination ${index + 1}: ${dest.name}`);
+            console.log(`  Weight: ${dest.total_weight} kg`);
+            console.log(`  Volume: ${dest.total_volume} m³`);
+            console.log(`  Package Type: ${dest.package_type}`);
+            console.log(`  Mission Type: ${dest.mission_type}`);
+        });
+        
+        const totalWeight = this.state.destinations.reduce((sum, dest) => sum + (dest.total_weight || 0), 0);
+        const totalVolume = this.state.destinations.reduce((sum, dest) => sum + (dest.total_volume || 0), 0);
+        console.log(`📦 Total cargo: ${totalWeight} kg, ${totalVolume} m³`);
+        
+        if (totalWeight === 0 && totalVolume === 0) {
+            console.warn("⚠️ WARNING: No cargo weight or volume detected!");
+            console.log("💡 TIP: Click on destinations to edit them and add weight/volume information");
+            this.notification.add("⚠️ No cargo detected! Click on destinations to add weight and volume.", { type: "warning" });
         }
 
         try {
@@ -837,6 +859,8 @@ export class BulkMissionWidget extends Component {
             // Show loading notification
             this.notification.add("🤖 AI is optimizing your missions... This may take a moment.", { type: "info" });
 
+            console.log("🤖 Calling backend AI optimization...");
+            
             // Call the backend AI optimization
             const result = await this.orm.call(
                 "bulk.mission.wizard",
@@ -844,8 +868,12 @@ export class BulkMissionWidget extends Component {
                 [this.props.record.resId]
             );
 
+            console.log("🤖 Backend AI optimization completed:", result);
+            
             // After optimization completes, get the AI results and log them
             if (result && result.params && result.params.type === 'success') {
+                console.log("🤖 Getting AI optimization results...");
+                
                 // Get the AI optimization results
                 try {
                     const aiResult = await this.orm.call(
@@ -853,6 +881,8 @@ export class BulkMissionWidget extends Component {
                         "get_ai_optimization_result",
                         [this.props.record.resId]
                     );
+                    
+                    console.log("🤖 AI Result retrieved:", aiResult);
                     
                     if (aiResult) {
                         this.handleAIOptimizationResult({
@@ -862,23 +892,52 @@ export class BulkMissionWidget extends Component {
                             message: result.params.message
                         });
                     } else {
-                        console.log("No AI results found");
+                        console.log("🤖 No AI results found");
                         this.notification.add(result.params.message, { type: "success" });
                     }
                 } catch (error) {
-                    console.error("Failed to get AI results:", error);
+                    console.error("🤖 Failed to get AI results:", error);
                     this.notification.add(result.params.message, { type: "success" });
                 }
             } else {
-                console.log("AI Optimization result:", result);
+                console.log("🤖 AI Optimization result (non-success):", result);
+                // Still show the notification if there's a message
+                if (result && result.params && result.params.message) {
+                    this.notification.add(result.params.message, { 
+                        type: result.params.type || "info" 
+                    });
+                }
             }
 
         } catch (error) {
-            console.error('AI optimization failed:', error);
+            console.error('🤖 AI optimization failed:', error);
             this.notification.add("AI optimization failed. Check console for details.", { type: "danger" });
         }
+        
+        console.log("🤖 AI Optimize method completed");
     }
 
+    // Helper method to quickly add default cargo to all destinations
+    addDefaultCargoToAllDestinations() {
+        let updated = 0;
+        this.state.destinations.forEach((dest, index) => {
+            if (dest.total_weight === 0 && dest.total_volume === 0) {
+                dest.total_weight = 100; // Default 100kg
+                dest.total_volume = 1;   // Default 1m³
+                dest.package_type = 'pallet';
+                updated++;
+            }
+        });
+        
+        if (updated > 0) {
+            this.saveData();
+            this.updateMapDisplay();
+            this.notification.add(`Added default cargo (100kg, 1m³) to ${updated} destinations`, { type: "success" });
+            console.log(`📦 Added default cargo to ${updated} destinations`);
+        } else {
+            this.notification.add("All destinations already have cargo information", { type: "info" });
+        }
+    }
     // Handle AI Optimization Results
     handleAIOptimizationResult(params) {
         const { ai_response, summary, title, message } = params;

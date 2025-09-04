@@ -226,7 +226,11 @@ export class BulkMissionWidget extends Component {
                 total_volume: 0,
                 service_duration: 0,
                 requires_signature: false,
-                expected_arrival_time: null
+                expected_arrival_time: null,
+                priority_delivery: false,
+                contact_name: '',
+                contact_phone: '',
+                special_instructions: ''
             };
 
             this.state.destinations.push(newDestination);
@@ -462,6 +466,261 @@ export class BulkMissionWidget extends Component {
         }
     }
 
+    // Destination Popup Management
+    openDestinationPopup(destIndex) {
+        const destination = this.state.destinations[destIndex];
+        if (!destination) return;
+
+        // Store current editing destination
+        this.currentEditingIndex = destIndex;
+        this.currentEditingDestination = { ...destination }; // Clone to avoid direct mutation
+
+        // Create and show modal
+        this.showDestinationModal();
+    }
+
+    showDestinationModal() {
+        const destination = this.currentEditingDestination;
+        
+        // Create modal HTML
+        const modalHTML = `
+            <div class="modal fade" id="destinationModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fa fa-flag-checkered me-2"></i>
+                                Destination Details - ${destination.name || 'Unnamed Destination'}
+                            </h5>
+                            <button type="button" class="btn-close" onclick="window.bulkMissionWidget.closeDestinationModal()" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form class="tm_destination_form">
+                                <!-- Basic Information -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Destination Name</label>
+                                        <input type="text" class="form-control" id="dest_name" 
+                                               value="${destination.name || ''}"
+                                               placeholder="Enter destination name"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Mission Type</label>
+                                        <div class="tm_type_radio_group">
+                                            <label class="tm_type_radio_option ${destination.mission_type === 'pickup' ? 'active' : ''}">
+                                                <input type="radio" name="mission_type_popup" value="pickup" 
+                                                       ${destination.mission_type === 'pickup' ? 'checked' : ''}/>
+                                                <i class="fa fa-arrow-up"></i>
+                                                <span>Pickup</span>
+                                            </label>
+                                            <label class="tm_type_radio_option ${destination.mission_type === 'delivery' || !destination.mission_type ? 'active' : ''}">
+                                                <input type="radio" name="mission_type_popup" value="delivery" 
+                                                       ${destination.mission_type === 'delivery' || !destination.mission_type ? 'checked' : ''}/>
+                                                <i class="fa fa-arrow-down"></i>
+                                                <span>Delivery</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Location Information -->
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <label class="form-label">Address</label>
+                                        <textarea class="form-control" rows="2" readonly>${destination.location}</textarea>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Latitude</label>
+                                        <input type="number" class="form-control" readonly value="${destination.latitude}"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Longitude</label>
+                                        <input type="number" class="form-control" readonly value="${destination.longitude}"/>
+                                    </div>
+                                </div>
+
+                                <!-- Package Information -->
+                                <h6 class="mb-3"><i class="fa fa-box me-2"></i>Package Information</h6>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Weight (kg)</label>
+                                        <input type="number" class="form-control" id="dest_weight"
+                                               value="${destination.total_weight || 0}" step="0.1" min="0"/>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Volume (m³)</label>
+                                        <input type="number" class="form-control" id="dest_volume"
+                                               value="${destination.total_volume || 0}" step="0.01" min="0"/>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Package Type</label>
+                                        <select class="form-select" id="dest_package_type">
+                                            <option value="individual" ${destination.package_type === 'individual' ? 'selected' : ''}>Individual</option>
+                                            <option value="pallet" ${destination.package_type === 'pallet' ? 'selected' : ''}>Pallet</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Service Information -->
+                                <h6 class="mb-3"><i class="fa fa-clock me-2"></i>Service Information</h6>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Service Duration (minutes)</label>
+                                        <input type="number" class="form-control" id="dest_service_duration"
+                                               value="${destination.service_duration || 0}" min="0"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Expected Arrival</label>
+                                        <input type="datetime-local" class="form-control" id="dest_expected_arrival"
+                                               value="${this.formatDateTimeForInput(destination.expected_arrival_time)}"/>
+                                    </div>
+                                </div>
+
+                                <!-- Additional Options -->
+                                <h6 class="mb-3"><i class="fa fa-cog me-2"></i>Additional Options</h6>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="dest_requires_signature"
+                                                   ${destination.requires_signature ? 'checked' : ''}/>
+                                            <label class="form-check-label">Requires Signature</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="dest_priority_delivery"
+                                                   ${destination.priority_delivery ? 'checked' : ''}/>
+                                            <label class="form-check-label">Priority Delivery</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Contact Information -->
+                                <h6 class="mb-3"><i class="fa fa-user me-2"></i>Contact Information</h6>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Contact Name</label>
+                                        <input type="text" class="form-control" id="dest_contact_name"
+                                               value="${destination.contact_name || ''}" placeholder="Contact person name"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Contact Phone</label>
+                                        <input type="tel" class="form-control" id="dest_contact_phone"
+                                               value="${destination.contact_phone || ''}" placeholder="Phone number"/>
+                                    </div>
+                                </div>
+
+                                <!-- Special Instructions -->
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <label class="form-label">Special Instructions</label>
+                                        <textarea class="form-control" rows="3" id="dest_special_instructions"
+                                                  placeholder="Any special delivery instructions...">${destination.special_instructions || ''}</textarea>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" onclick="window.bulkMissionWidget.closeDestinationModal()">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="window.bulkMissionWidget.saveDestinationModal()">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Remove existing modal if any
+        const existingModal = document.getElementById('destinationModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Add modal to body
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Show modal
+        const modal = document.getElementById('destinationModal');
+        modal.style.display = 'block';
+        modal.classList.add('show');
+        document.body.classList.add('modal-open');
+
+        // Add backdrop
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.id = 'destinationModalBackdrop';
+        document.body.appendChild(backdrop);
+
+        // Handle radio button changes
+        const radioButtons = modal.querySelectorAll('input[name="mission_type_popup"]');
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                // Update active class
+                modal.querySelectorAll('.tm_type_radio_option').forEach(option => {
+                    option.classList.remove('active');
+                });
+                e.target.closest('.tm_type_radio_option').classList.add('active');
+            });
+        });
+    }
+
+    closeDestinationModal() {
+        const modal = document.getElementById('destinationModal');
+        const backdrop = document.getElementById('destinationModalBackdrop');
+        
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+            modal.remove();
+        }
+        
+        if (backdrop) {
+            backdrop.remove();
+        }
+        
+        document.body.classList.remove('modal-open');
+    }
+
+    saveDestinationModal() {
+        const modal = document.getElementById('destinationModal');
+        if (!modal) return;
+
+        // Get all form values
+        const updatedDestination = {
+            ...this.currentEditingDestination,
+            name: modal.querySelector('#dest_name').value,
+            mission_type: modal.querySelector('input[name="mission_type_popup"]:checked').value,
+            total_weight: parseFloat(modal.querySelector('#dest_weight').value) || 0,
+            total_volume: parseFloat(modal.querySelector('#dest_volume').value) || 0,
+            package_type: modal.querySelector('#dest_package_type').value,
+            service_duration: parseInt(modal.querySelector('#dest_service_duration').value) || 0,
+            expected_arrival_time: modal.querySelector('#dest_expected_arrival').value,
+            requires_signature: modal.querySelector('#dest_requires_signature').checked,
+            priority_delivery: modal.querySelector('#dest_priority_delivery').checked,
+            contact_name: modal.querySelector('#dest_contact_name').value,
+            contact_phone: modal.querySelector('#dest_contact_phone').value,
+            special_instructions: modal.querySelector('#dest_special_instructions').value
+        };
+
+        // Update the destination
+        this.updateDestinationFromPopup(this.currentEditingIndex, updatedDestination);
+        
+        // Close modal
+        this.closeDestinationModal();
+    }
+
+    updateDestinationFromPopup(destIndex, updatedDestination) {
+        if (this.state.destinations[destIndex]) {
+            // Update the destination with all the new data
+            Object.assign(this.state.destinations[destIndex], updatedDestination);
+            this.saveData();
+            this.updateMapDisplay();
+            this.notification.add("Destination updated", { type: "success" });
+        }
+    }
+
     // JSON Generation for console logging
     generateCompleteJSON() {
         const completeData = {
@@ -564,6 +823,12 @@ export class BulkMissionWidget extends Component {
         return completeData;
     }
 }
+
+// Helper method for date formatting
+BulkMissionWidget.prototype.formatDateTimeForInput = function(dateTimeString) {
+    if (!dateTimeString) return '';
+    return dateTimeString.slice(0, 16);
+};
 
 // Register the widget
 registry.category("fields").add("bulk_mission_widget", BulkMissionWidget);

@@ -174,106 +174,52 @@
                         <div class="tm_destinations_list">
                             <t t-if="state.destinations.length > 0">
                                 <t t-foreach="state.destinations" t-as="dest" t-key="dest.id">
-                                    <div class="tm_location_item tm_destination_item" t-att-class="'tm-dest-' + (dest.mission_type || 'delivery')">
+                                    <div class="tm_location_item tm_destination_item tm_clickable_destination" 
+                                         t-att-class="'tm-dest-' + (dest.mission_type || 'delivery')"
+                                         t-on-click="() => this.openDestinationPopup(dest_index)">
                                         <div class="tm_destination_number"><t t-esc="dest_index + 1"/></div>
                                         <div class="tm_destination_type_icon">
                                             <i t-if="dest.mission_type === 'pickup'" class="fa fa-arrow-up text-info" title="Pickup"/>
                                             <i t-else="" class="fa fa-arrow-down text-success" title="Delivery"/>
                                         </div>
                                         <div class="tm_location_info">
+                                            <div class="tm_destination_header">
+                                                <span class="tm_destination_name"><t t-esc="dest.name || 'Unnamed Destination'"/></span>
+                                                <span class="tm_destination_type_badge badge" t-att-class="dest.mission_type === 'pickup' ? 'badge-info' : 'badge-success'">
+                                                    <t t-esc="dest.mission_type || 'delivery'"/>
+                                                </span>
+                                            </div>
                                             <span class="tm_location_address"><t t-esc="dest.location"/></span>
+                                            <div class="tm_destination_summary">
+                                                <span class="tm_weight_info">
+                                                    <i class="fa fa-weight-hanging"/>
+                                                    <t t-esc="dest.total_weight || 0"/> kg
+                                                </span>
+                                                <span class="tm_volume_info">
+                                                    <i class="fa fa-cube"/>
+                                                    <t t-esc="dest.total_volume || 0"/> m³
+                                                </span>
+                                                <span class="tm_package_info">
+                                                    <i class="fa fa-box"/>
+                                                    <t t-esc="dest.package_type || 'individual'"/>
+                                                </span>
+                                            </div>
                                             <small class="tm_location_coords">
                                                 <t t-esc="dest.latitude.toFixed(4)"/>, <t t-esc="dest.longitude.toFixed(4)"/>
                                             </small>
-                                            
-                                            <!-- Mission Type Selection -->
-                                            <div class="tm_destination_type_selector">
-                                                <div class="tm_type_radio_group">
-                                                    <label class="tm_type_radio_option" t-att-class="{'active': dest.mission_type === 'pickup'}">
-                                                        <input type="radio" t-att-name="'mission_type_' + dest.id" value="pickup" 
-                                                               t-att-checked="dest.mission_type === 'pickup'"
-                                                               t-on-change="(ev) => this.updateDestinationField(dest_index, 'mission_type', ev.target.value)"/>
-                                                        <i class="fa fa-arrow-up"/>
-                                                        <span>Pickup</span>
-                                                    </label>
-                                                    <label class="tm_type_radio_option" t-att-class="{'active': dest.mission_type === 'delivery'}">
-                                                        <input type="radio" t-att-name="'mission_type_' + dest.id" value="delivery" 
-                                                               t-att-checked="dest.mission_type === 'delivery' || !dest.mission_type"
-                                                               t-on-change="(ev) => this.updateDestinationField(dest_index, 'mission_type', ev.target.value)"/>
-                                                        <i class="fa fa-arrow-down"/>
-                                                        <span>Delivery</span>
-                                                    </label>
-                                                </div>
-                                            </div>
-
-                                            <!-- Package Details -->
-                                            <div class="tm_package_details">
-                                                <div class="tm_package_row">
-                                                    <div class="tm_package_field">
-                                                        <label>Destination Name</label>
-                                                        <input type="text" class="form-control form-control-sm" 
-                                                               t-att-value="dest.name || ''"
-                                                               t-on-change="(ev) => this.updateDestinationField(dest_index, 'name', ev.target.value)"
-                                                               placeholder="Enter destination name"/>
-                                                    </div>
-                                                    <div class="tm_package_field">
-                                                        <label>Weight (kg)</label>
-                                                        <input type="number" class="form-control form-control-sm" 
-                                                               t-att-value="dest.total_weight || 0"
-                                                               t-on-change="(ev) => this.updateDestinationField(dest_index, 'total_weight', parseFloat(ev.target.value) || 0)"
-                                                               step="0.1" min="0"/>
-                                                    </div>
-                                                </div>
-                                                <div class="tm_package_row">
-                                                    <div class="tm_package_field">
-                                                        <label>Volume (m³)</label>
-                                                        <input type="number" class="form-control form-control-sm" 
-                                                               t-att-value="dest.total_volume || 0"
-                                                               t-on-change="(ev) => this.updateDestinationField(dest_index, 'total_volume', parseFloat(ev.target.value) || 0)"
-                                                               step="0.01" min="0"/>
-                                                    </div>
-                                                    <div class="tm_package_field">
-                                                        <label>Package Type</label>
-                                                        <select class="form-select form-select-sm" 
-                                                                t-att-value="dest.package_type || 'individual'"
-                                                                t-on-change="(ev) => this.updateDestinationField(dest_index, 'package_type', ev.target.value)">
-                                                            <option value="individual">Individual</option>
-                                                            <option value="pallet">Pallet</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="tm_package_row">
-                                                    <div class="tm_package_field">
-                                                        <label>Service Duration (min)</label>
-                                                        <input type="number" class="form-control form-control-sm" 
-                                                               t-att-value="dest.service_duration || 0"
-                                                               t-on-change="(ev) => this.updateDestinationField(dest_index, 'service_duration', parseInt(ev.target.value) || 0)"
-                                                               min="0"/>
-                                                    </div>
-                                                    <div class="tm_package_field">
-                                                        <div class="form-check">
-                                                            <input type="checkbox" class="form-check-input" 
-                                                                   t-att-checked="dest.requires_signature"
-                                                                   t-on-change="(ev) => this.updateDestinationField(dest_index, 'requires_signature', ev.target.checked)"/>
-                                                            <label class="form-check-label">Requires Signature</label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="tm_package_row">
-                                                    <div class="tm_package_field">
-                                                        <label>Expected Arrival</label>
-                                                        <input type="datetime-local" class="form-control form-control-sm" 
-                                                               t-att-value="formatDateTimeForInput(dest.expected_arrival_time)"
-                                                               t-on-change="(ev) => this.updateDestinationField(dest_index, 'expected_arrival_time', ev.target.value)"/>
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-outline-danger tm_remove_dest_btn" 
-                                                t-on-click="() => this.removeDestination(dest_index)"
-                                                title="Remove destination">
-                                            <i class="fa fa-trash"/>
-                                        </button>
+                                        <div class="tm_destination_actions">
+                                            <button type="button" class="btn btn-sm btn-outline-primary tm_edit_dest_btn" 
+                                                    t-on-click.stop="() => this.openDestinationPopup(dest_index)"
+                                                    title="Edit destination details">
+                                                <i class="fa fa-edit"/>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger tm_remove_dest_btn" 
+                                                    t-on-click.stop="() => this.removeDestination(dest_index)"
+                                                    title="Remove destination">
+                                                <i class="fa fa-trash"/>
+                                            </button>
+                                        </div>
                                     </div>
                                 </t>
                             </t>
@@ -290,5 +236,7 @@
             </div>
         </div>
     </t>
+
+
 
 </templates>

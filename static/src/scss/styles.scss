@@ -4388,3 +4388,204 @@ ission Wizard Styles */
         overflow: visible;
     }
 }
+
+// === Destination Popup and Clickable Styling ===
+.tm_clickable_destination {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+
+    &:hover {
+        background: rgba(74, 93, 135, 0.05);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .tm_destination_header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+
+        .tm_destination_name {
+            font-weight: 600;
+            color: $tm-primary-color;
+            font-size: 0.95rem;
+        }
+
+        .tm_destination_type_badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+        }
+    }
+
+    .tm_destination_summary {
+        display: flex;
+        gap: 12px;
+        margin: 6px 0;
+        font-size: 0.8rem;
+        color: $tm-secondary-color;
+
+        span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+
+            i {
+                font-size: 0.75rem;
+            }
+        }
+
+        .tm_weight_info i {
+            color: #dc3545;
+        }
+
+        .tm_volume_info i {
+            color: #17a2b8;
+        }
+
+        .tm_package_info i {
+            color: #28a745;
+        }
+    }
+
+    .tm_destination_actions {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        display: flex;
+        gap: 4px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+
+        .btn {
+            padding: 4px 6px;
+            font-size: 0.7rem;
+        }
+    }
+
+    &:hover .tm_destination_actions {
+        opacity: 1;
+    }
+}
+
+// Destination popup modal styling
+.modal-dialog.modal-lg {
+    max-width: 800px;
+}
+
+.tm_destination_form {
+    .tm_type_radio_group {
+        display: flex;
+        gap: 8px;
+
+        .tm_type_radio_option {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            border: 1px solid $tm-border-color;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+
+            input[type="radio"] {
+                display: none;
+            }
+
+            i {
+                margin-right: 6px;
+                font-size: 0.9rem;
+            }
+
+            &:hover {
+                border-color: $tm-primary-color;
+                background: rgba(74, 93, 135, 0.05);
+            }
+
+            &.active {
+                border-color: $tm-primary-color;
+                background: rgba(74, 93, 135, 0.1);
+                color: $tm-primary-color;
+                font-weight: 600;
+
+                i {
+                    color: $tm-primary-color;
+                }
+            }
+        }
+    }
+
+    h6 {
+        color: $tm-primary-color;
+        font-weight: 600;
+        border-bottom: 1px solid $tm-border-color;
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+
+        i {
+            color: $tm-primary-color;
+        }
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: $tm-primary-color;
+        box-shadow: 0 0 0 2px rgba(74, 93, 135, 0.1);
+    }
+
+    .form-check-input:checked {
+        background-color: $tm-primary-color;
+        border-color: $tm-primary-color;
+    }
+}
+
+// Enhanced destination item styling
+.tm_destination_item {
+    border: 1px solid $tm-border-color;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: white;
+
+    &.tm_clickable_destination {
+        border-left: 4px solid transparent;
+
+        &.tm-dest-pickup {
+            border-left-color: #17a2b8;
+        }
+
+        &.tm-dest-delivery {
+            border-left-color: #28a745;
+        }
+    }
+
+    .tm_location_address {
+        font-size: 0.9rem;
+        color: $tm-secondary-color;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .tm_location_coords {
+        font-size: 0.75rem;
+        color: lighten($tm-secondary-color, 15%);
+    }
+}
+
+// Click hint styling
+.tm_clickable_destination::after {
+    content: "Click to edit";
+    position: absolute;
+    bottom: 4px;
+    right: 8px;
+    font-size: 0.7rem;
+    color: lighten($tm-secondary-color, 20%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.tm_clickable_destination:hover::after {
+    opacity: 1;
+}

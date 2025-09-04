@@ -3432,6 +3432,7 @@ Destination type selector styling .tm_destination_type_selector {
         }
     }
 }
+
 // === Capacity Progression Styles ===
 .tm_capacity_progression {
     .tm_progression_header {
@@ -3439,24 +3440,24 @@ Destination type selector styling .tm_destination_type_selector {
         padding: 10px;
         background: #f8f9fa;
         border-radius: 6px;
-        
+
         .tm_truck_limits {
             display: flex;
             gap: 20px;
-            
+
             .tm_limit_item {
                 display: flex;
                 align-items: center;
                 gap: 5px;
                 font-size: 0.9em;
-                
+
                 i {
                     color: #6c757d;
                 }
             }
         }
     }
-    
+
     .tm_progression_list {
         .tm_progression_step {
             display: flex;
@@ -3468,28 +3469,28 @@ Destination type selector styling .tm_destination_type_selector {
             border-left: 4px solid #dee2e6;
             background: #fff;
             transition: all 0.2s ease;
-            
+
             &.tm_step_start {
                 border-left-color: #007bff;
                 background: #f8f9ff;
             }
-            
+
             &.tm_step_pickup {
                 border-left-color: #17a2b8;
                 background: #f0fdff;
             }
-            
+
             &.tm_step_delivery {
                 border-left-color: #28a745;
                 background: #f8fff9;
             }
-            
+
             &.tm_step_exceeded {
                 border-left-color: #dc3545;
                 background: #fff5f5;
                 box-shadow: 0 2px 8px rgba(220, 53, 69, 0.15);
             }
-            
+
             .tm_step_number {
                 display: flex;
                 align-items: center;
@@ -3502,42 +3503,42 @@ Destination type selector styling .tm_destination_type_selector {
                 font-weight: 600;
                 font-size: 0.9em;
                 flex-shrink: 0;
-                
+
                 .tm_step_start & {
                     background: #007bff;
                     color: white;
                 }
-                
+
                 .tm_step_pickup & {
                     background: #17a2b8;
                     color: white;
                 }
-                
+
                 .tm_step_delivery & {
                     background: #28a745;
                     color: white;
                 }
-                
+
                 .tm_step_exceeded & {
                     background: #dc3545;
                     color: white;
                 }
             }
-            
+
             .tm_step_info {
                 flex: 1;
-                
+
                 .tm_step_location {
                     display: flex;
                     align-items: center;
                     gap: 10px;
                     margin-bottom: 8px;
-                    
+
                     .tm_location_name {
                         font-weight: 500;
                         color: #212529;
                     }
-                    
+
                     .tm_step_type {
                         display: inline-flex;
                         align-items: center;
@@ -3546,57 +3547,57 @@ Destination type selector styling .tm_destination_type_selector {
                         border-radius: 12px;
                         font-size: 0.75em;
                         font-weight: 500;
-                        
+
                         &.tm_type_pickup {
                             background: #d1ecf1;
                             color: #0c5460;
                         }
-                        
+
                         &.tm_type_delivery {
                             background: #d4edda;
                             color: #155724;
                         }
                     }
                 }
-                
+
                 .tm_step_capacity {
                     display: flex;
                     gap: 20px;
-                    
+
                     .tm_capacity_item {
                         display: flex;
                         align-items: center;
                         gap: 6px;
-                        
+
                         .tm_capacity_label {
                             font-size: 0.85em;
                             color: #6c757d;
                             font-weight: 500;
                         }
-                        
+
                         .tm_capacity_value {
                             font-weight: 600;
                             color: #212529;
-                            
+
                             &.tm_exceeded {
                                 color: #dc3545;
                                 font-weight: 700;
                             }
-                            
+
                             .tm_change {
                                 font-size: 0.85em;
                                 margin-left: 4px;
-                                
+
                                 &.tm_change_positive {
                                     color: #17a2b8;
                                 }
-                                
+
                                 &.tm_change_negative {
                                     color: #28a745;
                                 }
                             }
                         }
-                        
+
                         .tm_capacity_remaining {
                             font-weight: 500;
                             color: #28a745;
@@ -3604,7 +3605,7 @@ Destination type selector styling .tm_destination_type_selector {
                         }
                     }
                 }
-                
+
                 .tm_capacity_warning {
                     display: flex;
                     align-items: center;
@@ -3616,7 +3617,7 @@ Destination type selector styling .tm_destination_type_selector {
                     border-radius: 4px;
                     font-size: 0.85em;
                     font-weight: 500;
-                    
+
                     i {
                         color: #dc3545;
                     }
@@ -3630,22 +3631,23 @@ Destination type selector styling .tm_destination_type_selector {
     &.tm_capacity_exceeded {
         border-color: #dc3545 !important;
         background: #fff5f5 !important;
-        
+
         .tm_metric_icon {
             color: #dc3545 !important;
         }
     }
-    
+
     .tm_capacity_status {
         .tm_capacity_bar {
+
             .tm_capacity_weight,
             .tm_capacity_volume {
                 margin-bottom: 8px;
-                
+
                 &:last-child {
                     margin-bottom: 0;
                 }
-                
+
                 small {
                     display: block;
                     margin-bottom: 4px;
@@ -3664,7 +3666,7 @@ Destination type selector styling .tm_destination_type_selector {
     background: #f8f9fa;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .bulk-mission-map-column {
@@ -3775,13 +3777,13 @@ Destination type selector styling .tm_destination_type_selector {
 
 .bulk-mission-item:hover {
     border-color: #007bff;
-    box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
 }
 
 .bulk-mission-item.active {
     border-color: #007bff;
     background: #f8f9ff;
-    box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
 }
 
 .bulk-mission-item-header {
@@ -3878,7 +3880,7 @@ Destination type selector styling .tm_destination_type_selector {
     border: 1px solid #ced4da;
     border-top: none;
     border-radius: 0 0 4px 4px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     max-height: 200px;
     overflow-y: auto;
@@ -4038,7 +4040,7 @@ Destination type selector styling .tm_destination_type_selector {
     justify-content: center;
     color: white;
     font-weight: bold;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     border: 2px solid white;
 }
 
@@ -4065,6 +4067,7 @@ Destination type selector styling .tm_destination_type_selector {
 .bulk-mission-marker .marker-icon {
     font-size: 0.8rem;
 }
+
 /* Bulk M
 ission Wizard Styles */
 .bulk-mission-wizard-container {
@@ -4089,7 +4092,7 @@ ission Wizard Styles */
     background: white;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
 }
 
@@ -4104,7 +4107,7 @@ ission Wizard Styles */
     background: white;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .bulk-mission-planner-section h4 {
@@ -4112,4 +4115,276 @@ ission Wizard Styles */
     margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 2px solid #e9ecef;
+}
+
+// === Bulk Mission Widget Styling ===
+.tm_mission_list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid $tm-border-color;
+    border-radius: 8px;
+    background: white;
+}
+
+.tm_mission_item {
+    padding: 12px 16px;
+    border-bottom: 1px solid $tm-border-color;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background: $tm-bg-light;
+    }
+
+    &.active {
+        background: rgba(74, 93, 135, 0.1);
+        border-left: 4px solid $tm-primary-color;
+    }
+
+    .tm_mission_item_header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+
+        .tm_mission_item_title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            strong {
+                color: $tm-primary-color;
+                font-weight: 600;
+            }
+
+            .badge {
+                font-size: 0.7rem;
+            }
+        }
+
+        .tm_mission_item_actions {
+            display: flex;
+            gap: 4px;
+
+            .btn {
+                padding: 4px 8px;
+                font-size: 0.75rem;
+                border-radius: 4px;
+            }
+        }
+    }
+
+    .tm_mission_item_details {
+        font-size: 0.85rem;
+        color: $tm-secondary-color;
+
+        .tm_mission_item_source {
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+
+            i {
+                margin-right: 6px;
+            }
+        }
+
+        .tm_mission_item_meta {
+            display: flex;
+            gap: 12px;
+            font-size: 0.8rem;
+
+            span {
+                display: flex;
+                align-items: center;
+
+                i {
+                    margin-right: 4px;
+                }
+            }
+        }
+    }
+}
+
+// Enhanced destination styling for bulk mission widget
+.tm_destination_item {
+    .tm_package_details {
+        margin-top: 12px;
+        padding: 12px;
+        background: $tm-bg-light;
+        border-radius: 6px;
+        border: 1px solid $tm-border-color;
+
+        .tm_package_row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 8px;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            .tm_package_field {
+                flex: 1;
+
+                label {
+                    display: block;
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                    color: $tm-secondary-color;
+                    margin-bottom: 4px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+
+                .form-control,
+                .form-select {
+                    font-size: 0.85rem;
+                    padding: 6px 8px;
+                    border-radius: 4px;
+                    border: 1px solid $tm-border-color;
+
+                    &:focus {
+                        border-color: $tm-primary-color;
+                        box-shadow: 0 0 0 2px rgba(74, 93, 135, 0.1);
+                    }
+                }
+
+                .form-check {
+                    margin-top: 8px;
+
+                    .form-check-input {
+                        margin-right: 8px;
+                    }
+
+                    .form-check-label {
+                        font-size: 0.85rem;
+                        color: $tm-secondary-color;
+                        text-transform: none;
+                        letter-spacing: normal;
+                        font-weight: normal;
+                    }
+                }
+            }
+        }
+    }
+
+    .tm_remove_dest_btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 6px 8px;
+        font-size: 0.75rem;
+        border-radius: 4px;
+        border: 1px solid #dc3545;
+        background: white;
+        color: #dc3545;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: #dc3545;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+        }
+    }
+}
+
+// Destination type selector styling
+.tm_destination_type_selector {
+    margin: 8px 0;
+
+    .tm_type_radio_group {
+        display: flex;
+        gap: 8px;
+
+        .tm_type_radio_option {
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            border: 1px solid $tm-border-color;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+
+            input[type="radio"] {
+                display: none;
+            }
+
+            i {
+                margin-right: 6px;
+                font-size: 0.9rem;
+            }
+
+            &:hover {
+                border-color: $tm-primary-color;
+                background: rgba(74, 93, 135, 0.05);
+            }
+
+            &.active {
+                border-color: $tm-primary-color;
+                background: rgba(74, 93, 135, 0.1);
+                color: $tm-primary-color;
+                font-weight: 600;
+
+                i {
+                    color: $tm-primary-color;
+                }
+            }
+        }
+    }
+}
+
+// Empty state styling
+.tm_empty_destinations {
+    text-align: center;
+    padding: 40px 20px;
+    color: $tm-secondary-color;
+
+    i {
+        display: block;
+        margin-bottom: 16px;
+        color: lighten($tm-secondary-color, 20%);
+    }
+
+    p {
+        margin: 8px 0;
+        font-size: 0.9rem;
+
+        &.small {
+            font-size: 0.8rem;
+            color: lighten($tm-secondary-color, 10%);
+        }
+    }
+}
+
+// Responsive adjustments for bulk mission widget
+@media (max-width: 1200px) {
+    .tm_mission_form .tm_main_container {
+        grid-template-columns: 1fr 400px;
+    }
+}
+
+@media (max-width: 992px) {
+    .tm_mission_form .tm_main_container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 400px 1fr;
+        height: auto;
+        min-height: 800px;
+    }
+
+    .tm_map_column {
+        border-right: none;
+        border-bottom: 1px solid $tm-border-color;
+    }
+
+    .tm_details_column {
+        max-height: none;
+        overflow: visible;
+    }
 }

@@ -5,34 +5,6 @@ import { useService } from "@web/core/utils/hooks";
 
 const { Component, onMounted, onWillUnmount, useRef, useState } = owl;
 
-// Decode polyline function (same as in mission_map_planner_widget.js)
-function decodePolyline(encoded) {
-    let index = 0, len = encoded.length;
-    let lat = 0, lng = 0;
-    let array = [];
-    while (index < len) {
-        let b, shift = 0, result = 0;
-        do {
-            b = encoded.charCodeAt(index++) - 63;
-            result |= (b & 0x1f) << shift;
-            shift += 5;
-        } while (b >= 0x20);
-        let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
-        lat += dlat;
-        shift = 0;
-        result = 0;
-        do {
-            b = encoded.charCodeAt(index++) - 63;
-            result |= (b & 0x1f) << shift;
-            shift += 5;
-        } while (b >= 0x20);
-        let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
-        lng += dlng;
-        array.push([lat * 1e-5, lng * 1e-5]);
-    }
-    return array;
-}
-
 export class BulkMissionWidget extends Component {
     static template = "transport_management.BulkMissionWidget";
 
@@ -42,20 +14,14 @@ export class BulkMissionWidget extends Component {
         this.orm = useService("orm");
 
         this.map = null;
-        this.missionLayers = {};
-        this.currentMissionIndex = 0;
+        this.sourceMarkers = [];
+        this.destinationMarkers = [];
 
         this.state = useState({
-            missions: [],
-            currentMission: null,
+            sources: [],
+            destinations: [],
             drivers: [],
             vehicles: [],
-            showDriverDropdown: false,
-            showVehicleDropdown: false,
-            driverSearch: '',
-            vehicleSearch: '',
-            filteredDrivers: [],
-            filteredVehicles: [],
         });
 
         onMounted(() => {
@@ -89,14 +55,33 @@ export class BulkMissionWidget extends Component {
                 maxZoom: 19,
             }).addTo(this.map);
 
-            // Add click handlers for creating new missions
-            this.map.on("click", (e) => this.handleMapClick(e));
+            // Click to add sources
+            this.map.on("click", (e) => this.addSource(e.latlng.lat, e.latlng.lng));
+
+            // Right-click to add destinations
             this.map.on("contextmenu", (e) => {
                 e.originalEvent.preventDefault();
-                this.addDestinationToCurrentMission(e.latlng.lat, e.latlng.lng);
+                this.addDestination(e.latlng.lat, e.latlng.lng);
             });
 
-            console.log("Bulk mission map initialized successfully");
+            // Handle popup events for removal
+            this.map.on('popupopen', (e) => {
+                const deleteButton = e.popup._container.querySelector('.tm-delete-marker');
+                if (deleteButton) {
+                    deleteButton.addEventListener('click', () => {
+                        const type = deleteButton.dataset.type;
+                        const index = parseInt(deleteButton.dataset.index);
+                        if (type === 'source') {
+                            this.removeSource(index);
+                        } else {
+                            this.removeDestination(index);
+                        }
+                        this.map.closePopup();
+                    });
+                }
+            });
+
+            console.log("Bulk location selector map initialized successfully");
         } catch (error) {
             console.error("Error initializing map:", error);
             this.notification.add("Failed to initialize map. Please refresh the page.", { type: "danger" });
@@ -104,332 +89,286 @@ export class BulkMissionWidget extends Component {
     }
 
     syncStateFromRecord() {
-        const templates = this.getMissionTemplates();
-        this.state.missions = templates;
-        if (templates.length > 0 && !this.state.currentMission) {
-            this.selectMission(0);
-        }
-        this.updateMapDisplay();
-    }
-
-    getMissionTemplates() {
         try {
-            return JSON.parse(this.props.record.data.mission_templates || '[]');
+            const data = JSON.parse(this.props.record.data.mission_templates || '{"sources": [], "destinations": []}');
+            this.state.sources = data.sources || [];
+            this.state.destinations = data.destinations || [];
+            this.updateMapDisplay();
         } catch {
-            return [];
+            this.state.sources = [];
+            this.state.destinations = [];
         }
     }
 
-    async saveMissionTemplates() {
-        const templates = JSON.stringify(this.state.missions);
-        await this.props.record.update({ mission_templates: templates });
+    async saveData() {
+        const data = {
+            sources: this.state.sources,
+            destinations: this.state.destinations
+        };
+        await this.props.record.update({ mission_templates: JSON.stringify(data) });
     }
 
     async loadDriversAndVehicles() {
         try {
             const [drivers, vehicles] = await Promise.all([
                 this.orm.searchRead("res.partner", [["is_company", "=", false]], ["id", "name"]),
-                this.orm.searchRead("truck.vehicle", [], ["id", "name"])
+                this.orm.searchRead("truck.vehicle", [], ["id", "name", "max_weight", "max_volume", "license_plate"])
             ]);
 
             this.state.drivers = drivers;
             this.state.vehicles = vehicles;
-            this.state.filteredDrivers = drivers;
-            this.state.filteredVehicles = vehicles;
         } catch (error) {
             console.error("Error loading drivers and vehicles:", error);
         }
     }
 
-    // Mission Management
-    addNewMission() {
-        const newMission = {
-            id: Date.now(), // Temporary ID
-            name: `Mission ${this.state.missions.length + 1}`,
-            source_location: null,
-            source_latitude: null,
-            source_longitude: null,
-            destinations: [],
-            driver_id: null,
-            driver_name: null,
-            vehicle_id: null,
-            vehicle_name: null,
-            priority: '1',
-            notes: '',
-        };
-
-        this.state.missions.push(newMission);
-        this.selectMission(this.state.missions.length - 1);
-        this.saveMissionTemplates();
-        this.notification.add("New mission template added", { type: "success" });
-    }
-
-    selectMission(index) {
-        this.currentMissionIndex = index;
-        this.state.currentMission = this.state.missions[index];
-        this.updateMapDisplay();
-    }
-
-    async removeMission(index) {
-        if (confirm('Are you sure you want to remove this mission template?')) {
-            this.state.missions.splice(index, 1);
-
-            if (this.currentMissionIndex >= this.state.missions.length) {
-                this.currentMissionIndex = Math.max(0, this.state.missions.length - 1);
-            }
-
-            this.state.currentMission = this.state.missions[this.currentMissionIndex] || null;
-            this.updateMapDisplay();
-            await this.saveMissionTemplates();
-            this.notification.add("Mission template removed", { type: "success" });
-        }
-    }
-
-    async duplicateMission(index) {
-        const original = this.state.missions[index];
-        const duplicate = {
-            ...JSON.parse(JSON.stringify(original)),
-            id: Date.now(),
-            name: `${original.name} (Copy)`,
-        };
-
-        this.state.missions.splice(index + 1, 0, duplicate);
-        this.selectMission(index + 1);
-        await this.saveMissionTemplates();
-        this.notification.add("Mission template duplicated", { type: "success" });
-    }
-
-    // Map Interaction
-    async handleMapClick(e) {
-        if (!this.state.currentMission) {
-            this.addNewMission();
-        }
-
-        await this.setSourceLocation(e.latlng.lat, e.latlng.lng);
-    }
-
-    async setSourceLocation(lat, lng) {
-        if (!this.state.currentMission) return;
-
+    // Source Management
+    async addSource(lat, lng) {
         try {
             const address = await this.reverseGeocode(lat, lng);
 
-            this.state.currentMission.source_location = address;
-            this.state.currentMission.source_latitude = lat;
-            this.state.currentMission.source_longitude = lng;
-
-            await this.saveMissionTemplates();
-            this.updateMapDisplay();
-            this.notification.add("Source location updated", { type: "success" });
-        } catch (error) {
-            console.error('Error setting source location:', error);
-            this.notification.add("Failed to set source location", { type: "danger" });
-        }
-    }
-
-    async addDestinationToCurrentMission(lat, lng) {
-        if (!this.state.currentMission) {
-            this.addNewMission();
-        }
-
-        try {
-            const address = await this.reverseGeocode(lat, lng);
-            const newSequence = this.state.currentMission.destinations.length + 1;
-
-            const newDestination = {
+            const newSource = {
                 id: Date.now(),
+                name: `Source ${this.state.sources.length + 1}`,
                 location: address,
                 latitude: lat,
                 longitude: lng,
-                sequence: newSequence,
+                source_type: 'warehouse'
+            };
+
+            this.state.sources.push(newSource);
+            await this.saveData();
+            this.updateMapDisplay();
+            this.notification.add(`Source added: ${address.substring(0, 50)}...`, { type: "success" });
+        } catch (error) {
+            console.error('Error adding source:', error);
+            this.notification.add("Failed to add source", { type: "danger" });
+        }
+    }
+
+    async removeSource(index) {
+        this.state.sources.splice(index, 1);
+        await this.saveData();
+        this.updateMapDisplay();
+        this.notification.add("Source removed", { type: "success" });
+    }
+
+    async updateSourceField(index, field, value) {
+        if (this.state.sources[index]) {
+            this.state.sources[index][field] = value;
+            await this.saveData();
+        }
+    }
+
+    // Destination Management
+    async addDestination(lat, lng) {
+        try {
+            const address = await this.reverseGeocode(lat, lng);
+
+            const newDestination = {
+                id: Date.now(),
+                name: `Destination ${this.state.destinations.length + 1}`,
+                location: address,
+                latitude: lat,
+                longitude: lng,
                 mission_type: 'delivery',
-                expected_arrival_time: null,
-                service_duration: 0,
                 package_type: 'individual',
                 total_weight: 0,
                 total_volume: 0,
+                service_duration: 0,
                 requires_signature: false,
+                expected_arrival_time: null
             };
 
-            this.state.currentMission.destinations.push(newDestination);
-            await this.saveMissionTemplates();
+            this.state.destinations.push(newDestination);
+            await this.saveData();
             this.updateMapDisplay();
-            this.notification.add(`Destination ${newSequence} added`, { type: "success" });
+            this.notification.add(`Destination added: ${address.substring(0, 50)}...`, { type: "success" });
         } catch (error) {
             console.error('Error adding destination:', error);
             this.notification.add("Failed to add destination", { type: "danger" });
         }
     }
 
-    async removeDestination(missionIndex, destIndex) {
-        const mission = this.state.missions[missionIndex];
-        mission.destinations.splice(destIndex, 1);
-
-        // Resequence remaining destinations
-        mission.destinations.forEach((dest, index) => {
-            dest.sequence = index + 1;
-        });
-
-        await this.saveMissionTemplates();
+    async removeDestination(index) {
+        this.state.destinations.splice(index, 1);
+        await this.saveData();
         this.updateMapDisplay();
         this.notification.add("Destination removed", { type: "success" });
+    }
+
+    async updateDestinationField(index, field, value) {
+        if (this.state.destinations[index]) {
+            this.state.destinations[index][field] = value;
+            await this.saveData();
+
+            // Update map display if mission type changed
+            if (field === 'mission_type') {
+                this.updateMapDisplay();
+            }
+        }
     }
 
     // Map Display
     updateMapDisplay() {
         if (!this.map) return;
 
-        // Clear existing layers
-        Object.values(this.missionLayers).forEach(layer => {
-            this.map.removeLayer(layer);
-        });
-        this.missionLayers = {};
+        // Clear existing markers
+        this.sourceMarkers.forEach(marker => this.map.removeLayer(marker));
+        this.destinationMarkers.forEach(marker => this.map.removeLayer(marker));
+        this.sourceMarkers = [];
+        this.destinationMarkers = [];
 
-        // Display all missions
-        this.state.missions.forEach((mission, index) => {
-            this.displayMissionOnMap(mission, index);
-        });
-
-        this.fitMapToAllMissions();
-    }
-
-    displayMissionOnMap(mission, index) {
-        const isCurrentMission = index === this.currentMissionIndex;
-        const missionColor = isCurrentMission ? '#007bff' : '#6c757d';
-        const opacity = isCurrentMission ? 1.0 : 0.6;
-
-        // Create layer group for this mission
-        const missionGroup = L.layerGroup().addTo(this.map);
-        this.missionLayers[index] = missionGroup;
-
-        // Add source marker
-        if (mission.source_latitude && mission.source_longitude) {
-            const sourceMarker = L.marker([mission.source_latitude, mission.source_longitude], {
-                icon: this.createMissionMarkerIcon('source', missionColor, index + 1)
+        // Add source markers
+        this.state.sources.forEach((source, index) => {
+            const marker = L.marker([source.latitude, source.longitude], {
+                icon: this.createMarkerIcon('source'),
+                draggable: true
             });
 
-            sourceMarker.bindPopup(`
+            marker.on("dragend", async (e) => {
+                const newLatLng = e.target.getLatLng();
+                await this.updateSourceLocation(index, newLatLng.lat, newLatLng.lng);
+            });
+
+            marker.bindPopup(`
                 <div>
-                    <strong>Mission ${index + 1} - Source</strong><br>
-                    ${mission.source_location}<br>
-                    <small>Lat: ${mission.source_latitude.toFixed(4)}, Lng: ${mission.source_longitude.toFixed(4)}</small>
+                    <strong>${source.name}</strong><br>
+                    ${source.location}<br>
+                    <small>Type: ${source.source_type}</small><br>
+                    <small>Lat: ${source.latitude.toFixed(4)}, Lng: ${source.longitude.toFixed(4)}</small><br>
+                    <button class="tm-delete-marker" 
+                            data-type="source" 
+                            data-index="${index}"
+                            style="background: #dc3545; color: white; border: none; padding: 5px 10px; margin-top: 5px; border-radius: 3px; cursor: pointer;">
+                        🗑️ Remove Source
+                    </button>
                 </div>
             `);
 
-            missionGroup.addLayer(sourceMarker);
-        }
-
-        // Add destination markers
-        mission.destinations.forEach((dest, destIndex) => {
-            if (dest.latitude && dest.longitude) {
-                const destMarker = L.marker([dest.latitude, dest.longitude], {
-                    icon: this.createMissionMarkerIcon('destination', missionColor, dest.sequence)
-                });
-
-                destMarker.bindPopup(`
-                    <div>
-                        <strong>Mission ${index + 1} - Destination ${dest.sequence}</strong><br>
-                        ${dest.location}<br>
-                        <small>Type: ${dest.mission_type}</small><br>
-                        <small>Weight: ${dest.total_weight} kg</small><br>
-                        <button onclick="window.bulkMissionWidget.removeDestination(${index}, ${destIndex})" 
-                                style="background: #dc3545; color: white; border: none; padding: 5px 10px; margin-top: 5px; border-radius: 3px; cursor: pointer;">
-                            🗑️ Remove
-                        </button>
-                    </div>
-                `);
-
-                missionGroup.addLayer(destMarker);
-            }
+            this.sourceMarkers.push(marker);
+            marker.addTo(this.map);
         });
 
-        // Draw route if possible
-        this.drawMissionRoute(mission, missionGroup, missionColor, opacity);
+        // Add destination markers
+        this.state.destinations.forEach((dest, index) => {
+            const marker = L.marker([dest.latitude, dest.longitude], {
+                icon: this.createMarkerIcon(dest.mission_type),
+                draggable: true
+            });
+
+            marker.on("dragend", async (e) => {
+                const newLatLng = e.target.getLatLng();
+                await this.updateDestinationLocation(index, newLatLng.lat, newLatLng.lng);
+            });
+
+            marker.bindPopup(`
+                <div>
+                    <strong>${dest.name}</strong><br>
+                    ${dest.location}<br>
+                    <small>Type: ${dest.mission_type}</small><br>
+                    <small>Weight: ${dest.total_weight} kg</small><br>
+                    <small>Lat: ${dest.latitude.toFixed(4)}, Lng: ${dest.longitude.toFixed(4)}</small><br>
+                    <button class="tm-delete-marker" 
+                            data-type="destination" 
+                            data-index="${index}"
+                            style="background: #dc3545; color: white; border: none; padding: 5px 10px; margin-top: 5px; border-radius: 3px; cursor: pointer;">
+                        🗑️ Remove Destination
+                    </button>
+                </div>
+            `);
+
+            this.destinationMarkers.push(marker);
+            marker.addTo(this.map);
+        });
+
+        this.fitMapToAllMarkers();
     }
 
-    createMissionMarkerIcon(type, color, number) {
-        const isSource = type === 'source';
-
+    createMarkerIcon(type) {
         let html;
-        if (isSource) {
+
+        if (type === 'source') {
             html = `
-                <div class="bulk-mission-marker source-marker" style="background-color: ${color};">
-                    <div class="marker-number">${number}</div>
-                    <div class="marker-icon"><i class="fa fa-truck"></i></div>
+                <div class="tm-logistics-marker tm-source-marker">
+                    <div class="tm-marker-circle">
+                        <div class="tm-marker-icon"><i class="fa fa-truck"></i></div>
+                    </div>
                 </div>
             `;
         } else {
+            const markerClass = type === 'pickup' ? 'tm-pickup-marker' : 'tm-delivery-marker';
+            const markerIcon = type === 'pickup' ? '<i class="fa fa-upload"></i>' : '<i class="fa fa-download"></i>';
+
             html = `
-                <div class="bulk-mission-marker dest-marker" style="background-color: ${color};">
-                    <div class="marker-number">${number}</div>
-                    <div class="marker-icon"><i class="fa fa-map-marker"></i></div>
+                <div class="tm-logistics-marker ${markerClass}">
+                    <div class="tm-marker-circle">
+                        <div class="tm-marker-icon">${markerIcon}</div>
+                    </div>
                 </div>
             `;
         }
 
         return L.divIcon({
-            className: 'bulk-mission-custom-marker',
+            className: 'tm-logistics-custom-marker',
             html: html,
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
         });
     }
 
-    async drawMissionRoute(mission, layerGroup, color, opacity) {
-        if (!mission.source_latitude || !mission.source_longitude || mission.destinations.length === 0) {
-            return;
-        }
-
-        const waypoints = [[mission.source_longitude, mission.source_latitude]];
-        mission.destinations.forEach(dest => {
-            if (dest.latitude && dest.longitude) {
-                waypoints.push([dest.longitude, dest.latitude]);
+    async updateSourceLocation(index, lat, lng) {
+        if (this.state.sources[index]) {
+            try {
+                const address = await this.reverseGeocode(lat, lng);
+                this.state.sources[index].location = address;
+                this.state.sources[index].latitude = lat;
+                this.state.sources[index].longitude = lng;
+                await this.saveData();
+                this.notification.add("Source location updated", { type: "success" });
+            } catch (error) {
+                console.error('Error updating source location:', error);
+                this.notification.add("Failed to update source location", { type: "danger" });
             }
-        });
-
-        if (waypoints.length < 2) return;
-
-        try {
-            const coordinates = waypoints.map(wp => `${wp[0]},${wp[1]}`).join(';');
-            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=polyline`;
-
-            const response = await fetch(osrmUrl);
-            if (response.ok) {
-                const data = await response.json();
-                if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
-                    const geometry = decodePolyline(data.routes[0].geometry);
-                    const routeLine = L.polyline(geometry, {
-                        color: color,
-                        weight: 4,
-                        opacity: opacity
-                    });
-                    layerGroup.addLayer(routeLine);
-                }
-            }
-        } catch (error) {
-            console.warn('Failed to draw route:', error);
         }
     }
 
-    fitMapToAllMissions() {
+    async updateDestinationLocation(index, lat, lng) {
+        if (this.state.destinations[index]) {
+            try {
+                const address = await this.reverseGeocode(lat, lng);
+                this.state.destinations[index].location = address;
+                this.state.destinations[index].latitude = lat;
+                this.state.destinations[index].longitude = lng;
+                await this.saveData();
+                this.notification.add("Destination location updated", { type: "success" });
+            } catch (error) {
+                console.error('Error updating destination location:', error);
+                this.notification.add("Failed to update destination location", { type: "danger" });
+            }
+        }
+    }
+
+    fitMapToAllMarkers() {
         if (!this.map) return;
 
-        const allPoints = [];
-
-        this.state.missions.forEach(mission => {
-            if (mission.source_latitude && mission.source_longitude) {
-                allPoints.push([mission.source_latitude, mission.source_longitude]);
+        const allMarkers = [...this.sourceMarkers, ...this.destinationMarkers];
+        if (allMarkers.length > 0) {
+            const bounds = new L.FeatureGroup(allMarkers).getBounds();
+            if (bounds.isValid()) {
+                this.map.fitBounds(bounds, { padding: [50, 50] });
             }
-            mission.destinations.forEach(dest => {
-                if (dest.latitude && dest.longitude) {
-                    allPoints.push([dest.latitude, dest.longitude]);
-                }
-            });
-        });
+        }
+    }
 
-        if (allPoints.length > 0) {
-            const bounds = L.latLngBounds(allPoints);
-            this.map.fitBounds(bounds, { padding: [20, 20] });
+    async clearAllMarkers() {
+        if (confirm('Are you sure you want to clear all sources and destinations?')) {
+            this.state.sources = [];
+            this.state.destinations = [];
+
+            await this.saveData();
+            this.updateMapDisplay();
+            this.notification.add("All locations cleared", { type: "success" });
         }
     }
 
@@ -445,66 +384,71 @@ export class BulkMissionWidget extends Component {
         }
     }
 
-    // Driver/Vehicle Selection
-    toggleDriverDropdown() {
-        this.state.showDriverDropdown = !this.state.showDriverDropdown;
-        this.state.showVehicleDropdown = false;
+    // Date/Time formatting
+    formatDateTimeForInput(dateTimeString) {
+        if (!dateTimeString) return '';
+        return dateTimeString.slice(0, 16);
     }
 
-    toggleVehicleDropdown() {
-        this.state.showVehicleDropdown = !this.state.showVehicleDropdown;
-        this.state.showDriverDropdown = false;
-    }
+    // JSON Generation for console logging
+    generateCompleteJSON() {
+        const completeData = {
+            bulk_location_data: {
+                created_at: new Date().toISOString(),
+                total_sources: this.state.sources.length,
+                total_destinations: this.state.destinations.length,
+                sources: this.state.sources.map(source => ({
+                    ...source,
+                    // Ensure all required fields are present
+                    source_type: source.source_type || 'warehouse',
+                    name: source.name || 'Unnamed Source'
+                })),
+                destinations: this.state.destinations.map(dest => ({
+                    ...dest,
+                    // Ensure all required fields are present
+                    mission_type: dest.mission_type || 'delivery',
+                    package_type: dest.package_type || 'individual',
+                    total_weight: dest.total_weight || 0,
+                    total_volume: dest.total_volume || 0,
+                    service_duration: dest.service_duration || 0,
+                    requires_signature: dest.requires_signature || false,
+                    expected_arrival_time: dest.expected_arrival_time || null,
+                    name: dest.name || 'Unnamed Destination'
+                })),
+                available_vehicles: this.state.vehicles.map(vehicle => ({
+                    ...vehicle,
+                    // Include all vehicle details
+                    max_weight: vehicle.max_weight || 0,
+                    max_volume: vehicle.max_volume || 0,
+                    license_plate: vehicle.license_plate || 'N/A'
+                })),
+                available_drivers: this.state.drivers,
+                summary: {
+                    total_locations: this.state.sources.length + this.state.destinations.length,
+                    pickup_destinations: this.state.destinations.filter(d => d.mission_type === 'pickup').length,
+                    delivery_destinations: this.state.destinations.filter(d => d.mission_type === 'delivery').length,
+                    total_weight: this.state.destinations.reduce((sum, d) => sum + (d.total_weight || 0), 0),
+                    total_volume: this.state.destinations.reduce((sum, d) => sum + (d.total_volume || 0), 0)
+                }
+            }
+        };
 
-    filterDrivers(ev) {
-        const search = ev.target.value.toLowerCase();
-        this.state.driverSearch = search;
-        this.state.filteredDrivers = this.state.drivers.filter(driver =>
-            driver.name.toLowerCase().includes(search)
+        console.log("=== COMPLETE BULK LOCATION JSON ===");
+        console.log(JSON.stringify(completeData, null, 2));
+        console.log("=== END JSON ===");
+
+        // Also trigger notification
+        this.notification.add(
+            `JSON generated with ${this.state.sources.length} sources, ${this.state.destinations.length} destinations, and ${this.state.vehicles.length} vehicles. Check browser console.`,
+            { type: "success" }
         );
-    }
 
-    filterVehicles(ev) {
-        const search = ev.target.value.toLowerCase();
-        this.state.vehicleSearch = search;
-        this.state.filteredVehicles = this.state.vehicles.filter(vehicle =>
-            vehicle.name.toLowerCase().includes(search)
-        );
-    }
-
-    async selectDriver(driver) {
-        if (this.state.currentMission) {
-            this.state.currentMission.driver_id = driver.id;
-            this.state.currentMission.driver_name = driver.name;
-            await this.saveMissionTemplates();
-        }
-        this.state.showDriverDropdown = false;
-    }
-
-    async selectVehicle(vehicle) {
-        if (this.state.currentMission) {
-            this.state.currentMission.vehicle_id = vehicle.id;
-            this.state.currentMission.vehicle_name = vehicle.name;
-            await this.saveMissionTemplates();
-        }
-        this.state.showVehicleDropdown = false;
-    }
-
-    // Form Updates
-    async updateMissionField(field, value) {
-        if (this.state.currentMission) {
-            this.state.currentMission[field] = value;
-            await this.saveMissionTemplates();
-        }
-    }
-
-    async updateDestinationField(destIndex, field, value) {
-        if (this.state.currentMission && this.state.currentMission.destinations[destIndex]) {
-            this.state.currentMission.destinations[destIndex][field] = value;
-            await this.saveMissionTemplates();
-        }
+        return completeData;
     }
 }
 
 // Register the widget
 registry.category("fields").add("bulk_mission_widget", BulkMissionWidget);
+
+// Also register as a standalone widget
+registry.category("view_widgets").add("bulk_mission_widget", BulkMissionWidget);

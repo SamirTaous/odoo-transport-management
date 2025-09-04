@@ -127,28 +127,146 @@ class BulkMissionWizard(models.TransientModel):
                 'target': 'current',
             }
     
-    def action_preview_missions(self):
-        """Preview missions before creation"""
-        templates = self.get_mission_templates()
+    def action_generate_json(self):
+        """Generate and log complete JSON data for bulk locations"""
+        try:
+            location_data = json.loads(self.mission_templates or '{"sources": [], "destinations": []}')
+        except:
+            location_data = {"sources": [], "destinations": []}
         
-        if not templates:
-            raise UserError(_("No mission templates defined."))
+        sources = location_data.get('sources', [])
+        destinations = location_data.get('destinations', [])
+        
+        if not sources and not destinations:
+            raise UserError(_("No locations selected. Please add sources and destinations using the map interface first."))
+        
+        # Get all available vehicles and drivers
+        vehicles = self.env['truck.vehicle'].search([]).read(['id', 'name', 'max_weight', 'max_volume', 'license_plate'])
+        drivers = self.env['res.partner'].search([('is_company', '=', False)]).read(['id', 'name'])
+        
+        complete_data = {
+            'bulk_location_data': {
+                'created_at': fields.Datetime.now().isoformat(),
+                'total_sources': len(sources),
+                'total_destinations': len(destinations),
+                'sources': [
+                    {
+                        **source,
+                        # Ensure all required fields are present with defaults
+                        'source_type': source.get('source_type', 'warehouse'),
+                        'name': source.get('name', 'Unnamed Source')
+                    }
+                    for source in sources
+                ],
+                'destinations': [
+                    {
+                        **dest,
+                        # Ensure all required fields are present with defaults
+                        'mission_type': dest.get('mission_type', 'delivery'),
+                        'package_type': dest.get('package_type', 'individual'),
+                        'total_weight': dest.get('total_weight', 0),
+                        'total_volume': dest.get('total_volume', 0),
+                        'service_duration': dest.get('service_duration', 0),
+                        'requires_signature': dest.get('requires_signature', False),
+                        'expected_arrival_time': dest.get('expected_arrival_time'),
+                        'name': dest.get('name', 'Unnamed Destination')
+                    }
+                    for dest in destinations
+                ],
+                'available_vehicles': [
+                    {
+                        **vehicle,
+                        # Include all vehicle details
+                        'max_weight': vehicle.get('max_weight', 0),
+                        'max_volume': vehicle.get('max_volume', 0),
+                        'license_plate': vehicle.get('license_plate', 'N/A')
+                    }
+                    for vehicle in vehicles
+                ],
+                'available_drivers': drivers,
+                'summary': {
+                    'total_locations': len(sources) + len(destinations),
+                    'pickup_destinations': len([d for d in destinations if d.get('mission_type') == 'pickup']),
+                    'delivery_destinations': len([d for d in destinations if d.get('mission_type') == 'delivery']),
+                    'total_weight': sum(d.get('total_weight', 0) for d in destinations),
+                    'total_volume': sum(d.get('total_volume', 0) for d in destinations)
+                }
+            }
+        }
+        
+        # Log the complete JSON
+        _logger.info("=== COMPLETE BULK LOCATION JSON ===")
+        _logger.info(json.dumps(complete_data, indent=2, default=str))
+        _logger.info("=== END JSON ===")
+        
+        # Print summary
+        summary = f"""
+BULK LOCATION SUMMARY:
+- Total Sources: {len(sources)}
+- Total Destinations: {len(destinations)}
+- Pickup Destinations: {len([d for d in destinations if d.get('mission_type') == 'pickup'])}
+- Delivery Destinations: {len([d for d in destinations if d.get('mission_type') == 'delivery'])}
+- Total Weight: {sum(d.get('total_weight', 0) for d in destinations)} kg
+- Total Volume: {sum(d.get('total_volume', 0) for d in destinations)} m³
+- Available Vehicles: {len(vehicles)}
+- Available Drivers: {len(drivers)}
+
+JSON has been logged to server console. Check the logs for complete data.
+        """
+        
+        _logger.info(summary)
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'JSON Generated Successfully',
+                'message': f'Complete JSON with {len(sources)} sources, {len(destinations)} destinations, and {len(vehicles)} vehicles logged to console.',
+                'type': 'success',
+                'sticky': True,
+            }
+        }
+
+    def action_preview_missions(self):
+        """Preview selected locations"""
+        try:
+            location_data = json.loads(self.mission_templates or '{"sources": [], "destinations": []}')
+        except:
+            location_data = {"sources": [], "destinations": []}
+        
+        sources = location_data.get('sources', [])
+        destinations = location_data.get('destinations', [])
+        
+        if not sources and not destinations:
+            raise UserError(_("No locations selected."))
         
         preview_data = []
-        for i, template in enumerate(templates, 1):
-            destinations = template.get('destinations', [])
+        
+        # Add sources to preview
+        for i, source in enumerate(sources, 1):
             preview_data.append({
-                'mission_number': i,
-                'source': template.get('source_location', 'Not set'),
-                'destination_count': len(destinations),
-                'total_weight': sum(d.get('total_weight', 0) for d in destinations),
-                'driver': template.get('driver_name') or (self.driver_id.name if self.driver_id else 'Default'),
-                'vehicle': template.get('vehicle_name') or (self.vehicle_id.name if self.vehicle_id else 'Default'),
+                'mission_number': f'S{i}',
+                'source': source.get('location', 'Unknown location'),
+                'destination_count': 0,
+                'total_weight': 0,
+                'driver': 'Source Location',
+                'vehicle': source.get('source_type', 'warehouse').title(),
+            })
+        
+        # Add destinations to preview
+        for i, dest in enumerate(destinations, 1):
+            preview_data.append({
+                'mission_number': f'D{i}',
+                'source': dest.get('location', 'Unknown location'),
+                'destination_count': 1,
+                'total_weight': dest.get('total_weight', 0),
+                'driver': dest.get('mission_type', 'delivery').title(),
+                'vehicle': dest.get('package_type', 'individual').title(),
             })
         
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Mission Preview'),
+            'name': _('Location Preview'),
             'res_model': 'bulk.mission.preview',
             'view_mode': 'tree',
             'target': 'new',

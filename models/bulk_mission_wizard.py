@@ -1047,6 +1047,199 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                 return None
         return None
 
+    def create_missions_from_ai_results(self):
+        """Create actual transport missions from AI optimization results"""
+        if not self.ai_optimization_result:
+            raise UserError(_("No AI optimization results found. Please run AI optimization first."))
+        
+        try:
+            ai_data = json.loads(self.ai_optimization_result)
+            missions_data = ai_data.get('created_missions', [])
+            
+            if not missions_data:
+                raise UserError(_("No missions found in AI results."))
+            
+            created_missions = []
+            
+            for mission_data in missions_data:
+                try:
+                    # Extract mission information
+                    source_location = mission_data.get('source_location', {})
+                    assigned_vehicle = mission_data.get('assigned_vehicle', {})
+                    assigned_driver = mission_data.get('assigned_driver', {})
+                    destinations = mission_data.get('destinations', [])
+                    
+                    # Create mission
+                    mission_vals = {
+                        'mission_date': self.mission_date,
+                        'driver_id': assigned_driver.get('driver_id') or self.driver_id.id,
+                        'vehicle_id': assigned_vehicle.get('vehicle_id') or self.vehicle_id.id,
+                        'priority': self.priority,
+                        'source_location': source_location.get('location', ''),
+                        'source_latitude': source_location.get('latitude'),
+                        'source_longitude': source_location.get('longitude'),
+                        'notes': f"AI Generated Mission: {mission_data.get('mission_name', 'Unnamed Mission')}",
+                        'state': 'draft',
+                    }
+                    
+                    mission = self.env['transport.mission'].create(mission_vals)
+                    
+                    # Create destinations
+                    for seq, dest_data in enumerate(destinations, 1):
+                        cargo_details = dest_data.get('cargo_details', {})
+                        
+                        dest_vals = {
+                            'mission_id': mission.id,
+                            'location': dest_data.get('location', ''),
+                            'latitude': dest_data.get('latitude'),
+                            'longitude': dest_data.get('longitude'),
+                            'sequence': seq,
+                            'mission_type': dest_data.get('mission_type', 'delivery'),
+                            'expected_arrival_time': dest_data.get('estimated_arrival_time'),
+                            'service_duration': dest_data.get('service_duration', 0),
+                            'package_type': cargo_details.get('package_type', 'individual'),
+                            'total_weight': cargo_details.get('total_weight', 0),
+                            'total_volume': cargo_details.get('total_volume', 0),
+                            'requires_signature': cargo_details.get('requires_signature', False),
+                            'special_instructions': cargo_details.get('special_instructions', ''),
+                        }
+                        self.env['transport.destination'].create(dest_vals)
+                    
+                    # Auto-optimize route if requested
+                    if self.auto_optimize_routes and len(destinations) > 1:
+                        try:
+                            mission.action_optimize_route()
+                        except Exception as e:
+                            _logger.warning(f"Failed to optimize route for AI mission {mission.name}: {e}")
+                    
+                    # Confirm mission if requested
+                    if self.create_confirmed:
+                        mission.action_confirm()
+                    
+                    created_missions.append(mission)
+                    _logger.info(f"✅ Created mission: {mission.name} with {len(destinations)} destinations")
+                    
+                except Exception as e:
+                    _logger.error(f"Failed to create mission from AI data: {e}")
+                    continue
+            
+            if not created_missions:
+                raise UserError(_("Failed to create any missions from AI results."))
+            
+            # Clear AI results after successful creation
+            self.write({'ai_optimization_result': False})
+            
+            # Return action to view created missions
+            if len(created_missions) == 1:
+                return {
+                    'type': 'ir.actions.act_window',
+                    'name': _('AI Generated Mission'),
+                    'res_model': 'transport.mission',
+                    'res_id': created_missions[0].id,
+                    'view_mode': 'form',
+                    'target': 'current',
+                }
+            else:
+                return {
+                    'type': 'ir.actions.act_window',
+                    'name': _('AI Generated Missions'),
+                    'res_model': 'transport.mission',
+                    'view_mode': 'tree,form',
+                    'domain': [('id', 'in', [m.id for m in created_missions])],
+                    'target': 'current',
+                }
+                
+        except json.JSONDecodeError:
+            raise UserError(_("Invalid AI optimization data format."))
+        except Exception as e:
+            _logger.error(f"Failed to create missions from AI results: {e}")
+            raise UserError(_("Failed to create missions: %s") % str(e))
+
+    def create_single_mission_from_ai(self, mission_index):
+        """Create a single transport mission from AI optimization results"""
+        if not self.ai_optimization_result:
+            raise UserError(_("No AI optimization results found. Please run AI optimization first."))
+        
+        try:
+            ai_data = json.loads(self.ai_optimization_result)
+            missions_data = ai_data.get('created_missions', [])
+            
+            if not missions_data or mission_index >= len(missions_data):
+                raise UserError(_("Mission not found in AI results."))
+            
+            mission_data = missions_data[mission_index]
+            
+            # Extract mission information
+            source_location = mission_data.get('source_location', {})
+            assigned_vehicle = mission_data.get('assigned_vehicle', {})
+            assigned_driver = mission_data.get('assigned_driver', {})
+            destinations = mission_data.get('destinations', [])
+            
+            # Create mission
+            mission_vals = {
+                'mission_date': self.mission_date,
+                'driver_id': assigned_driver.get('driver_id') or self.driver_id.id,
+                'vehicle_id': assigned_vehicle.get('vehicle_id') or self.vehicle_id.id,
+                'priority': self.priority,
+                'source_location': source_location.get('location', ''),
+                'source_latitude': source_location.get('latitude'),
+                'source_longitude': source_location.get('longitude'),
+                'notes': f"AI Generated Mission: {mission_data.get('mission_name', 'Unnamed Mission')}",
+                'state': 'draft',
+            }
+            
+            mission = self.env['transport.mission'].create(mission_vals)
+            
+            # Create destinations
+            for seq, dest_data in enumerate(destinations, 1):
+                cargo_details = dest_data.get('cargo_details', {})
+                
+                dest_vals = {
+                    'mission_id': mission.id,
+                    'location': dest_data.get('location', ''),
+                    'latitude': dest_data.get('latitude'),
+                    'longitude': dest_data.get('longitude'),
+                    'sequence': seq,
+                    'mission_type': dest_data.get('mission_type', 'delivery'),
+                    'expected_arrival_time': dest_data.get('estimated_arrival_time'),
+                    'service_duration': dest_data.get('service_duration', 0),
+                    'package_type': cargo_details.get('package_type', 'individual'),
+                    'total_weight': cargo_details.get('total_weight', 0),
+                    'total_volume': cargo_details.get('total_volume', 0),
+                    'requires_signature': cargo_details.get('requires_signature', False),
+                    'special_instructions': cargo_details.get('special_instructions', ''),
+                }
+                self.env['transport.destination'].create(dest_vals)
+            
+            # Auto-optimize route if requested
+            if self.auto_optimize_routes and len(destinations) > 1:
+                try:
+                    mission.action_optimize_route()
+                except Exception as e:
+                    _logger.warning(f"Failed to optimize route for AI mission {mission.name}: {e}")
+            
+            # Confirm mission if requested
+            if self.create_confirmed:
+                mission.action_confirm()
+            
+            _logger.info(f"✅ Created single mission: {mission.name} with {len(destinations)} destinations")
+            
+            # Return action to view created mission
+            return {
+                'type': 'ir.actions.act_window',
+                'name': _('AI Generated Mission'),
+                'res_model': 'transport.mission',
+                'res_id': mission.id,
+                'view_mode': 'form',
+                'target': 'current',
+            }
+                
+        except json.JSONDecodeError:
+            raise UserError(_("Invalid AI optimization data format."))
+        except Exception as e:
+            _logger.error(f"Failed to create single mission from AI results: {e}")
+            raise UserError(_("Failed to create mission: %s") % str(e))
+
     def _call_gemini_api(self, prompt):
         """Call the Gemini API with the optimization prompt"""
         api_key = self._get_gemini_api_key()

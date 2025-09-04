@@ -4589,3 +4589,479 @@ ission Wizard Styles */
 .tm_clickable_destination:hover::after {
     opacity: 1;
 }
+
+// === AI Missions Styles ===
+.tm_ai_missions_section {
+    margin-bottom: 20px;
+    border: 2px solid #4ECDC4;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #f8fdff 0%, #e8f8f5 100%);
+
+    .tm_section_header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid #4ECDC4;
+        background: rgba(78, 205, 196, 0.1);
+
+        h4 {
+            margin: 0;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .tm_mission_controls {
+            display: flex;
+            gap: 10px;
+        }
+    }
+
+    .tm_missions_list {
+        padding: 15px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+}
+
+.tm_mission_item {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    padding: 15px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        border-color: #4ECDC4;
+        box-shadow: 0 4px 12px rgba(78, 205, 196, 0.15);
+        transform: translateY(-1px);
+    }
+
+    &.tm_mission_selected {
+        border-color: #4ECDC4;
+        background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
+        box-shadow: 0 4px 16px rgba(78, 205, 196, 0.2);
+
+        .tm_mission_number {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+    }
+}
+
+.tm_mission_header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+
+    .tm_mission_number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+        margin-right: 15px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .tm_mission_info {
+        flex: 1;
+
+        .tm_mission_name {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .tm_mission_details {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #64748b;
+
+            .tm_mission_vehicle,
+            .tm_mission_driver {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+
+                i {
+                    color: #4ECDC4;
+                }
+            }
+        }
+    }
+}
+
+.tm_mission_stats {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+
+    .tm_stat_item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 4px 8px;
+        border-radius: 4px;
+
+        i {
+            color: #4ECDC4;
+        }
+    }
+}
+
+.tm_mission_destinations {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+
+    h6 {
+        margin: 0 0 10px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #2d3748;
+    }
+
+    .tm_destinations_preview {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+}
+
+.tm_dest_preview_item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    background: #f8fafc;
+    border-radius: 6px;
+    border-left: 3px solid #4ECDC4;
+
+    .tm_dest_number {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #4ECDC4;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .tm_dest_info {
+        flex: 1;
+
+        .tm_dest_name {
+            display: block;
+            font-weight: 500;
+            color: #2d3748;
+            font-size: 13px;
+        }
+
+        .tm_dest_cargo {
+            color: #64748b;
+            font-size: 11px;
+        }
+    }
+
+    .tm_dest_type {
+        font-size: 11px;
+        padding: 2px 6px;
+    }
+}
+
+.tm_details_collapsed {
+    opacity: 0.6;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+// Mission marker styles
+.tm-mission-marker {
+    transition: all 0.2s ease;
+}
+
+.tm-mission-popup {
+    .btn {
+        margin-top: 8px;
+    }
+}
+
+.tm-route-popup {
+    min-width: 200px;
+}
+
+// Mission controls in map header
+.tm_map_controls {
+    .btn {
+        &.btn-warning {
+            background-color: #f39c12;
+            border-color: #f39c12;
+
+            &:hover {
+                background-color: #e67e22;
+                border-color: #e67e22;
+            }
+        }
+    }
+}
+
+//===Mission Details Styles (same as single mission)===
+.tm_mission_details {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid #4ECDC4;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
+    border-radius: 8px;
+    padding: 20px;
+
+    .tm_form_section {
+        margin-bottom: 20px;
+
+        h6 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+
+            i {
+                margin-right: 8px;
+            }
+        }
+    }
+}
+
+// Route Summary Styles
+.tm_route_summary {
+    .tm_route_step {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 8px 12px;
+        background: #f8fafc;
+        border-radius: 6px;
+        border-left: 3px solid #4ECDC4;
+
+        .tm_route_step_marker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+            font-size: 12px;
+
+            &.tm_route_start {
+                background: #4ECDC4;
+                color: white;
+            }
+
+            &.tm_route_destination {
+                background: #e2e8f0;
+                color: #2d3748;
+            }
+        }
+
+        .tm_route_step_content {
+            flex: 1;
+            font-size: 13px;
+
+            .tm_dest_type_badge {
+                font-size: 10px;
+                padding: 2px 6px;
+            }
+        }
+    }
+}
+
+// Capacity Progression Styles
+.tm_capacity_progression {
+    .tm_progression_header {
+        margin-bottom: 15px;
+
+        .tm_truck_limits {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+
+            .tm_limit_item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 12px;
+                color: #64748b;
+                background: #f1f5f9;
+                padding: 6px 10px;
+                border-radius: 4px;
+
+                i {
+                    color: #4ECDC4;
+                }
+
+                strong {
+                    color: #2d3748;
+                }
+            }
+        }
+    }
+
+    .tm_cargo_details {
+        .tm_cargo_item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border-left: 3px solid #4ECDC4;
+
+            .tm_cargo_number {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                background: #4ECDC4;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: bold;
+                margin-right: 12px;
+            }
+
+            .tm_cargo_info {
+                flex: 1;
+
+                .tm_cargo_name {
+                    display: block;
+                    font-weight: 500;
+                    color: #2d3748;
+                    font-size: 13px;
+                    margin-bottom: 4px;
+                }
+
+                .tm_cargo_stats {
+                    display: flex;
+                    gap: 15px;
+                    font-size: 11px;
+                    color: #64748b;
+
+                    span {
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+
+                        i {
+                            color: #4ECDC4;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Cost Breakdown Styles (same as single mission)
+.tm_cost_section {
+    .tm_cost_breakdown_modern {
+        .tm_cost_row {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            background: #f8fafc;
+            border-radius: 6px;
+
+            .tm_cost_icon {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                background: #4ECDC4;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 12px;
+                font-size: 12px;
+            }
+
+            .tm_cost_label {
+                flex: 1;
+                font-size: 13px;
+                color: #2d3748;
+                font-weight: 500;
+            }
+
+            .tm_cost_amount {
+                font-size: 13px;
+                color: #64748b;
+                font-weight: 600;
+
+                &.tm_total_amount {
+                    color: #2d3748;
+                    font-size: 14px;
+                    font-weight: 700;
+                }
+            }
+
+            &.tm_cost_total_row {
+                background: linear-gradient(135deg, #4ECDC4 0%, #45B7D1 100%);
+                color: white;
+                margin-top: 10px;
+
+                .tm_cost_icon {
+                    background: rgba(255, 255, 255, 0.2);
+                }
+
+                .tm_cost_label,
+                .tm_cost_amount {
+                    color: white;
+                }
+            }
+        }
+    }
+}
+
+// Mission Actions
+.tm_mission_actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+
+    .btn {
+        flex: 1;
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}
+
+// Marker selection styles
+.tm-marker-selected {
+    transform: scale(1.2);
+    z-index: 1000;
+
+    .tm-marker-circle {
+        box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.3);
+    }
+}

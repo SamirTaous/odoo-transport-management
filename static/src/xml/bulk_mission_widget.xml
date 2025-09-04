@@ -111,8 +111,212 @@
                     </div>
                 </div>
 
+                <!-- AI Missions Section -->
+                <div class="tm_ai_missions_section" t-if="state.showAIMissions and state.aiMissions.length > 0">
+                    <div class="tm_section_header">
+                        <h4><i class="fa fa-robot me-2 text-primary"/>AI Generated Missions</h4>
+                        <div class="tm_mission_controls">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" t-on-click="toggleMissionView">
+                                <i class="fa fa-eye me-1"/>Toggle View
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success" t-on-click="createMissionsFromAI">
+                                <i class="fa fa-plus me-1"/>Create Missions
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="tm_missions_list">
+                        <t t-foreach="state.aiMissions" t-as="mission" t-key="mission_index">
+                            <div class="tm_mission_item" 
+                                 t-att-class="state.selectedMissionIndex === mission_index ? 'tm_mission_selected' : ''"
+                                 t-on-click="() => this.selectMission(mission_index)">
+                                <div class="tm_mission_header">
+                                    <div class="tm_mission_number" t-att-style="'background-color: ' + this.getMissionColor(mission_index)">
+                                        <t t-esc="mission_index + 1"/>
+                                    </div>
+                                    <div class="tm_mission_info">
+                                        <h6 class="tm_mission_name"><t t-esc="mission.mission_name || 'Unnamed Mission'"/></h6>
+                                        <div class="tm_mission_details">
+                                            <span class="tm_mission_vehicle">
+                                                <i class="fa fa-truck"/>
+                                                <t t-esc="mission.assigned_vehicle?.vehicle_name || 'No Vehicle'"/>
+                                            </span>
+                                            <span class="tm_mission_driver">
+                                                <i class="fa fa-user"/>
+                                                <t t-esc="mission.assigned_driver?.driver_name || 'No Driver'"/>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="tm_mission_stats">
+                                    <div class="tm_stat_item">
+                                        <i class="fa fa-flag"/>
+                                        <span><t t-esc="mission.destinations?.length || 0"/> stops</span>
+                                    </div>
+                                    <div class="tm_stat_item" t-if="mission.calculated_route">
+                                        <i class="fa fa-route"/>
+                                        <span><t t-esc="mission.calculated_route.distance_km?.toFixed(1) || '0'"/> km</span>
+                                    </div>
+                                    <div class="tm_stat_item" t-if="mission.calculated_route">
+                                        <i class="fa fa-clock"/>
+                                        <span><t t-esc="Math.round(mission.calculated_route.duration_minutes || 0)"/> min</span>
+                                    </div>
+                                    <div class="tm_stat_item">
+                                        <i class="fa fa-weight-hanging"/>
+                                        <span><t t-esc="mission.capacity_utilization?.weight_utilization_percentage || 0"/>%</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Detailed Mission Information (same as single mission) -->
+                                <div class="tm_mission_details" t-if="state.selectedMissionIndex === mission_index">
+                                    
+                                    <!-- Route Summary -->
+                                    <div class="tm_form_section">
+                                        <h6><i class="fa fa-list-ol me-2 text-info"/>Route Summary</h6>
+                                        <div class="tm_route_summary">
+                                            <div class="tm_route_step">
+                                                <div class="tm_route_step_marker tm_route_start">
+                                                    <i class="fa fa-play"/>
+                                                </div>
+                                                <div class="tm_route_step_content">
+                                                    <strong>Start:</strong> <t t-esc="mission.source_location?.location || 'Unknown'"/>
+                                                </div>
+                                            </div>
+                                            <t t-foreach="mission.destinations" t-as="dest" t-key="dest_index">
+                                                <div class="tm_route_step">
+                                                    <div class="tm_route_step_marker tm_route_destination">
+                                                        <t t-esc="dest_index + 1"/>
+                                                    </div>
+                                                    <div class="tm_route_step_content">
+                                                        <strong>Stop <t t-esc="dest_index + 1"/>:</strong> <t t-esc="dest.location"/>
+                                                        <span class="tm_dest_type_badge badge ms-2" 
+                                                              t-att-class="dest.mission_type === 'pickup' ? 'badge-info' : 'badge-success'">
+                                                            <t t-esc="dest.mission_type"/>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
+
+                                    <!-- Cargo Progression -->
+                                    <div class="tm_form_section" t-if="mission.capacity_utilization">
+                                        <h6>
+                                            <i class="fa fa-chart-line me-2 text-info"/>
+                                            Capacity Utilization
+                                        </h6>
+                                        <div class="tm_capacity_progression">
+                                            <div class="tm_progression_header">
+                                                <div class="tm_truck_limits">
+                                                    <span class="tm_limit_item">
+                                                        <i class="fa fa-weight-hanging"/>
+                                                        Weight: <strong><t t-esc="mission.capacity_utilization.weight_utilization_percentage || 0"/>%</strong>
+                                                    </span>
+                                                    <span class="tm_limit_item">
+                                                        <i class="fa fa-cube"/>
+                                                        Volume: <strong><t t-esc="mission.capacity_utilization.volume_utilization_percentage || 0"/>%</strong>
+                                                    </span>
+                                                    <span class="tm_limit_item">
+                                                        <i class="fa fa-star"/>
+                                                        Efficiency: <strong><t t-esc="mission.capacity_utilization.efficiency_score || 0"/>%</strong>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="tm_cargo_details">
+                                                <t t-foreach="mission.destinations" t-as="dest" t-key="dest_index">
+                                                    <div class="tm_cargo_item">
+                                                        <span class="tm_cargo_number"><t t-esc="dest_index + 1"/></span>
+                                                        <div class="tm_cargo_info">
+                                                            <span class="tm_cargo_name"><t t-esc="dest.name"/></span>
+                                                            <div class="tm_cargo_stats">
+                                                                <span class="tm_cargo_weight">
+                                                                    <i class="fa fa-weight-hanging"/>
+                                                                    <t t-esc="dest.cargo_details?.total_weight || 0"/>kg
+                                                                </span>
+                                                                <span class="tm_cargo_volume">
+                                                                    <i class="fa fa-cube"/>
+                                                                    <t t-esc="dest.cargo_details?.total_volume || 0"/>m³
+                                                                </span>
+                                                                <span class="tm_cargo_type">
+                                                                    <i class="fa fa-box"/>
+                                                                    <t t-esc="dest.cargo_details?.package_type || 'individual'"/>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Cost Breakdown -->
+                                    <div class="tm_form_section tm_cost_section" t-if="mission.route_optimization">
+                                        <h6><i class="fa fa-calculator me-2 text-success"/>Cost Breakdown</h6>
+                                        <div class="tm_cost_breakdown_modern">
+                                            <!-- Distance Cost -->
+                                            <div class="tm_cost_row">
+                                                <div class="tm_cost_icon">
+                                                    <i class="fa fa-road"/>
+                                                </div>
+                                                <div class="tm_cost_label">Distance</div>
+                                                <div class="tm_cost_amount">
+                                                    <t t-esc="mission.calculated_route?.distance_km?.toFixed(1) || mission.route_optimization?.total_distance_km || 0"/> km
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Duration -->
+                                            <div class="tm_cost_row">
+                                                <div class="tm_cost_icon">
+                                                    <i class="fa fa-clock"/>
+                                                </div>
+                                                <div class="tm_cost_label">Duration</div>
+                                                <div class="tm_cost_amount">
+                                                    <t t-esc="Math.round(mission.calculated_route?.duration_minutes || mission.route_optimization?.estimated_duration_hours * 60 || 0)"/> min
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Fuel Cost -->
+                                            <div class="tm_cost_row" t-if="mission.route_optimization?.estimated_fuel_cost">
+                                                <div class="tm_cost_icon">
+                                                    <i class="fa fa-gas-pump"/>
+                                                </div>
+                                                <div class="tm_cost_label">Fuel Cost</div>
+                                                <div class="tm_cost_amount">
+                                                    <t t-esc="mission.route_optimization.estimated_fuel_cost.toFixed(2)"/> DH
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Total Cost -->
+                                            <div class="tm_cost_row tm_cost_total_row" t-if="mission.route_optimization?.estimated_total_cost">
+                                                <div class="tm_cost_icon">
+                                                    <i class="fa fa-calculator"/>
+                                                </div>
+                                                <div class="tm_cost_label">Total Cost</div>
+                                                <div class="tm_cost_amount tm_total_amount">
+                                                    <t t-esc="mission.route_optimization.estimated_total_cost.toFixed(2)"/> DH
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Mission Actions -->
+                                    <div class="tm_mission_actions">
+                                        <button type="button" class="btn btn-sm btn-primary" t-on-click="() => this.fitMapToMission(mission_index)">
+                                            <i class="fa fa-search me-1"/>Fit to View
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-success" t-on-click="() => this.createSingleMissionFromAI(mission_index)">
+                                            <i class="fa fa-save me-1"/>Save This Mission
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
                 <!-- Location Details Form Sections -->
-                <div class="tm_details_form">
+                <div class="tm_details_form" t-att-class="state.showAIMissions ? 'tm_details_collapsed' : ''">
                     <!-- Sources List Section -->
                     <div class="tm_form_section">
                         <h4><i class="fa fa-play-circle me-2 text-primary"/>Selected Sources</h4>

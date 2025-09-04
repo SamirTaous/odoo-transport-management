@@ -16,12 +16,17 @@ export class BulkMissionWidget extends Component {
         this.map = null;
         this.sourceMarkers = [];
         this.destinationMarkers = [];
+        this.missionRoutes = [];
+        this.missionMarkers = [];
 
         this.state = useState({
             sources: [],
             destinations: [],
             drivers: [],
             vehicles: [],
+            aiMissions: [],
+            selectedMissionIndex: -1,
+            showAIMissions: false,
         });
 
         onMounted(async () => {
@@ -481,7 +486,7 @@ export class BulkMissionWidget extends Component {
 
     showDestinationModal() {
         const destination = this.currentEditingDestination;
-        
+
         // Create modal HTML
         const modalHTML = `
             <div class="modal fade" id="destinationModal" tabindex="-1" role="dialog">
@@ -669,17 +674,17 @@ export class BulkMissionWidget extends Component {
     closeDestinationModal() {
         const modal = document.getElementById('destinationModal');
         const backdrop = document.getElementById('destinationModalBackdrop');
-        
+
         if (modal) {
             modal.style.display = 'none';
             modal.classList.remove('show');
             modal.remove();
         }
-        
+
         if (backdrop) {
             backdrop.remove();
         }
-        
+
         document.body.classList.remove('modal-open');
     }
 
@@ -706,7 +711,7 @@ export class BulkMissionWidget extends Component {
 
         // Update the destination
         this.updateDestinationFromPopup(this.currentEditingIndex, updatedDestination);
-        
+
         // Close modal
         this.closeDestinationModal();
     }
@@ -826,7 +831,7 @@ export class BulkMissionWidget extends Component {
     // AI Optimization
     async optimizeWithAI() {
         console.log("🤖 AI Optimize button clicked from widget!");
-        
+
         if (this.state.sources.length === 0 && this.state.destinations.length === 0) {
             this.notification.add("Please add sources and destinations before optimizing", { type: "warning" });
             return;
@@ -841,11 +846,11 @@ export class BulkMissionWidget extends Component {
             console.log(`  Package Type: ${dest.package_type}`);
             console.log(`  Mission Type: ${dest.mission_type}`);
         });
-        
+
         const totalWeight = this.state.destinations.reduce((sum, dest) => sum + (dest.total_weight || 0), 0);
         const totalVolume = this.state.destinations.reduce((sum, dest) => sum + (dest.total_volume || 0), 0);
         console.log(`📦 Total cargo: ${totalWeight} kg, ${totalVolume} m³`);
-        
+
         if (totalWeight === 0 && totalVolume === 0) {
             console.warn("⚠️ WARNING: No cargo weight or volume detected!");
             console.log("💡 TIP: Click on destinations to edit them and add weight/volume information");
@@ -860,7 +865,7 @@ export class BulkMissionWidget extends Component {
             this.notification.add("🤖 AI is optimizing your missions... This may take a moment.", { type: "info" });
 
             console.log("🤖 Calling backend AI optimization...");
-            
+
             // Call the backend AI optimization
             const result = await this.orm.call(
                 "bulk.mission.wizard",
@@ -869,11 +874,11 @@ export class BulkMissionWidget extends Component {
             );
 
             console.log("🤖 Backend AI optimization completed:", result);
-            
+
             // After optimization completes, get the AI results and log them
             if (result && result.params && result.params.type === 'success') {
                 console.log("🤖 Getting AI optimization results...");
-                
+
                 // Get the AI optimization results
                 try {
                     const aiResult = await this.orm.call(
@@ -881,11 +886,11 @@ export class BulkMissionWidget extends Component {
                         "get_ai_optimization_result",
                         [this.props.record.resId]
                     );
-                    
+
                     console.log("🤖 AI Result retrieved:", aiResult);
-                    
+
                     if (aiResult) {
-                        this.handleAIOptimizationResult({
+                        await this.handleAIOptimizationResult({
                             ai_response: aiResult,
                             summary: aiResult.optimization_summary || {},
                             title: result.params.title,
@@ -903,8 +908,8 @@ export class BulkMissionWidget extends Component {
                 console.log("🤖 AI Optimization result (non-success):", result);
                 // Still show the notification if there's a message
                 if (result && result.params && result.params.message) {
-                    this.notification.add(result.params.message, { 
-                        type: result.params.type || "info" 
+                    this.notification.add(result.params.message, {
+                        type: result.params.type || "info"
                     });
                 }
             }
@@ -913,7 +918,7 @@ export class BulkMissionWidget extends Component {
             console.error('🤖 AI optimization failed:', error);
             this.notification.add("AI optimization failed. Check console for details.", { type: "danger" });
         }
-        
+
         console.log("🤖 AI Optimize method completed");
     }
 
@@ -928,7 +933,7 @@ export class BulkMissionWidget extends Component {
                 updated++;
             }
         });
-        
+
         if (updated > 0) {
             this.saveData();
             this.updateMapDisplay();
@@ -939,7 +944,7 @@ export class BulkMissionWidget extends Component {
         }
     }
     // Handle AI Optimization Results
-    handleAIOptimizationResult(params) {
+    async handleAIOptimizationResult(params) {
         const { ai_response, summary, title, message } = params;
 
         // Log comprehensive results to browser console
@@ -951,27 +956,27 @@ export class BulkMissionWidget extends Component {
         console.log(`💰 Total Cost: ${summary.total_cost}`);
         console.log(`⭐ Optimization Score: ${summary.optimization_score}/100`);
         console.log(`💡 Cost Savings: ${summary.cost_savings}%`);
-        
+
         console.log("\n🎯 COMPLETE AI RESPONSE:");
         console.log(JSON.stringify(ai_response, null, 2));
-        
+
         // Log individual missions for easy analysis
         const missions = ai_response.created_missions || [];
         console.log(`\n📋 CREATED MISSIONS (${missions.length} total):`);
-        
+
         missions.forEach((mission, index) => {
             console.log(`\n--- Mission ${index + 1}: ${mission.mission_name || 'Unnamed'} ---`);
             console.log(`🚛 Vehicle: ${mission.assigned_vehicle?.vehicle_name} (${mission.assigned_vehicle?.license_plate})`);
             console.log(`👤 Driver: ${mission.assigned_driver?.driver_name}`);
             console.log(`📍 Source: ${mission.source_location?.name} - ${mission.source_location?.location}`);
             console.log(`🎯 Destinations (${mission.destinations?.length || 0}):`);
-            
+
             mission.destinations?.forEach((dest, destIndex) => {
                 console.log(`  ${destIndex + 1}. ${dest.name} (${dest.mission_type})`);
                 console.log(`     📍 ${dest.location}`);
                 console.log(`     📦 Weight: ${dest.cargo_details?.total_weight}kg, Volume: ${dest.cargo_details?.total_volume}m³`);
             });
-            
+
             console.log(`📊 Route Stats:`);
             console.log(`   Distance: ${mission.route_optimization?.total_distance_km}km`);
             console.log(`   Duration: ${mission.route_optimization?.estimated_duration_hours}h`);
@@ -1006,8 +1011,16 @@ export class BulkMissionWidget extends Component {
 
         console.log("\n🤖 ===== END AI OPTIMIZATION RESULTS =====");
 
+        // Store AI missions in state
+        this.state.aiMissions = missions;
+        this.state.showAIMissions = true;
+        this.state.selectedMissionIndex = missions.length > 0 ? 0 : -1;
+
         // Show success notification
         this.notification.add(message, { type: "success" });
+
+        // Create missions on the map
+        await this.displayAIMissionsOnMap();
 
         // Also create a summary table in console for quick reference
         console.table(missions.map((mission, index) => ({
@@ -1023,10 +1036,347 @@ export class BulkMissionWidget extends Component {
             'Volume %': mission.capacity_utilization?.volume_utilization_percentage || 0
         })));
     }
+
+    // Display AI missions on the map
+    async displayAIMissionsOnMap() {
+        if (!this.map || !this.state.aiMissions.length) return;
+
+        console.log("🗺️ Displaying AI missions on map...");
+
+        // Clear existing mission displays
+        this.clearMissionDisplay();
+
+        // Hide original markers when showing AI missions
+        if (this.state.showAIMissions) {
+            this.sourceMarkers.forEach(marker => this.map.removeLayer(marker));
+            this.destinationMarkers.forEach(marker => this.map.removeLayer(marker));
+        }
+
+        // Display each mission
+        for (let i = 0; i < this.state.aiMissions.length; i++) {
+            await this.displaySingleMission(i);
+        }
+
+        // Select the first mission by default
+        if (this.state.selectedMissionIndex >= 0) {
+            this.selectMission(this.state.selectedMissionIndex);
+        }
+    }
+
+    // Display a single mission on the map
+    async displaySingleMission(missionIndex) {
+        const mission = this.state.aiMissions[missionIndex];
+        if (!mission) return;
+
+        const missionColor = this.getMissionColor(missionIndex);
+        const isSelected = missionIndex === this.state.selectedMissionIndex;
+
+        // Create source marker
+        const sourceLocation = mission.source_location;
+        if (sourceLocation && sourceLocation.latitude && sourceLocation.longitude) {
+            const sourceMarker = L.marker([sourceLocation.latitude, sourceLocation.longitude], {
+                icon: this.createMissionMarkerIcon('source', missionColor, isSelected),
+                zIndexOffset: isSelected ? 1000 : 0
+            });
+
+            sourceMarker.bindPopup(`
+                <div class="tm-mission-popup">
+                    <h6><strong>Mission ${missionIndex + 1}: ${mission.mission_name}</strong></h6>
+                    <p><i class="fa fa-truck"></i> <strong>Source:</strong> ${sourceLocation.name}</p>
+                    <p><i class="fa fa-map-marker"></i> ${sourceLocation.location}</p>
+                    <p><i class="fa fa-car"></i> <strong>Vehicle:</strong> ${mission.assigned_vehicle?.vehicle_name} (${mission.assigned_vehicle?.license_plate})</p>
+                    <p><i class="fa fa-user"></i> <strong>Driver:</strong> ${mission.assigned_driver?.driver_name}</p>
+                    <button class="btn btn-sm btn-primary" onclick="window.bulkMissionWidget.selectMission(${missionIndex})">
+                        Select Mission
+                    </button>
+                </div>
+            `);
+
+            this.missionMarkers.push(sourceMarker);
+            sourceMarker.addTo(this.map);
+        }
+
+        // Create destination markers
+        mission.destinations?.forEach((dest, destIndex) => {
+            if (dest.latitude && dest.longitude) {
+                const destMarker = L.marker([dest.latitude, dest.longitude], {
+                    icon: this.createMissionMarkerIcon('destination', missionColor, isSelected, destIndex + 1, dest.mission_type),
+                    zIndexOffset: isSelected ? 1000 : 0
+                });
+
+                destMarker.bindPopup(`
+                    <div class="tm-mission-popup">
+                        <h6><strong>Mission ${missionIndex + 1} - Stop ${destIndex + 1}</strong></h6>
+                        <p><i class="fa fa-flag"></i> <strong>${dest.name}</strong></p>
+                        <p><i class="fa fa-map-marker"></i> ${dest.location}</p>
+                        <p><i class="fa fa-box"></i> <strong>Cargo:</strong> ${dest.cargo_details?.total_weight}kg, ${dest.cargo_details?.total_volume}m³</p>
+                        <p><i class="fa fa-clock"></i> <strong>Type:</strong> ${dest.mission_type}</p>
+                        <p><i class="fa fa-time"></i> <strong>ETA:</strong> ${dest.estimated_arrival_time || 'TBD'}</p>
+                    </div>
+                `);
+
+                this.missionMarkers.push(destMarker);
+                destMarker.addTo(this.map);
+            }
+        });
+
+        // Calculate and display route
+        await this.calculateMissionRoute(missionIndex);
+    }
+
+    // Calculate route for a mission using OSRM
+    async calculateMissionRoute(missionIndex) {
+        const mission = this.state.aiMissions[missionIndex];
+        if (!mission || !mission.source_location || !mission.destinations?.length) return;
+
+        try {
+            // Build waypoints: source + all destinations
+            const waypoints = [
+                [mission.source_location.longitude, mission.source_location.latitude]
+            ];
+
+            mission.destinations.forEach(dest => {
+                if (dest.latitude && dest.longitude) {
+                    waypoints.push([dest.longitude, dest.latitude]);
+                }
+            });
+
+            if (waypoints.length < 2) return;
+
+            // Call OSRM API
+            const waypointsStr = waypoints.map(wp => `${wp[1]},${wp[0]}`).join(';');
+            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${waypointsStr}?overview=full&geometries=geojson&steps=true`;
+
+            console.log(`🛣️ Calculating route for mission ${missionIndex + 1}...`);
+
+            const response = await fetch(osrmUrl);
+            const data = await response.json();
+
+            if (data.code === 'Ok' && data.routes?.length > 0) {
+                const route = data.routes[0];
+                const missionColor = this.getMissionColor(missionIndex);
+                const isSelected = missionIndex === this.state.selectedMissionIndex;
+
+                // Create route polyline
+                const routeLine = L.geoJSON(route.geometry, {
+                    style: {
+                        color: missionColor,
+                        weight: isSelected ? 6 : 4,
+                        opacity: isSelected ? 0.9 : 0.6,
+                        dashArray: isSelected ? null : '10, 5'
+                    }
+                });
+
+                routeLine.bindPopup(`
+                    <div class="tm-route-popup">
+                        <h6><strong>Mission ${missionIndex + 1} Route</strong></h6>
+                        <p><i class="fa fa-route"></i> <strong>Distance:</strong> ${(route.distance / 1000).toFixed(1)} km</p>
+                        <p><i class="fa fa-clock"></i> <strong>Duration:</strong> ${Math.round(route.duration / 60)} minutes</p>
+                        <p><i class="fa fa-truck"></i> <strong>Vehicle:</strong> ${mission.assigned_vehicle?.vehicle_name}</p>
+                    </div>
+                `);
+
+                this.missionRoutes.push(routeLine);
+                routeLine.addTo(this.map);
+
+                // Update mission with calculated route data
+                mission.calculated_route = {
+                    distance_km: route.distance / 1000,
+                    duration_minutes: route.duration / 60,
+                    geometry: route.geometry
+                };
+
+                console.log(`✅ Route calculated for mission ${missionIndex + 1}: ${(route.distance / 1000).toFixed(1)}km, ${Math.round(route.duration / 60)}min`);
+            }
+        } catch (error) {
+            console.error(`❌ Failed to calculate route for mission ${missionIndex + 1}:`, error);
+        }
+    }
+
+    // Get color for mission (different color for each mission)
+    getMissionColor(missionIndex) {
+        const colors = [
+            '#FF6B6B', // Red
+            '#4ECDC4', // Teal
+            '#45B7D1', // Blue
+            '#96CEB4', // Green
+            '#FFEAA7', // Yellow
+            '#DDA0DD', // Plum
+            '#98D8C8', // Mint
+            '#F7DC6F', // Light Yellow
+            '#BB8FCE', // Light Purple
+            '#85C1E9'  // Light Blue
+        ];
+        return colors[missionIndex % colors.length];
+    }
+
+    // Create mission marker icon
+    createMissionMarkerIcon(type, color, isSelected = false, number = null, destinationType = null) {
+        const isSource = type === 'source';
+        let html;
+
+        if (isSource) {
+            // Source marker - Truck depot (starting point) - same as single mission
+            html = `
+                <div class="tm-logistics-marker tm-source-marker">
+                    <div class="tm-marker-circle">
+                        <div class="tm-marker-icon"><i class="fa fa-truck"></i></div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Destination markers with intuitive icons - same as single mission
+            const destType = destinationType || 'delivery';
+            const markerClass = destType === 'pickup' ? 'tm-pickup-marker' : 'tm-delivery-marker';
+
+            // Pickup: Upload/collection icon
+            // Delivery: Download/drop-off icon
+            const markerIcon = destType === 'pickup' ? '<i class="fa fa-upload"></i>' : '<i class="fa fa-download"></i>';
+
+            html = `
+                <div class="tm-logistics-marker ${markerClass}">
+                    <div class="tm-marker-number">${number}</div>
+                    <div class="tm-marker-circle">
+                        <div class="tm-marker-icon">${markerIcon}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Add selection styling
+        if (isSelected) {
+            html = html.replace('tm-logistics-marker', 'tm-logistics-marker tm-marker-selected');
+        }
+
+        return L.divIcon({
+            className: 'tm-logistics-custom-marker',
+            html: html,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20] // Center the marker on the actual location
+        });
+    }
+
+    // Select a specific mission
+    selectMission(missionIndex) {
+        console.log(`🎯 Selecting mission ${missionIndex + 1}`);
+
+        this.state.selectedMissionIndex = missionIndex;
+
+        // Refresh mission display to update selection
+        this.displayAIMissionsOnMap();
+
+        // Fit map to selected mission
+        this.fitMapToMission(missionIndex);
+    }
+
+    // Fit map to a specific mission
+    fitMapToMission(missionIndex) {
+        const mission = this.state.aiMissions[missionIndex];
+        if (!mission) return;
+
+        const bounds = L.latLngBounds();
+
+        // Add source to bounds
+        if (mission.source_location?.latitude && mission.source_location?.longitude) {
+            bounds.extend([mission.source_location.latitude, mission.source_location.longitude]);
+        }
+
+        // Add destinations to bounds
+        mission.destinations?.forEach(dest => {
+            if (dest.latitude && dest.longitude) {
+                bounds.extend([dest.latitude, dest.longitude]);
+            }
+        });
+
+        if (bounds.isValid()) {
+            this.map.fitBounds(bounds, { padding: [50, 50] });
+        }
+    }
+
+    // Clear mission display
+    clearMissionDisplay() {
+        // Remove mission routes
+        this.missionRoutes.forEach(route => this.map.removeLayer(route));
+        this.missionRoutes = [];
+
+        // Remove mission markers
+        this.missionMarkers.forEach(marker => this.map.removeLayer(marker));
+        this.missionMarkers = [];
+    }
+
+    // Toggle between original view and AI missions view
+    toggleMissionView() {
+        this.state.showAIMissions = !this.state.showAIMissions;
+
+        if (this.state.showAIMissions && this.state.aiMissions.length > 0) {
+            this.displayAIMissionsOnMap();
+        } else {
+            this.clearMissionDisplay();
+            this.updateMapDisplay(); // Show original markers
+        }
+    }
+
+    // Create actual missions from AI results
+    async createMissionsFromAI() {
+        if (!this.state.aiMissions.length) {
+            this.notification.add("No AI missions to create", { type: "warning" });
+            return;
+        }
+
+        try {
+            console.log("🚀 Creating missions from AI results...");
+
+            const result = await this.orm.call(
+                "bulk.mission.wizard",
+                "create_missions_from_ai_results",
+                [this.props.record.resId]
+            );
+
+            if (result && result.type === 'ir.actions.act_window') {
+                this.notification.add("✅ Missions created successfully!", { type: "success" });
+
+                // Optionally redirect to view created missions
+                // You can implement this based on your needs
+                console.log("✅ Missions created:", result);
+            }
+        } catch (error) {
+            console.error("❌ Failed to create missions:", error);
+            this.notification.add("Failed to create missions. Check console for details.", { type: "danger" });
+        }
+    }
+
+    // Create a single mission from AI results
+    async createSingleMissionFromAI(missionIndex) {
+        const mission = this.state.aiMissions[missionIndex];
+        if (!mission) {
+            this.notification.add("Mission not found", { type: "warning" });
+            return;
+        }
+
+        try {
+            console.log(`🚀 Creating single mission: ${mission.mission_name}`);
+            
+            const result = await this.orm.call(
+                "bulk.mission.wizard",
+                "create_single_mission_from_ai",
+                [this.props.record.resId, missionIndex]
+            );
+
+            if (result && result.type === 'ir.actions.act_window') {
+                this.notification.add(`✅ Mission "${mission.mission_name}" created successfully!`, { type: "success" });
+                
+                // Optionally redirect to view the created mission
+                console.log("✅ Mission created:", result);
+            }
+        } catch (error) {
+            console.error("❌ Failed to create mission:", error);
+            this.notification.add("Failed to create mission. Check console for details.", { type: "danger" });
+        }
+    }
 }
 
 // Helper method for date formatting
-BulkMissionWidget.prototype.formatDateTimeForInput = function(dateTimeString) {
+BulkMissionWidget.prototype.formatDateTimeForInput = function (dateTimeString) {
     if (!dateTimeString) return '';
     return dateTimeString.slice(0, 16);
 };

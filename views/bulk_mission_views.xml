@@ -8,6 +8,9 @@
             <form string="Bulk Mission Creation" class="o_form_nosheet">
                 <header>
                     <button name="action_generate_json" string="Generate JSON" type="object" class="btn-success"/>
+                    <button name="action_optimize_with_ai" string="🤖 AI Optimize" type="object" class="btn-primary"/>
+                    <button name="action_test_full_flow" string="🚀 Test Full Flow" type="object" class="btn-warning"/>
+                    <button name="action_test_ai_connection" string="🔗 Test Connection" type="object" class="btn-info"/>
                     <button name="action_preview_missions" string="Preview Locations" type="object" class="btn-secondary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </header>

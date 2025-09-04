@@ -822,6 +822,36 @@ export class BulkMissionWidget extends Component {
 
         return completeData;
     }
+
+    // AI Optimization
+    async optimizeWithAI() {
+        if (this.state.sources.length === 0 && this.state.destinations.length === 0) {
+            this.notification.add("Please add sources and destinations before optimizing", { type: "warning" });
+            return;
+        }
+
+        try {
+            // Save current data first
+            await this.saveData();
+
+            // Show loading notification
+            this.notification.add("🤖 AI is optimizing your missions... This may take a moment.", { type: "info" });
+
+            // Call the backend AI optimization
+            const result = await this.orm.call(
+                "bulk.mission.wizard",
+                "action_optimize_with_ai",
+                [this.props.record.resId]
+            );
+
+            // The result will be handled by the notification system
+            console.log("AI Optimization triggered successfully");
+
+        } catch (error) {
+            console.error('AI optimization failed:', error);
+            this.notification.add("AI optimization failed. Check console for details.", { type: "danger" });
+        }
+    }
 }
 
 // Helper method for date formatting

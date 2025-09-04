@@ -21,6 +21,9 @@
                             <button type="button" class="btn btn-sm btn-success ms-2" t-on-click="generateCompleteJSON">
                                 <i class="fa fa-download me-1"/>Generate JSON
                             </button>
+                            <button type="button" class="btn btn-sm btn-primary ms-2" t-on-click="optimizeWithAI">
+                                <i class="fa fa-robot me-1"/>🤖 AI Optimize
+                            </button>
                         </div>
                     </div>
                     

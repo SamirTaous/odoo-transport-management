@@ -844,13 +844,125 @@ export class BulkMissionWidget extends Component {
                 [this.props.record.resId]
             );
 
-            // The result will be handled by the notification system
-            console.log("AI Optimization triggered successfully");
+            // After optimization completes, get the AI results and log them
+            if (result && result.params && result.params.type === 'success') {
+                // Get the AI optimization results
+                try {
+                    const aiResult = await this.orm.call(
+                        "bulk.mission.wizard",
+                        "get_ai_optimization_result",
+                        [this.props.record.resId]
+                    );
+                    
+                    if (aiResult) {
+                        this.handleAIOptimizationResult({
+                            ai_response: aiResult,
+                            summary: aiResult.optimization_summary || {},
+                            title: result.params.title,
+                            message: result.params.message
+                        });
+                    } else {
+                        console.log("No AI results found");
+                        this.notification.add(result.params.message, { type: "success" });
+                    }
+                } catch (error) {
+                    console.error("Failed to get AI results:", error);
+                    this.notification.add(result.params.message, { type: "success" });
+                }
+            } else {
+                console.log("AI Optimization result:", result);
+            }
 
         } catch (error) {
             console.error('AI optimization failed:', error);
             this.notification.add("AI optimization failed. Check console for details.", { type: "danger" });
         }
+    }
+
+    // Handle AI Optimization Results
+    handleAIOptimizationResult(params) {
+        const { ai_response, summary, title, message } = params;
+
+        // Log comprehensive results to browser console
+        console.log("🤖 ===== AI MISSION OPTIMIZATION RESULTS =====");
+        console.log("📊 OPTIMIZATION SUMMARY:");
+        console.log(`✅ Missions Created: ${summary.missions_created}`);
+        console.log(`🚛 Vehicles Used: ${summary.vehicles_used}`);
+        console.log(`📏 Total Distance: ${summary.total_distance} km`);
+        console.log(`💰 Total Cost: ${summary.total_cost}`);
+        console.log(`⭐ Optimization Score: ${summary.optimization_score}/100`);
+        console.log(`💡 Cost Savings: ${summary.cost_savings}%`);
+        
+        console.log("\n🎯 COMPLETE AI RESPONSE:");
+        console.log(JSON.stringify(ai_response, null, 2));
+        
+        // Log individual missions for easy analysis
+        const missions = ai_response.created_missions || [];
+        console.log(`\n📋 CREATED MISSIONS (${missions.length} total):`);
+        
+        missions.forEach((mission, index) => {
+            console.log(`\n--- Mission ${index + 1}: ${mission.mission_name || 'Unnamed'} ---`);
+            console.log(`🚛 Vehicle: ${mission.assigned_vehicle?.vehicle_name} (${mission.assigned_vehicle?.license_plate})`);
+            console.log(`👤 Driver: ${mission.assigned_driver?.driver_name}`);
+            console.log(`📍 Source: ${mission.source_location?.name} - ${mission.source_location?.location}`);
+            console.log(`🎯 Destinations (${mission.destinations?.length || 0}):`);
+            
+            mission.destinations?.forEach((dest, destIndex) => {
+                console.log(`  ${destIndex + 1}. ${dest.name} (${dest.mission_type})`);
+                console.log(`     📍 ${dest.location}`);
+                console.log(`     📦 Weight: ${dest.cargo_details?.total_weight}kg, Volume: ${dest.cargo_details?.total_volume}m³`);
+            });
+            
+            console.log(`📊 Route Stats:`);
+            console.log(`   Distance: ${mission.route_optimization?.total_distance_km}km`);
+            console.log(`   Duration: ${mission.route_optimization?.estimated_duration_hours}h`);
+            console.log(`   Cost: ${mission.route_optimization?.estimated_total_cost}`);
+            console.log(`   Weight Utilization: ${mission.capacity_utilization?.weight_utilization_percentage}%`);
+            console.log(`   Volume Utilization: ${mission.capacity_utilization?.volume_utilization_percentage}%`);
+        });
+
+        // Log insights and recommendations
+        const insights = ai_response.optimization_insights || {};
+        if (insights.key_decisions?.length > 0) {
+            console.log("\n🎯 KEY OPTIMIZATION DECISIONS:");
+            insights.key_decisions.forEach((decision, index) => {
+                console.log(`${index + 1}. ${decision}`);
+            });
+        }
+
+        if (insights.recommendations?.length > 0) {
+            console.log("\n💡 AI RECOMMENDATIONS:");
+            insights.recommendations.forEach((rec, index) => {
+                console.log(`${index + 1}. ${rec}`);
+            });
+        }
+
+        if (insights.alternative_scenarios?.length > 0) {
+            console.log("\n🔄 ALTERNATIVE SCENARIOS CONSIDERED:");
+            insights.alternative_scenarios.forEach((scenario, index) => {
+                console.log(`${index + 1}. ${scenario.scenario_name}: ${scenario.description}`);
+                console.log(`   Trade-offs: ${scenario.trade_offs}`);
+            });
+        }
+
+        console.log("\n🤖 ===== END AI OPTIMIZATION RESULTS =====");
+
+        // Show success notification
+        this.notification.add(message, { type: "success" });
+
+        // Also create a summary table in console for quick reference
+        console.table(missions.map((mission, index) => ({
+            'Mission': index + 1,
+            'Name': mission.mission_name || 'Unnamed',
+            'Vehicle': mission.assigned_vehicle?.vehicle_name || 'Unknown',
+            'Driver': mission.assigned_driver?.driver_name || 'Unknown',
+            'Destinations': mission.destinations?.length || 0,
+            'Distance (km)': mission.route_optimization?.total_distance_km || 0,
+            'Duration (h)': mission.route_optimization?.estimated_duration_hours || 0,
+            'Cost': mission.route_optimization?.estimated_total_cost || 0,
+            'Weight %': mission.capacity_utilization?.weight_utilization_percentage || 0,
+            'Volume %': mission.capacity_utilization?.volume_utilization_percentage || 0
+        })));
     }
 }
 

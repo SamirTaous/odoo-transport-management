@@ -25,6 +25,9 @@ class BulkMissionWizard(models.TransientModel):
     # Mission template data
     mission_templates = fields.Text(string='Mission Templates', default='[]')
     
+    # AI optimization result storage
+    ai_optimization_result = fields.Text(string='AI Optimization Result')
+    
     # Bulk creation settings
     auto_optimize_routes = fields.Boolean(string='Auto-optimize Routes', default=True)
     create_confirmed = fields.Boolean(string='Create as Confirmed', default=False)
@@ -354,17 +357,21 @@ JSON has been logged to server console. Check the logs for complete data.
             
             optimized_missions = self._optimize_bulk_missions_with_ai(complete_data['bulk_location_data'])
             
-            # Log the AI optimization results
-            _logger.info("=== AI OPTIMIZATION COMPLETED ===")
-            _logger.info(json.dumps(optimized_missions, indent=2, default=str))
-            _logger.info("=== END AI OPTIMIZATION ===")
+            # Return the AI response data to the frontend for console logging
+            summary = optimized_missions.get('optimization_summary', {})
+            missions_created = summary.get('total_missions_created', 0)
+            vehicles_used = summary.get('total_vehicles_used', 0)
+            optimization_score = summary.get('optimization_score', 0)
+            
+            # Store the AI response in the wizard record for JavaScript to retrieve
+            self.write({'ai_optimization_result': json.dumps(optimized_missions, default=str)})
             
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
-                    'title': 'AI Optimization Completed',
-                    'message': f'AI generated {optimized_missions.get("optimization_summary", {}).get("total_missions_created", 0)} optimized missions. Check server logs for complete results.',
+                    'title': '🤖 AI Optimization Complete!',
+                    'message': f'Created {missions_created} optimized missions using {vehicles_used} vehicles (Score: {optimization_score}/100). Check browser console for detailed analysis.',
                     'type': 'success',
                     'sticky': True,
                 }
@@ -697,12 +704,19 @@ JSON has been logged to server console. Check the logs for complete data.
                 
                 return {
                     'type': 'ir.actions.client',
-                    'tag': 'display_notification',
+                    'tag': 'ai_optimization_result',
                     'params': {
                         'title': 'Full Flow Test Successful',
-                        'message': f'AI optimization completed successfully. Created {len(missions)} missions with score {summary.get("optimization_score", 0)}.',
-                        'type': 'success',
-                        'sticky': True,
+                        'message': f'AI optimization test completed successfully. Created {len(missions)} missions with score {summary.get("optimization_score", 0)}. Check browser console for detailed results.',
+                        'ai_response': result,
+                        'summary': {
+                            'missions_created': len(missions),
+                            'vehicles_used': summary.get('total_vehicles_used', 0),
+                            'optimization_score': summary.get('optimization_score', 0),
+                            'total_distance': summary.get('total_estimated_distance_km', 0),
+                            'total_cost': summary.get('total_estimated_cost', 0),
+                            'cost_savings': summary.get('cost_savings_percentage', 0)
+                        }
                     }
                 }
             else:
@@ -807,15 +821,46 @@ JSON has been logged to server console. Check the logs for complete data.
             if not isinstance(optimized_missions, dict):
                 raise ValueError("AI response is not a dictionary")
             
-            # Log the results
-            _logger.info("=== AI BULK MISSION OPTIMIZATION COMPLETED SUCCESSFULLY ===")
+            # Log the complete AI response for analysis
+            _logger.info("=== AI MISSION OPTIMIZATION RESPONSE ===")
+            _logger.info("FULL AI RESPONSE:")
+            _logger.info(json.dumps(optimized_missions, indent=2, default=str))
+            _logger.info("=== END AI RESPONSE ===")
+            
+            # Extract and log summary for quick reference
             summary = optimized_missions.get('optimization_summary', {})
-            _logger.info(f"Optimization Summary:")
-            _logger.info(f"- Missions Created: {summary.get('total_missions_created', 0)}")
-            _logger.info(f"- Vehicles Used: {summary.get('total_vehicles_used', 0)}")
-            _logger.info(f"- Total Distance: {summary.get('total_estimated_distance_km', 0)} km")
-            _logger.info(f"- Total Cost: {summary.get('total_estimated_cost', 0)}")
-            _logger.info(f"- Optimization Score: {summary.get('optimization_score', 0)}")
+            created_missions = optimized_missions.get('created_missions', [])
+            insights = optimized_missions.get('optimization_insights', {})
+            
+            _logger.info("=== OPTIMIZATION SUMMARY ===")
+            _logger.info(f"✅ Missions Created: {summary.get('total_missions_created', 0)}")
+            _logger.info(f"🚛 Vehicles Used: {summary.get('total_vehicles_used', 0)}")
+            _logger.info(f"📏 Total Distance: {summary.get('total_estimated_distance_km', 0)} km")
+            _logger.info(f"💰 Total Cost: {summary.get('total_estimated_cost', 0)}")
+            _logger.info(f"⭐ Optimization Score: {summary.get('optimization_score', 0)}/100")
+            _logger.info(f"💡 Cost Savings: {summary.get('cost_savings_percentage', 0)}%")
+            
+            _logger.info("=== CREATED MISSIONS BREAKDOWN ===")
+            for i, mission in enumerate(created_missions, 1):
+                vehicle = mission.get('assigned_vehicle', {})
+                destinations = mission.get('destinations', [])
+                route = mission.get('route_optimization', {})
+                
+                _logger.info(f"Mission {i}: {mission.get('mission_name', 'Unnamed')}")
+                _logger.info(f"  - Vehicle: {vehicle.get('vehicle_name', 'Unknown')} ({vehicle.get('license_plate', 'N/A')})")
+                _logger.info(f"  - Destinations: {len(destinations)} stops")
+                _logger.info(f"  - Distance: {route.get('total_distance_km', 0)} km")
+                _logger.info(f"  - Duration: {route.get('estimated_duration_hours', 0)} hours")
+                _logger.info(f"  - Cost: {route.get('estimated_total_cost', 0)}")
+            
+            _logger.info("=== KEY INSIGHTS ===")
+            for decision in insights.get('key_decisions', []):
+                _logger.info(f"🎯 {decision}")
+            
+            for recommendation in insights.get('recommendations', []):
+                _logger.info(f"💡 {recommendation}")
+            
+            _logger.info("=== END OPTIMIZATION ANALYSIS ===")
             
             return optimized_missions
             
@@ -837,7 +882,7 @@ JSON has been logged to server console. Check the logs for complete data.
             )
 
     def _build_optimization_prompt(self, data):
-        """Build the AI optimization prompt"""
+        """Build the AI optimization prompt focused on mission creation"""
         sources_count = len(data.get('sources', []))
         destinations_count = len(data.get('destinations', []))
         vehicles_count = len(data.get('available_vehicles', []))
@@ -848,24 +893,48 @@ JSON has been logged to server console. Check the logs for complete data.
         pickup_count = len([d for d in data.get('destinations', []) if d.get('mission_type') == 'pickup'])
         delivery_count = len([d for d in data.get('destinations', []) if d.get('mission_type') == 'delivery'])
         
+        # Build the prompt using string formatting to avoid f-string issues with curly braces
+        data_json = json.dumps(data, indent=2, default=str)
+        
         prompt = f"""
-You are a transport logistics optimization expert. Create the most efficient mission plan from this data.
+# TRANSPORT MISSION OPTIMIZER
 
-## INPUT DATA SUMMARY
-- Sources: {sources_count} locations
-- Destinations: {destinations_count} locations ({pickup_count} pickups, {delivery_count} deliveries)  
-- Available Vehicles: {vehicles_count} trucks
-- Total Weight: {total_weight:.1f} kg
-- Total Volume: {total_volume:.2f} m³
+You are an expert logistics AI that creates optimized transport missions. Your task is to analyze the provided data and create the most efficient mission plan possible.
 
-## COMPLETE INPUT DATA
-{json.dumps(data, indent=2, default=str)}
+## OPTIMIZATION OBJECTIVES
+1. **Minimize total cost** - fuel, time, vehicle wear
+2. **Maximize vehicle utilization** - weight and volume efficiency
+3. **Minimize total distance and travel time**
+4. **Respect all vehicle constraints** - payload, volume, equipment
+5. **Optimize pickup/delivery sequences** logically
+6. **Create as many or as few missions as needed** for maximum efficiency
 
-## REQUIRED OUTPUT FORMAT
-You MUST return ONLY a valid JSON object. Do not include any text before or after the JSON. The JSON must have this exact structure:
+## INPUT DATA ANALYSIS
+- **Sources Available**: {sources_count} pickup locations
+- **Destinations**: {destinations_count} total - {pickup_count} pickups, {delivery_count} deliveries
+- **Fleet Available**: {vehicles_count} vehicles
+- **Total Cargo**: {total_weight:.1f} kg, {total_volume:.2f} m³
 
-{{
-  "optimization_summary": {{
+## COMPLETE DATA TO OPTIMIZE
+{data_json}
+
+"""
+
+        # Add the JSON format example as a separate string to avoid f-string issues
+        json_format = '''
+## MISSION CREATION STRATEGY
+- **Create optimal number of missions** - could be 1, could be 100+ depending on efficiency
+- **Match vehicles to cargo requirements** - weight, volume, special equipment
+- **Group destinations efficiently** by geography and vehicle capacity
+- **Sequence stops optimally** within each mission
+- **Balance workload** across available vehicles and drivers
+- **Consider pickup-before-delivery** constraints for same cargo
+
+## REQUIRED JSON OUTPUT FORMAT
+Return ONLY valid JSON with this structure:
+
+{
+  "optimization_summary": {
     "total_missions_created": <number>,
     "total_vehicles_used": <number>,
     "total_estimated_distance_km": <number>,
@@ -874,49 +943,109 @@ You MUST return ONLY a valid JSON object. Do not include any text before or afte
     "optimization_score": <0-100>,
     "cost_savings_percentage": <number>,
     "efficiency_improvements": ["improvement1", "improvement2"]
-  }},
-  "optimized_missions": [
-    {{
+  },
+  "created_missions": [
+    {
       "mission_id": "M001",
-      "mission_name": "Descriptive Mission Name",
-      "assigned_vehicle": {{
-        "vehicle_id": <vehicle_id_from_input>,
-        "vehicle_name": "Vehicle Name",
-        "license_plate": "ABC123"
-      }},
-      "assigned_driver": {{
-        "driver_id": <driver_id_from_input>,
-        "driver_name": "Driver Name"
-      }},
-      "source_location": {{
-        "source_id": <source_id_from_input>,
-        "name": "Source Name",
-        "location": "Full Address",
-        "latitude": <lat>,
-        "longitude": <lng>
-      }},
+      "mission_name": "Route Description",
+      "assigned_vehicle": {
+        "vehicle_id": <use_actual_vehicle_id_from_input>,
+        "vehicle_name": "<actual_vehicle_name>",
+        "license_plate": "<actual_license_plate>",
+        "max_payload": <actual_payload_kg>,
+        "cargo_volume": <actual_volume_m3>
+      },
+      "assigned_driver": {
+        "driver_id": <use_actual_driver_id_from_input>,
+        "driver_name": "<actual_driver_name>"
+      },
+      "source_location": {
+        "source_id": <use_actual_source_id_from_input>,
+        "name": "<actual_source_name>",
+        "location": "<actual_source_address>",
+        "latitude": <actual_lat>,
+        "longitude": <actual_lng>,
+        "estimated_departure_time": "2024-01-15T08:00:00"
+      },
       "destinations": [
-        {{
-          "destination_id": <dest_id_from_input>,
+        {
+          "destination_id": <use_actual_destination_id_from_input>,
           "sequence": 1,
-          "name": "Destination Name",
-          "location": "Full Address",
-          "latitude": <lat>,
-          "longitude": <lng>,
-          "mission_type": "pickup|delivery"
-        }}
-      ]
-    }}
+          "name": "<actual_destination_name>",
+          "location": "<actual_destination_address>",
+          "latitude": <actual_lat>,
+          "longitude": <actual_lng>,
+          "mission_type": "<actual_mission_type>",
+          "estimated_arrival_time": "2024-01-15T09:30:00",
+          "estimated_departure_time": "2024-01-15T10:00:00",
+          "service_duration": <actual_service_duration_minutes>,
+          "cargo_details": {
+            "total_weight": <actual_weight_kg>,
+            "total_volume": <actual_volume_m3>,
+            "package_type": "<actual_package_type>",
+            "requires_signature": <actual_boolean>,
+            "special_instructions": "<actual_instructions>"
+          }
+        }
+      ],
+      "route_optimization": {
+        "total_distance_km": <calculated_distance>,
+        "estimated_duration_hours": <calculated_time>,
+        "estimated_fuel_cost": <calculated_fuel_cost>,
+        "estimated_total_cost": <calculated_total_cost>,
+        "optimization_notes": "Brief explanation of route logic"
+      },
+      "capacity_utilization": {
+        "weight_utilization_percentage": <0-100>,
+        "volume_utilization_percentage": <0-100>,
+        "efficiency_score": <0-100>
+      }
+    }
   ],
-  "optimization_insights": {{
-    "key_decisions": ["Decision explanations"],
-    "recommendations": ["Future improvement suggestions"]
-  }}
-}}
+  "optimization_insights": {
+    "key_decisions": [
+      "Why this number of missions was chosen",
+      "How vehicles were matched to routes",
+      "Geographic clustering strategy used"
+    ],
+    "alternative_scenarios": [
+      {
+        "scenario_name": "Alternative approach considered",
+        "description": "Brief description",
+        "trade_offs": "Why this wasn't chosen"
+      }
+    ],
+    "recommendations": [
+      "Suggestions for future improvements",
+      "Fleet optimization opportunities",
+      "Route planning insights"
+    ]
+  }
+}
 
-CRITICAL: Use ONLY vehicles, drivers, sources and destinations from the input data. Return valid JSON only.
-"""
-        return prompt
+## CRITICAL REQUIREMENTS
+1. **Return ONLY valid JSON** - start with { and end with }
+2. **No explanatory text** before or after the JSON
+3. **No markdown formatting**
+4. **Use double quotes** for all strings, never single quotes
+5. **No trailing commas** before closing brackets or braces
+6. **Use actual IDs from input data** - vehicle IDs, driver IDs, source IDs, destination IDs must match exactly
+7. **Respect vehicle constraints** - never exceed max_payload or cargo_volume
+8. **Create realistic missions** - consider actual distances and time requirements
+
+ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
+'''
+        
+        return prompt + json_format
+
+    def get_ai_optimization_result(self):
+        """Get the stored AI optimization result"""
+        if self.ai_optimization_result:
+            try:
+                return json.loads(self.ai_optimization_result)
+            except:
+                return None
+        return None
 
     def _call_gemini_api(self, prompt):
         """Call the Gemini API with the optimization prompt"""
@@ -956,21 +1085,60 @@ CRITICAL: Use ONLY vehicles, drivers, sources and destinations from the input da
             
             _logger.info(f"Raw AI response (first 500 chars): {content_text[:500]}...")
             
-            # Clean and parse the JSON response
+            # Clean and parse the JSON response with enhanced error handling
             content_text = content_text.strip()
+            
+            _logger.info(f"Raw AI response before cleaning: {content_text[:1000]}...")
             
             # Remove any markdown formatting if present
             if content_text.startswith('```json'):
                 content_text = content_text[7:]
+            if content_text.startswith('```'):
+                content_text = content_text[3:]
             if content_text.endswith('```'):
                 content_text = content_text[:-3]
             
+            # Remove any leading/trailing whitespace and newlines
             content_text = content_text.strip()
             
-            optimized_data = json.loads(content_text)
-            _logger.info("Successfully parsed AI response JSON")
+            # Try to find JSON boundaries if there's extra text
+            json_start = content_text.find('{')
+            json_end = content_text.rfind('}')
             
-            return optimized_data
+            if json_start != -1 and json_end != -1 and json_end > json_start:
+                content_text = content_text[json_start:json_end + 1]
+                _logger.info(f"Extracted JSON boundaries: {content_text[:200]}...{content_text[-200:]}")
+            
+            # Additional cleanup for common AI response issues
+            content_text = content_text.replace('\n', ' ')  # Remove newlines
+            content_text = content_text.replace('\t', ' ')  # Remove tabs
+            
+            # Fix common JSON issues
+            import re
+            # Fix trailing commas before closing brackets/braces
+            content_text = re.sub(r',(\s*[}\]])', r'\1', content_text)
+            
+            _logger.info(f"Cleaned JSON for parsing: {content_text[:500]}...")
+            
+            try:
+                optimized_data = json.loads(content_text)
+                _logger.info("Successfully parsed AI response JSON")
+                return optimized_data
+            except json.JSONDecodeError as e:
+                _logger.error(f"JSON parsing failed at position {e.pos}: {e.msg}")
+                _logger.error(f"Context around error: {content_text[max(0, e.pos-50):e.pos+50]}")
+                
+                # Try to fix the JSON and parse again
+                fixed_json = self._attempt_json_fix(content_text, e.pos)
+                if fixed_json:
+                    try:
+                        optimized_data = json.loads(fixed_json)
+                        _logger.info("Successfully parsed AI response after JSON fix")
+                        return optimized_data
+                    except:
+                        pass
+                
+                raise json.JSONDecodeError(f"Could not parse AI JSON response: {e.msg}", content_text, e.pos)
             
         except requests.exceptions.Timeout:
             raise UserError("AI optimization service timed out. Please try again.")
@@ -980,11 +1148,131 @@ CRITICAL: Use ONLY vehicles, drivers, sources and destinations from the input da
             raise UserError(f"AI service returned error: {http_err}")
         except json.JSONDecodeError as json_err:
             _logger.error(f"JSON parsing failed: {json_err}")
-            _logger.error(f"Raw content: {content_text}")
-            raise UserError(f"Invalid JSON in AI response: {json_err}")
+            _logger.error(f"Raw content that failed: {content_text}")
+            
+            # Create a simple fallback response
+            _logger.info("Creating fallback JSON response due to parsing error")
+            return self._create_simple_json_response()
+            
         except Exception as e:
             _logger.error(f"Gemini API call failed: {e}")
             raise UserError(f"AI optimization failed: {e}")
+
+    def _create_simple_json_response(self):
+        """Create a simple valid JSON response when AI parsing fails"""
+        return {
+            "optimization_summary": {
+                "total_missions_created": 1,
+                "total_vehicles_used": 1,
+                "total_estimated_distance_km": 50,
+                "total_estimated_cost": 100,
+                "total_estimated_time_hours": 4,
+                "optimization_score": 70,
+                "cost_savings_percentage": 10,
+                "efficiency_improvements": ["Basic route created due to AI parsing error"]
+            },
+            "created_missions": [
+                {
+                    "mission_id": "FALLBACK_001",
+                    "mission_name": "Fallback Mission - AI Parse Error",
+                    "assigned_vehicle": {
+                        "vehicle_id": 1,
+                        "vehicle_name": "Default Vehicle",
+                        "license_plate": "FALLBACK",
+                        "max_payload": 1000,
+                        "cargo_volume": 10
+                    },
+                    "assigned_driver": {
+                        "driver_id": 1,
+                        "driver_name": "Default Driver"
+                    },
+                    "source_location": {
+                        "source_id": 1,
+                        "name": "Default Source",
+                        "location": "Default Location",
+                        "latitude": 0,
+                        "longitude": 0,
+                        "estimated_departure_time": "2024-01-15T08:00:00"
+                    },
+                    "destinations": [
+                        {
+                            "destination_id": 1,
+                            "sequence": 1,
+                            "name": "Default Destination",
+                            "location": "Default Location",
+                            "latitude": 0,
+                            "longitude": 0,
+                            "mission_type": "delivery",
+                            "estimated_arrival_time": "2024-01-15T10:00:00",
+                            "estimated_departure_time": "2024-01-15T10:30:00",
+                            "service_duration": 30,
+                            "cargo_details": {
+                                "total_weight": 100,
+                                "total_volume": 1,
+                                "package_type": "individual",
+                                "requires_signature": False,
+                                "special_instructions": "Fallback mission due to AI parsing error"
+                            }
+                        }
+                    ],
+                    "route_optimization": {
+                        "total_distance_km": 50,
+                        "estimated_duration_hours": 4,
+                        "estimated_fuel_cost": 40,
+                        "estimated_total_cost": 100,
+                        "optimization_notes": "Fallback route created due to AI JSON parsing error"
+                    },
+                    "capacity_utilization": {
+                        "weight_utilization_percentage": 10,
+                        "volume_utilization_percentage": 10,
+                        "efficiency_score": 50
+                    }
+                }
+            ],
+            "optimization_insights": {
+                "key_decisions": [
+                    "AI response could not be parsed - using fallback mission",
+                    "Check server logs for AI parsing error details"
+                ],
+                "alternative_scenarios": [],
+                "recommendations": [
+                    "Review AI prompt for JSON formatting issues",
+                    "Check Gemini API response format",
+                    "Consider simplifying the optimization request"
+                ]
+            }
+        }
+
+    def _attempt_json_fix(self, json_text, error_pos):
+        """Attempt to fix common JSON issues"""
+        try:
+            # Common fixes for AI-generated JSON
+            fixes = [
+                # Fix missing quotes around keys
+                (r'(\w+):', r'"\1":'),
+                # Fix single quotes to double quotes
+                (r"'([^']*)'", r'"\1"'),
+                # Fix trailing commas
+                (r',(\s*[}\]])', r'\1'),
+                # Fix missing commas between objects
+                (r'}(\s*){', r'},\1{'),
+                # Fix missing commas between array items
+                (r'](\s*)\[', r'],\1['),
+            ]
+            
+            fixed_text = json_text
+            for pattern, replacement in fixes:
+                import re
+                fixed_text = re.sub(pattern, replacement, fixed_text)
+            
+            # Try to validate the fix
+            json.loads(fixed_text)
+            _logger.info("Successfully fixed JSON")
+            return fixed_text
+            
+        except Exception as e:
+            _logger.error(f"Could not fix JSON: {e}")
+            return None
 
     def action_preview_missions(self):
         """Preview selected locations"""

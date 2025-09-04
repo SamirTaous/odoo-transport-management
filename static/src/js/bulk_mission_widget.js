@@ -127,10 +127,21 @@ export class BulkMissionWidget extends Component {
                 }
             }
 
-            // Try to load vehicles from different possible models
+            // Load all truck information from truck.vehicle model
             let vehicles = [];
             try {
-                vehicles = await this.orm.searchRead("truck.vehicle", [], ["id", "name", "max_weight", "max_volume", "license_plate"]);
+                vehicles = await this.orm.searchRead("truck.vehicle", [], [
+                    "id", "name", "license_plate", "vin_number", "year", "brand", "model_name",
+                    "ownership_type", "driver_id", "truck_type", "max_payload", "cargo_volume",
+                    "cargo_length", "cargo_width", "cargo_height", "overall_length", "overall_width",
+                    "overall_height", "gross_vehicle_weight", "engine_power", "fuel_type",
+                    "fuel_capacity", "fuel_consumption", "has_crane", "has_tailgate",
+                    "has_refrigeration", "has_gps", "special_equipment", "registration_expiry",
+                    "insurance_expiry", "inspection_due", "maintenance_status", "odometer",
+                    "last_service_odometer", "service_interval_km", "purchase_price",
+                    "current_value", "is_available", "rental_status", "km_until_service",
+                    "rental_start_date", "rental_end_date", "rental_cost_per_day", "subcontractor_id"
+                ]);
                 console.log("Found vehicles in truck.vehicle:", vehicles.length);
             } catch (e) {
                 console.warn("Could not load from truck.vehicle:", e);
@@ -153,6 +164,8 @@ export class BulkMissionWidget extends Component {
 
             // Also check what models are available
             await this.debugAvailableModels();
+
+            console.log("Final state - Drivers:", this.state.drivers.length, "Vehicles:", this.state.vehicles.length);
         } catch (error) {
             console.error("Error loading drivers and vehicles:", error);
         }
@@ -476,10 +489,56 @@ export class BulkMissionWidget extends Component {
                 })),
                 available_vehicles: this.state.vehicles.map(vehicle => ({
                     ...vehicle,
-                    // Include all vehicle details
-                    max_weight: vehicle.max_weight || 0,
-                    max_volume: vehicle.max_volume || 0,
-                    license_plate: vehicle.license_plate || 'N/A'
+                    // Include all truck details from truck maintenance module
+                    max_payload: vehicle.max_payload || 0,
+                    cargo_volume: vehicle.cargo_volume || 0,
+                    license_plate: vehicle.license_plate || 'N/A',
+                    brand: vehicle.brand || 'unknown',
+                    model_name: vehicle.model_name || 'unknown',
+                    truck_type: vehicle.truck_type || 'rigid',
+                    fuel_type: vehicle.fuel_type || 'diesel',
+                    ownership_type: vehicle.ownership_type || 'owned',
+                    maintenance_status: vehicle.maintenance_status || 'good',
+                    is_available: vehicle.is_available !== undefined ? vehicle.is_available : true,
+                    rental_status: vehicle.rental_status || 'N/A',
+                    // Capacity and dimensions
+                    cargo_length: vehicle.cargo_length || 0,
+                    cargo_width: vehicle.cargo_width || 0,
+                    cargo_height: vehicle.cargo_height || 0,
+                    overall_length: vehicle.overall_length || 0,
+                    overall_width: vehicle.overall_width || 0,
+                    overall_height: vehicle.overall_height || 0,
+                    gross_vehicle_weight: vehicle.gross_vehicle_weight || 0,
+                    // Engine and performance
+                    engine_power: vehicle.engine_power || 0,
+                    fuel_capacity: vehicle.fuel_capacity || 0,
+                    fuel_consumption: vehicle.fuel_consumption || 0,
+                    // Special equipment
+                    has_crane: vehicle.has_crane || false,
+                    has_tailgate: vehicle.has_tailgate || false,
+                    has_refrigeration: vehicle.has_refrigeration || false,
+                    has_gps: vehicle.has_gps || false,
+                    special_equipment: vehicle.special_equipment || '',
+                    // Maintenance and service
+                    odometer: vehicle.odometer || 0,
+                    last_service_odometer: vehicle.last_service_odometer || 0,
+                    service_interval_km: vehicle.service_interval_km || 0,
+                    km_until_service: vehicle.km_until_service || 0,
+                    // Financial
+                    purchase_price: vehicle.purchase_price || 0,
+                    current_value: vehicle.current_value || 0,
+                    rental_cost_per_day: vehicle.rental_cost_per_day || 0,
+                    // Dates (convert to strings for JSON)
+                    registration_expiry: vehicle.registration_expiry || null,
+                    insurance_expiry: vehicle.insurance_expiry || null,
+                    inspection_due: vehicle.inspection_due || null,
+                    rental_start_date: vehicle.rental_start_date || null,
+                    rental_end_date: vehicle.rental_end_date || null,
+                    // Additional info
+                    year: vehicle.year || 0,
+                    vin_number: vehicle.vin_number || '',
+                    driver_id: vehicle.driver_id || null,
+                    subcontractor_id: vehicle.subcontractor_id || null
                 })),
                 available_drivers: this.state.drivers,
                 summary: {

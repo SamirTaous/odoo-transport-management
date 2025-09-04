@@ -140,13 +140,26 @@ class BulkMissionWizard(models.TransientModel):
         if not sources and not destinations:
             raise UserError(_("No locations selected. Please add sources and destinations using the map interface first."))
         
-        # Get all available vehicles and drivers
+        # Get all available vehicles with complete information
         try:
-            vehicles = self.env['truck.vehicle'].search([]).read(['id', 'name', 'max_weight', 'max_volume', 'license_plate'])
-        except:
+            vehicles = self.env['truck.vehicle'].search([]).read([
+                'id', 'name', 'license_plate', 'vin_number', 'year', 'brand', 'model_name',
+                'ownership_type', 'driver_id', 'truck_type', 'max_payload', 'cargo_volume',
+                'cargo_length', 'cargo_width', 'cargo_height', 'overall_length', 'overall_width', 
+                'overall_height', 'gross_vehicle_weight', 'engine_power', 'fuel_type', 
+                'fuel_capacity', 'fuel_consumption', 'has_crane', 'has_tailgate', 
+                'has_refrigeration', 'has_gps', 'special_equipment', 'registration_expiry',
+                'insurance_expiry', 'inspection_due', 'maintenance_status', 'odometer',
+                'last_service_odometer', 'service_interval_km', 'purchase_price', 
+                'current_value', 'is_available', 'rental_status', 'km_until_service',
+                'rental_start_date', 'rental_end_date', 'rental_cost_per_day', 'subcontractor_id'
+            ])
+        except Exception as e:
+            _logger.warning(f"Could not load from truck.vehicle: {e}")
             try:
                 vehicles = self.env['fleet.vehicle'].search([]).read(['id', 'name', 'model_id'])
-            except:
+            except Exception as e2:
+                _logger.warning(f"Could not load from fleet.vehicle: {e2}")
                 vehicles = []
         
         try:
@@ -189,10 +202,24 @@ class BulkMissionWizard(models.TransientModel):
                 'available_vehicles': [
                     {
                         **vehicle,
-                        # Include all vehicle details
-                        'max_weight': vehicle.get('max_weight', 0),
-                        'max_volume': vehicle.get('max_volume', 0),
-                        'license_plate': vehicle.get('license_plate', 'N/A')
+                        # Ensure all truck fields are properly formatted
+                        'max_payload': vehicle.get('max_payload', 0),
+                        'cargo_volume': vehicle.get('cargo_volume', 0),
+                        'license_plate': vehicle.get('license_plate', 'N/A'),
+                        'brand': vehicle.get('brand', 'unknown'),
+                        'model_name': vehicle.get('model_name', 'unknown'),
+                        'truck_type': vehicle.get('truck_type', 'rigid'),
+                        'fuel_type': vehicle.get('fuel_type', 'diesel'),
+                        'ownership_type': vehicle.get('ownership_type', 'owned'),
+                        'maintenance_status': vehicle.get('maintenance_status', 'good'),
+                        'is_available': vehicle.get('is_available', True),
+                        'rental_status': vehicle.get('rental_status', 'N/A'),
+                        # Convert date fields to strings for JSON serialization
+                        'registration_expiry': str(vehicle.get('registration_expiry')) if vehicle.get('registration_expiry') else None,
+                        'insurance_expiry': str(vehicle.get('insurance_expiry')) if vehicle.get('insurance_expiry') else None,
+                        'inspection_due': str(vehicle.get('inspection_due')) if vehicle.get('inspection_due') else None,
+                        'rental_start_date': str(vehicle.get('rental_start_date')) if vehicle.get('rental_start_date') else None,
+                        'rental_end_date': str(vehicle.get('rental_end_date')) if vehicle.get('rental_end_date') else None,
                     }
                     for vehicle in vehicles
                 ],

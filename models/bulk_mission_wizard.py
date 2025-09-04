@@ -141,8 +141,21 @@ class BulkMissionWizard(models.TransientModel):
             raise UserError(_("No locations selected. Please add sources and destinations using the map interface first."))
         
         # Get all available vehicles and drivers
-        vehicles = self.env['truck.vehicle'].search([]).read(['id', 'name', 'max_weight', 'max_volume', 'license_plate'])
-        drivers = self.env['res.partner'].search([('is_company', '=', False)]).read(['id', 'name'])
+        try:
+            vehicles = self.env['truck.vehicle'].search([]).read(['id', 'name', 'max_weight', 'max_volume', 'license_plate'])
+        except:
+            try:
+                vehicles = self.env['fleet.vehicle'].search([]).read(['id', 'name', 'model_id'])
+            except:
+                vehicles = []
+        
+        try:
+            drivers = self.env['res.partner'].search([('is_company', '=', False)]).read(['id', 'name'])
+        except:
+            try:
+                drivers = self.env['hr.employee'].search([]).read(['id', 'name'])
+            except:
+                drivers = []
         
         complete_data = {
             'bulk_location_data': {

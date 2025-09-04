@@ -15,6 +15,9 @@
                             <button type="button" class="btn btn-sm btn-outline-secondary ms-2" t-on-click="clearAllMarkers">
                                 <i class="fa fa-trash me-1"/>Clear All
                             </button>
+                            <button type="button" class="btn btn-sm btn-outline-warning ms-2" t-on-click="loadDriversAndVehicles">
+                                <i class="fa fa-refresh me-1"/>Refresh Data
+                            </button>
                             <button type="button" class="btn btn-sm btn-success ms-2" t-on-click="generateCompleteJSON">
                                 <i class="fa fa-download me-1"/>Generate JSON
                             </button>

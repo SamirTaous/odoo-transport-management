@@ -24,10 +24,10 @@ export class BulkMissionWidget extends Component {
             vehicles: [],
         });
 
-        onMounted(() => {
+        onMounted(async () => {
             window.bulkMissionWidget = this;
             this.initializeMap();
-            this.loadDriversAndVehicles();
+            await this.loadDriversAndVehicles();
             this.syncStateFromRecord();
         });
 
@@ -110,13 +110,49 @@ export class BulkMissionWidget extends Component {
 
     async loadDriversAndVehicles() {
         try {
-            const [drivers, vehicles] = await Promise.all([
-                this.orm.searchRead("res.partner", [["is_company", "=", false]], ["id", "name"]),
-                this.orm.searchRead("truck.vehicle", [], ["id", "name", "max_weight", "max_volume", "license_plate"])
-            ]);
+            console.log("Loading drivers and vehicles...");
+
+            // Try to load drivers from different possible models
+            let drivers = [];
+            try {
+                drivers = await this.orm.searchRead("res.partner", [["is_company", "=", false]], ["id", "name"]);
+                console.log("Found drivers in res.partner:", drivers.length);
+            } catch (e) {
+                console.warn("Could not load from res.partner:", e);
+                try {
+                    drivers = await this.orm.searchRead("hr.employee", [], ["id", "name"]);
+                    console.log("Found drivers in hr.employee:", drivers.length);
+                } catch (e2) {
+                    console.warn("Could not load from hr.employee:", e2);
+                }
+            }
+
+            // Try to load vehicles from different possible models
+            let vehicles = [];
+            try {
+                vehicles = await this.orm.searchRead("truck.vehicle", [], ["id", "name", "max_weight", "max_volume", "license_plate"]);
+                console.log("Found vehicles in truck.vehicle:", vehicles.length);
+            } catch (e) {
+                console.warn("Could not load from truck.vehicle:", e);
+                try {
+                    vehicles = await this.orm.searchRead("fleet.vehicle", [], ["id", "name", "model_id"]);
+                    console.log("Found vehicles in fleet.vehicle:", vehicles.length);
+                } catch (e2) {
+                    console.warn("Could not load from fleet.vehicle:", e2);
+                }
+            }
+
+            console.log("Loaded drivers:", drivers.length, drivers);
+            console.log("Loaded vehicles:", vehicles.length, vehicles);
 
             this.state.drivers = drivers;
             this.state.vehicles = vehicles;
+
+            // Force a re-render to update the metrics
+            this.render();
+
+            // Also check what models are available
+            await this.debugAvailableModels();
         } catch (error) {
             console.error("Error loading drivers and vehicles:", error);
         }
@@ -388,6 +424,29 @@ export class BulkMissionWidget extends Component {
     formatDateTimeForInput(dateTimeString) {
         if (!dateTimeString) return '';
         return dateTimeString.slice(0, 16);
+    }
+
+    // Debug method to check available models
+    async debugAvailableModels() {
+        try {
+            console.log("=== DEBUGGING AVAILABLE MODELS ===");
+
+            // Check what models exist
+            const models = ['res.partner', 'hr.employee', 'truck.vehicle', 'fleet.vehicle'];
+
+            for (const model of models) {
+                try {
+                    const count = await this.orm.call(model, 'search_count', [[]]);
+                    console.log(`${model}: ${count} records`);
+                } catch (e) {
+                    console.log(`${model}: NOT AVAILABLE (${e.message})`);
+                }
+            }
+
+            console.log("=== END DEBUG ===");
+        } catch (error) {
+            console.error("Debug error:", error);
+        }
     }
 
     // JSON Generation for console logging

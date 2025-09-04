@@ -763,7 +763,7 @@ JSON has been logged to server console. Check the logs for complete data.
                 }
             }
             
-            api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+            api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent"
             request_url = f"{api_url}?key={api_key}"
             headers = {'Content-Type': 'application/json'}
             
@@ -1257,7 +1257,7 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
             }
         }
         
-        api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+        api_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent"
         request_url = f"{api_url}?key={api_key}"
         headers = {'Content-Type': 'application/json'}
         
@@ -1338,6 +1338,38 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
         except requests.exceptions.ConnectionError:
             raise UserError("Cannot connect to AI optimization service. Please check your internet connection.")
         except requests.exceptions.HTTPError as http_err:
+            _logger.error(f"HTTP error from Gemini API: {http_err}")
+            
+            # Handle rate limiting (429 error)
+            if "429" in str(http_err) or "Too Many Requests" in str(http_err):
+                _logger.warning("⚠️ Gemini API rate limit exceeded - waiting and retrying...")
+                import time
+                time.sleep(3)  # Wait 3 seconds
+                
+                try:
+                    # Retry the request once
+                    _logger.info("🔄 Retrying Gemini API request after rate limit...")
+                    response = requests.post(request_url, json=gemini_payload, headers=headers, timeout=90)
+                    response.raise_for_status()
+                    
+                    response_data = response.json()
+                    content_text = response_data['candidates'][0]['content']['parts'][0]['text']
+                    
+                    # Clean and parse the JSON response
+                    content_text = content_text.strip()
+                    if content_text.startswith('```json'):
+                        content_text = content_text[7:]
+                    if content_text.endswith('```'):
+                        content_text = content_text[:-3]
+                    
+                    optimized_data = json.loads(content_text.strip())
+                    _logger.info("✅ Gemini API retry successful after rate limit")
+                    return optimized_data
+                    
+                except Exception as retry_err:
+                    _logger.error(f"❌ Gemini API retry failed: {retry_err}")
+                    raise UserError("🚫 AI service is temporarily overloaded. Please wait 1-2 minutes and try again.")
+            
             raise UserError(f"AI service returned error: {http_err}")
         except json.JSONDecodeError as json_err:
             _logger.error(f"JSON parsing failed: {json_err}")

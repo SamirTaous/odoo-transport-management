@@ -32,8 +32,12 @@ class TransportDestination(models.Model):
     estimated_arrival_time = fields.Datetime(string='Estimated Arrival Time', compute='_compute_estimated_times', store=True, help="Calculated arrival time based on route and previous stops")
     estimated_departure_time = fields.Datetime(string='Estimated Departure Time', compute='_compute_estimated_times', store=True, help="Estimated departure time after service")
     
-    # Delivery requirements - simplified
+    # Delivery requirements and instructions
     requires_signature = fields.Boolean(string='Requires Signature', default=False)
+    special_instructions = fields.Text(string='Special Instructions', help="Any special handling or delivery instructions")
+    contact_name = fields.Char(string='Contact Name', help="Name of the contact person at destination")
+    contact_phone = fields.Char(string='Contact Phone', help="Phone number of the contact person")
+    priority_delivery = fields.Boolean(string='Priority Delivery', default=False, help="Mark if this delivery has high priority")
     
     # Package type
     package_type = fields.Selection([

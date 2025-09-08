@@ -74,6 +74,17 @@
                         </group>
                     </group>
                     
+                    <group string="Contact Information">
+                        <group>
+                            <field name="contact_name"/>
+                            <field name="contact_phone"/>
+                        </group>
+                        <group>
+                            <field name="priority_delivery"/>
+                            <field name="special_instructions"/>
+                        </group>
+                    </group>
+                    
                     <group>
                         <group string="Package Type">
                             <field name="package_type" widget="radio"/>
@@ -167,7 +178,11 @@
                             <field name="total_weight"/>
                             <field name="total_volume"/>
                             <field name="requires_signature"/>
+                            <field name="priority_delivery"/>
+                            <field name="contact_name"/>
+                            <field name="contact_phone"/>
                             <field name="is_completed"/>
+                            <field name="special_instructions"/>
                         </tree>
                     </field>
                 </div>

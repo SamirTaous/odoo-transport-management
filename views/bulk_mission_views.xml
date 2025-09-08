@@ -5,9 +5,19 @@
         <field name="name">bulk.mission.wizard.form</field>
         <field name="model">bulk.mission.wizard</field>
         <field name="arch" type="xml">
-            <form string="Bulk Mission Creation" class="o_form_nosheet">
+            <form string="Bulk Mission Creation">
                 <header>
-                    <button name="action_optimize_with_ai" string="🤖 AI Optimize" type="object" class="btn-primary"/>
+                    <!-- Save button -->
+                    <button string="Save" class="btn-primary" special="save"/>
+                    
+                    <!-- AI Results buttons -->
+                    <button name="create_missions_from_ai_results" 
+                            string="Create All Missions" 
+                            type="object" 
+                            class="btn-success" 
+                            attrs="{'invisible': [('ai_optimization_result', '=', False)]}"/>
+                            
+                    <!-- Cancel button -->
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </header>
                 
@@ -22,6 +32,7 @@
                 <div class="oe_hide">
                     <field name="name"/>
                     <field name="mission_date"/>
+                    <field name="ai_optimization_result"/>
                     <field name="driver_id"/>
                     <field name="vehicle_id"/>
                     <field name="priority"/>

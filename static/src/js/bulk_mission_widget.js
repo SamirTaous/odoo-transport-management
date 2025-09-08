@@ -106,11 +106,28 @@ export class BulkMissionWidget extends Component {
     }
 
     async saveData() {
-        const data = {
-            sources: this.state.sources,
-            destinations: this.state.destinations
-        };
-        await this.props.record.update({ mission_templates: JSON.stringify(data) });
+        try {
+            console.log("Saving data...");
+            const data = {
+                sources: this.state.sources,
+                destinations: this.state.destinations
+            };
+            
+            // Log the data being saved
+            console.log("Data to save:", data);
+            const jsonString = JSON.stringify(data);
+            console.log("JSON string length:", jsonString.length);
+            
+            // Save to record
+            await this.props.record.update({ mission_templates: jsonString });
+            
+            // Verify save
+            console.log("Data saved successfully");
+            return true;
+        } catch (error) {
+            console.error("Failed to save data:", error);
+            throw error;
+        }
     }
 
     async loadDriversAndVehicles() {
@@ -832,8 +849,28 @@ export class BulkMissionWidget extends Component {
     async optimizeWithAI() {
         console.log("🤖 AI Optimize button clicked from widget!");
 
+        // Validate inputs
         if (this.state.sources.length === 0 && this.state.destinations.length === 0) {
             this.notification.add("Please add sources and destinations before optimizing", { type: "warning" });
+            return;
+        }
+
+        // First ensure we have a valid record and it's saved
+        if (!this.props.record || !this.props.record.resId) {
+            console.log("No valid record ID found");
+            this.notification.add("Please save the form first before optimizing", { type: "warning", sticky: true });
+            return;
+        }
+
+        console.log("Using record ID:", this.props.record.resId);
+
+        // Force save current state
+        try {
+            console.log("Saving current state with record ID:", this.props.record.resId);
+            await this.saveData();
+        } catch (error) {
+            console.error("Failed to save current state:", error);
+            this.notification.add("Failed to save current state before optimization", { type: "danger" });
             return;
         }
 
@@ -862,64 +899,108 @@ export class BulkMissionWidget extends Component {
             await this.saveData();
 
             // Show loading notification
-            this.notification.add("🤖 AI is optimizing your missions... This may take a moment.", { type: "info" });
+            this.notification.add("🤖 AI is optimizing your missions... This may take a moment.", { 
+                type: "info",
+                sticky: true 
+            });
 
-            console.log("🤖 Calling backend AI optimization...");
+            console.log("🤖 Starting AI optimization process...");
 
-            // Call the backend AI optimization
-            const result = await this.orm.call(
+            console.log("Calling optimize method with record ID:", this.props.record.resId);
+            
+            // Debug current record state
+            console.log("Current record state:", {
+                id: this.props.record.resId,
+                data: this.props.record.data,
+                model: this.props.record.model,
+            });
+            
+            // Ensure we have a valid record ID
+            if (!this.props.record.resId) {
+                throw new Error("No valid record ID found");
+            }
+
+            // First, call the optimize method with proper error handling
+            let optimizeResult;
+            try {
+                console.log("Making RPC call to optimize_with_ai...");
+                optimizeResult = await this.orm.call(
+                    "bulk.mission.wizard",
+                    "action_optimize_with_ai",
+                    [[this.props.record.resId]]
+                );
+                console.log("RPC call successful:", optimizeResult);
+            } catch (error) {
+                console.error("RPC call failed:", error);
+                this.notification.add(`AI optimization failed: ${error.message || 'Unknown error'}`, {
+                    type: "danger",
+                    sticky: true
+                });
+                throw error;
+            }
+
+            console.log("Optimize result:", optimizeResult);
+            
+            // Validate response format
+            if (!optimizeResult) {
+                throw new Error("No response from AI optimization");
+            }
+            
+            if (optimizeResult.type !== 'ir.actions.client') {
+                console.error("Invalid response type:", optimizeResult.type);
+                throw new Error("Invalid response type from AI optimization");
+            }
+            
+            if (!optimizeResult.params) {
+                console.error("Missing params in response:", optimizeResult);
+                throw new Error("Missing parameters in AI optimization response");
+            }
+            
+            if (optimizeResult.params.type !== 'success') {
+                console.error("Non-success response:", optimizeResult.params);
+                throw new Error(optimizeResult.params.message || "AI optimization did not succeed");
+            }
+
+            // Immediately get the results
+            console.log("🤖 Getting AI optimization results...");
+            const aiResult = await this.orm.call(
                 "bulk.mission.wizard",
-                "action_optimize_with_ai",
+                "get_ai_optimization_result",
                 [this.props.record.resId]
             );
 
-            console.log("🤖 Backend AI optimization completed:", result);
-
-            // After optimization completes, get the AI results and log them
-            if (result && result.params && result.params.type === 'success') {
-                console.log("🤖 Getting AI optimization results...");
-
-                // Get the AI optimization results
-                try {
-                    const aiResult = await this.orm.call(
-                        "bulk.mission.wizard",
-                        "get_ai_optimization_result",
-                        [this.props.record.resId]
-                    );
-
-                    console.log("🤖 AI Result retrieved:", aiResult);
-
-                    if (aiResult) {
-                        await this.handleAIOptimizationResult({
-                            ai_response: aiResult,
-                            summary: aiResult.optimization_summary || {},
-                            title: result.params.title,
-                            message: result.params.message
-                        });
-                    } else {
-                        console.log("🤖 No AI results found");
-                        this.notification.add(result.params.message, { type: "success" });
-                    }
-                } catch (error) {
-                    console.error("🤖 Failed to get AI results:", error);
-                    this.notification.add(result.params.message, { type: "success" });
-                }
-            } else {
-                console.log("🤖 AI Optimization result (non-success):", result);
-                // Still show the notification if there's a message
-                if (result && result.params && result.params.message) {
-                    this.notification.add(result.params.message, {
-                        type: result.params.type || "info"
-                    });
-                }
+            if (!aiResult) {
+                throw new Error("No AI optimization results found");
             }
+
+            // Display results
+            await this.handleAIOptimizationResult({
+                ai_response: aiResult,
+                summary: aiResult.optimization_summary || {},
+                title: optimizeResult.params.title,
+                message: optimizeResult.params.message
+            });
+
+            // Show success notification
+            this.notification.add("🤖 AI optimization completed successfully!", { 
+                type: "success",
+                sticky: false 
+            });
+
+            // Update the form's record data to reflect the AI results
+            await this.props.record.update({ 
+                ai_optimization_result: JSON.stringify(aiResult)
+            });
+
+            console.log("🤖 AI Optimization completed successfully");
 
         } catch (error) {
             console.error('🤖 AI optimization failed:', error);
-            this.notification.add("AI optimization failed. Check console for details.", { type: "danger" });
+            this.notification.add(error.message || "AI optimization failed. Check console for details.", { 
+                type: "danger",
+                sticky: true
+            });
         }
-
-        console.log("🤖 AI Optimize method completed");
     }
 
     // Helper method to quickly add default cargo to all destinations
@@ -1469,30 +1550,56 @@ export class BulkMissionWidget extends Component {
 
     // Create actual missions from AI results
     async createMissionsFromAI() {
-        if (!this.state.aiMissions.length) {
-            this.notification.add("No AI missions to create", { type: "warning" });
+        if (!this.state.aiMissions || !this.state.aiMissions.length) {
+            this.notification.add("No AI missions to create. Please optimize with AI first.", { type: "warning" });
             return;
         }
 
         try {
             console.log("🚀 Creating missions from AI results...");
+            console.log(`Found ${this.state.aiMissions.length} missions to create`);
 
+            // Get record ID from wizard
+            const recordId = this.props.record.resId;
+            if (!recordId) {
+                throw new Error("No wizard record ID found");
+            }
+
+            this.notification.add("Creating missions... Please wait.", { type: "info", sticky: true });
+
+            // Call backend method to create missions
             const result = await this.orm.call(
                 "bulk.mission.wizard",
                 "create_missions_from_ai_results",
-                [this.props.record.resId]
+                [recordId]
             );
 
+            console.log("✅ Backend create_missions_from_ai_results result:", result);
+
             if (result && result.type === 'ir.actions.act_window') {
+                // Success! Show notification and redirect
                 this.notification.add("✅ Missions created successfully!", { type: "success" });
 
-                // Optionally redirect to view created missions
-                // You can implement this based on your needs
-                console.log("✅ Missions created:", result);
+                // Redirect to the created missions
+                if (result.res_id) {
+                    // Single mission created
+                    console.log("Opening single mission view:", result.res_id);
+                    window.location.href = `/web#model=transport.mission&view_type=form&id=${result.res_id}`;
+                } else if (result.domain) {
+                    // Multiple missions created
+                    const domain = JSON.stringify(result.domain);
+                    console.log("Opening mission list view with domain:", domain);
+                    window.location.href = `/web#model=transport.mission&view_type=list&domain=${encodeURIComponent(domain)}`;
+                }
+            } else {
+                throw new Error("Invalid response from server");
             }
         } catch (error) {
             console.error("❌ Failed to create missions:", error);
-            this.notification.add("Failed to create missions. Check console for details.", { type: "danger" });
+            this.notification.add("Failed to create missions: " + (error.message || error.toString()), { 
+                type: "danger",
+                sticky: true
+            });
         }
     }
 

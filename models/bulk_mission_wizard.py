@@ -48,7 +48,17 @@ class BulkMissionWizard(models.TransientModel):
         """Set default values"""
         defaults = super().default_get(fields_list)
         defaults['mission_templates'] = '[]'
+        defaults['name'] = _('Bulk Mission Batch')
         return defaults
+        
+    @api.model
+    def create(self, vals):
+        """Override create to handle widget creation"""
+        _logger.info(f"Creating bulk mission wizard with vals: {vals}")
+        # Ensure mission_templates is a valid JSON string
+        if 'mission_templates' in vals and not isinstance(vals['mission_templates'], str):
+            vals['mission_templates'] = json.dumps(vals['mission_templates'])
+        return super().create(vals)
     
     def action_create_missions(self):
         """Create multiple missions from templates"""
@@ -282,22 +292,33 @@ JSON has been logged to server console. Check the logs for complete data.
 
     def action_optimize_with_ai(self):
         """Generate optimized missions using AI"""
-        try:
-            location_data = json.loads(self.mission_templates or '{"sources": [], "destinations": []}')
-        except:
-            location_data = {"sources": [], "destinations": []}
+        _logger.info("=== Starting AI optimization ===")
         
+        # First try to parse the JSON data
+        if not self.mission_templates:
+            _logger.error("No mission templates data found")
+            raise UserError(_("No locations found. Please add sources and destinations first."))
+            
+        try:
+            location_data = json.loads(self.mission_templates)
+            _logger.info(f"Successfully parsed mission templates JSON: {type(location_data)}")
+        except json.JSONDecodeError as e:
+            _logger.error(f"Failed to parse mission templates JSON: {e}")
+            raise UserError(_("Invalid location data format."))
+            
         # Handle both list and dict formats
         if isinstance(location_data, list):
             # If it's a list, assume it's the old mission format
             sources = []
             destinations = location_data  # The list contains destinations
+            _logger.info(f"Using list format with {len(destinations)} destinations")
         elif isinstance(location_data, dict):
             sources = location_data.get('sources', [])
             destinations = location_data.get('destinations', [])
+            _logger.info(f"Using dict format with {len(sources)} sources and {len(destinations)} destinations")
         else:
-            sources = []
-            destinations = []
+            _logger.error(f"Unexpected data format type: {type(location_data)}")
+            raise UserError(_("Invalid location data structure."))
         
         if not sources and not destinations:
             raise UserError(_("No locations selected. Please add sources and destinations first."))
@@ -1194,12 +1215,18 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
             for seq, dest_data in enumerate(destinations, 1):
                 cargo_details = dest_data.get('cargo_details', {})
                 
+                # Only include fields that exist in the transport.destination model
+                # Prepare initial destination values with only basic fields
                 dest_vals = {
                     'mission_id': mission.id,
-                    'location': dest_data.get('location', ''),
+                    'sequence': seq,
+                }
+                
+                # Add fields that definitely exist in transport.destination model
+                fields_mapping = {
+                    'location': dest_data.get('location'),
                     'latitude': dest_data.get('latitude'),
                     'longitude': dest_data.get('longitude'),
-                    'sequence': seq,
                     'mission_type': dest_data.get('mission_type', 'delivery'),
                     'expected_arrival_time': dest_data.get('estimated_arrival_time'),
                     'service_duration': dest_data.get('service_duration', 0),
@@ -1207,8 +1234,14 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                     'total_weight': cargo_details.get('total_weight', 0),
                     'total_volume': cargo_details.get('total_volume', 0),
                     'requires_signature': cargo_details.get('requires_signature', False),
-                    'special_instructions': cargo_details.get('special_instructions', ''),
                 }
+                
+                # Check which fields exist in the model before adding them
+                destination_fields = self.env['transport.destination']._fields
+                for field, value in fields_mapping.items():
+                    if field in destination_fields:
+                        if value is not None:  # Only set non-None values
+                            dest_vals[field] = value
                 self.env['transport.destination'].create(dest_vals)
             
             # Auto-optimize route if requested

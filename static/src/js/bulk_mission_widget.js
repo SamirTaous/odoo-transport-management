@@ -1254,13 +1254,16 @@ export class BulkMissionWidget extends Component {
             const missionColor = this.getMissionColor(missionIndex);
             const isSelected = missionIndex === this.state.selectedMissionIndex;
 
-            // Create route polyline (same style as single mission)
+            // Create route polyline with more distinctive styling
             const routeLine = L.polyline(routeGeometry, {
                 className: 'tm-route-line',
                 color: missionColor,
                 weight: isSelected ? 6 : 4,
-                opacity: isSelected ? 0.8 : 0.6,
-                dashArray: isSelected ? null : '10, 5'
+                opacity: isSelected ? 1 : 0.8,
+                dashArray: null,
+                lineCap: 'round',
+                lineJoin: 'round',
+                smoothFactor: 1
             });
 
             routeLine.bindPopup(`
@@ -1401,16 +1404,21 @@ export class BulkMissionWidget extends Component {
     // Get color for mission (different color for each mission)
     getMissionColor(missionIndex) {
         const colors = [
-            '#FF6B6B', // Red
-            '#4ECDC4', // Teal
-            '#45B7D1', // Blue
-            '#96CEB4', // Green
-            '#FFEAA7', // Yellow
-            '#DDA0DD', // Plum
-            '#98D8C8', // Mint
-            '#F7DC6F', // Light Yellow
-            '#BB8FCE', // Light Purple
-            '#85C1E9'  // Light Blue
+            '#FF4B4B', // Bright Red
+            '#4CAF50', // Material Green
+            '#2196F3', // Material Blue
+            '#9C27B0', // Material Purple
+            '#FF9800', // Material Orange
+            '#00BCD4', // Material Cyan
+            '#E91E63', // Material Pink
+            '#FFEB3B', // Material Yellow
+            '#673AB7', // Deep Purple
+            '#009688', // Teal
+            '#F44336', // Material Red
+            '#3F51B5', // Indigo
+            '#FFA726', // Deep Orange
+            '#8BC34A', // Light Green
+            '#03A9F4'  // Light Blue
         ];
         return colors[missionIndex % colors.length];
     }

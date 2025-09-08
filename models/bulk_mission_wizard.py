@@ -71,29 +71,46 @@ class BulkMissionWizard(models.TransientModel):
         
         for template in templates:
             try:
+                # Get source information
+                source_data = {
+                    'latitude': template.get('source_latitude'),
+                    'longitude': template.get('source_longitude'),
+                    'location': template.get('source_location')
+                }
+                
+                # Get destinations and optimize their sequence
+                destinations = template.get('destinations', [])
+                if destinations:
+                    # Optimize the sequence of destinations
+                    optimized_destinations = self._optimize_route_sequence(source_data, destinations)
+                    _logger.info(f"Optimized route sequence for mission. Original order vs optimized:")
+                    for i, (orig, opt) in enumerate(zip(destinations, optimized_destinations)):
+                        _logger.info(f"Stop {i+1}: {orig.get('location')} -> {opt.get('location')}")
+                    template['destinations'] = optimized_destinations
+
                 # Create mission
                 mission_vals = {
                     'mission_date': self.mission_date,
                     'driver_id': template.get('driver_id') or self.driver_id.id,
                     'vehicle_id': template.get('vehicle_id') or self.vehicle_id.id,
                     'priority': template.get('priority') or self.priority,
-                    'source_location': template.get('source_location'),
-                    'source_latitude': template.get('source_latitude'),
-                    'source_longitude': template.get('source_longitude'),
+                    'source_location': source_data['location'],
+                    'source_latitude': source_data['latitude'],
+                    'source_longitude': source_data['longitude'],
                     'notes': template.get('notes', ''),
                 }
                 
                 mission = self.env['transport.mission'].create(mission_vals)
                 
-                # Create destinations
+                # Create destinations with optimized sequence
                 destinations = template.get('destinations', [])
-                for dest_data in destinations:
+                for index, dest_data in enumerate(destinations, start=1):
                     dest_vals = {
                         'mission_id': mission.id,
                         'location': dest_data.get('location'),
                         'latitude': dest_data.get('latitude'),
                         'longitude': dest_data.get('longitude'),
-                        'sequence': dest_data.get('sequence', 1),
+                        'sequence': index,  # Use the optimized order index
                         'mission_type': dest_data.get('mission_type', 'delivery'),
                         'expected_arrival_time': dest_data.get('expected_arrival_time'),
                         'service_duration': dest_data.get('service_duration', 0),
@@ -805,6 +822,144 @@ JSON has been logged to server console. Check the logs for complete data.
             _logger.error(f"API test failed: {e}")
             return False, str(e)
 
+    def _optimize_route_sequence(self, source, destinations):
+        """
+        Optimize the sequence of destinations using an enhanced clustering and route optimization approach
+        Returns reordered destinations list with proper sequences
+        """
+        if not destinations:
+            return []
+            
+        _logger.info("Starting enhanced route sequence optimization")
+        _logger.info(f"Original sequence: {[d.get('location') for d in destinations]}")
+
+        def calculate_distance(point1, point2):
+            """Calculate straight-line distance between two points using Haversine formula"""
+            from math import radians, sin, cos, sqrt, atan2
+            
+            lat1 = radians(float(point1['latitude']))
+            lon1 = radians(float(point1['longitude']))
+            lat2 = radians(float(point2['latitude']))
+            lon2 = radians(float(point2['longitude']))
+            
+            dlon = lon2 - lon1
+            dlat = lat2 - lat1
+            a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+            c = 2 * atan2(sqrt(a), sqrt(1-a))
+            R = 6371  # Earth's radius in km
+            return R * c
+
+        def find_centroid(points):
+            """Find the centroid of a group of points"""
+            if not points:
+                return None
+            lat_sum = sum(float(p['latitude']) for p in points)
+            lon_sum = sum(float(p['longitude']) for p in points)
+            return {'latitude': lat_sum / len(points), 'longitude': lon_sum / len(points)}
+
+        def cluster_destinations(destinations, max_cluster_size=5):
+            """Group destinations into geographical clusters"""
+            if len(destinations) <= max_cluster_size:
+                return [destinations]
+
+            # Find overall centroid
+            centroid = find_centroid(destinations)
+            clusters = []
+            remaining = destinations.copy()
+
+            while remaining:
+                # Start a new cluster with the farthest point from centroid
+                current_cluster = [max(remaining, key=lambda x: calculate_distance(centroid, x))]
+                remaining.remove(current_cluster[0])
+
+                # Add nearest neighbors until cluster is full
+                while len(current_cluster) < max_cluster_size and remaining:
+                    cluster_centroid = find_centroid(current_cluster)
+                    nearest = min(remaining, key=lambda x: calculate_distance(cluster_centroid, x))
+                    current_cluster.append(nearest)
+                    remaining.remove(nearest)
+
+                clusters.append(current_cluster)
+
+            return clusters
+
+        def optimize_cluster_sequence(cluster, start_point):
+            """Optimize route within a cluster using an improved nearest neighbor with lookahead"""
+            if not cluster:
+                return []
+
+            remaining = cluster.copy()
+            route = []
+            current = start_point
+
+            while remaining:
+                if len(remaining) <= 2:
+                    # For last two points, check both permutations
+                    if len(remaining) == 2:
+                        dist1 = calculate_distance(current, remaining[0]) + calculate_distance(remaining[0], remaining[1])
+                        dist2 = calculate_distance(current, remaining[1]) + calculate_distance(remaining[1], remaining[0])
+                        route.extend(remaining if dist1 <= dist2 else remaining[::-1])
+                        break
+                    else:
+                        route.extend(remaining)
+                        break
+
+                # Find next point with 2-opt lookahead
+                min_total_dist = float('inf')
+                best_next = None
+
+                for next_point in remaining:
+                    # Calculate distance including the next possible point
+                    current_dist = calculate_distance(current, next_point)
+                    remaining_after = [p for p in remaining if p != next_point]
+                    
+                    # Look ahead to next possible point
+                    if remaining_after:
+                        next_min_dist = min(calculate_distance(next_point, p) for p in remaining_after)
+                        total_dist = current_dist + next_min_dist
+                    else:
+                        total_dist = current_dist
+
+                    if total_dist < min_total_dist:
+                        min_total_dist = total_dist
+                        best_next = next_point
+
+                route.append(best_next)
+                remaining.remove(best_next)
+                current = best_next
+
+            return route
+
+        # Cluster destinations if there are many
+        clusters = cluster_destinations(destinations)
+        optimized_sequence = []
+        current_point = source
+
+        # Optimize cluster sequence and routes within clusters
+        while clusters:
+            # Find nearest cluster to current point
+            cluster_centroids = [find_centroid(cluster) for cluster in clusters]
+            nearest_cluster_index = min(range(len(clusters)), 
+                                     key=lambda i: calculate_distance(current_point, cluster_centroids[i]))
+            
+            # Optimize route within the nearest cluster
+            current_cluster = clusters.pop(nearest_cluster_index)
+            optimized_cluster = optimize_cluster_sequence(current_cluster, current_point)
+            optimized_sequence.extend(optimized_cluster)
+            
+            if optimized_cluster:
+                current_point = {
+                    'latitude': optimized_cluster[-1]['latitude'],
+                    'longitude': optimized_cluster[-1]['longitude']
+                }
+
+        # Log the optimized sequence
+        _logger.info("Optimized sequence with clustering:")
+        for i, dest in enumerate(optimized_sequence, 1):
+            _logger.info(f"{i}. {dest.get('location')} (was: {destinations.index(dest) + 1})")
+
+        return optimized_sequence
+
     def _optimize_bulk_missions_with_ai(self, bulk_location_data):
         """
         Main method to optimize bulk missions using AI
@@ -923,12 +1078,25 @@ JSON has been logged to server console. Check the logs for complete data.
 You are an expert logistics AI that creates optimized transport missions. Your task is to analyze the provided data and create the most efficient mission plan possible.
 
 ## OPTIMIZATION OBJECTIVES
-1. **Minimize total cost** - fuel, time, vehicle wear
-2. **Maximize vehicle utilization** - weight and volume efficiency
-3. **Minimize total distance and travel time**
-4. **Respect all vehicle constraints** - payload, volume, equipment
-5. **Optimize pickup/delivery sequences** logically
+1. **Optimize Stop Sequence** - For each mission:
+   - Start from the source location
+   - Find the closest unvisited destination
+   - Make that the first stop (sequence=1)
+   - From there, find the next closest destination
+   - Continue until all destinations are sequenced
+   - IMPORTANT: The sequence in the response must reflect this proximity-based order
+2. **Minimize total cost** - fuel, time, vehicle wear
+3. **Maximize vehicle utilization** - weight and volume efficiency
+4. **Minimize total distance and travel time**
+5. **Respect all vehicle constraints** - payload, volume, equipment
 6. **Create as many or as few missions as needed** for maximum efficiency
+
+## SEQUENCE OPTIMIZATION RULES
+1. The sequence of destinations in each mission MUST be based on proximity
+2. Ignore the original order of destinations provided in the input
+3. Always calculate distances from the current point to find the next stop
+4. Update destination sequence numbers to match the optimized order
+5. The response JSON must list destinations in this optimized order
 
 ## INPUT DATA ANALYSIS
 - **Sources Available**: {sources_count} pickup locations
@@ -1175,6 +1343,60 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
         except Exception as e:
             _logger.error(f"Failed to create missions from AI results: {e}")
             raise UserError(_("Failed to create missions: %s") % str(e))
+
+    def _calculate_distance(self, point1, point2):
+        """Calculate distance between two points using Haversine formula"""
+        from math import radians, sin, cos, sqrt, atan2
+        
+        lat1 = radians(float(point1['latitude']))
+        lon1 = radians(float(point1['longitude']))
+        lat2 = radians(float(point2['latitude']))
+        lon2 = radians(float(point2['longitude']))
+        
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+        a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+        c = 2 * atan2(sqrt(a), sqrt(1-a))
+        R = 6371  # Earth's radius in km
+        return R * c
+
+    def _verify_and_fix_sequence(self, mission):
+        """Verify and fix destination sequences based on proximity"""
+        if not mission.get('source_location') or not mission.get('destinations'):
+            return mission
+
+        source = {
+            'latitude': mission['source_location']['latitude'],
+            'longitude': mission['source_location']['longitude']
+        }
+        
+        # Start from source, find closest destination each time
+        current = source
+        remaining = mission['destinations'].copy()
+        optimized = []
+        
+        while remaining:
+            # Find closest to current point
+            closest = min(remaining, 
+                        key=lambda x: self._calculate_distance(current, {
+                            'latitude': x['latitude'],
+                            'longitude': x['longitude']
+                        }))
+            
+            # Update sequence and add to optimized list
+            closest['sequence'] = len(optimized) + 1
+            optimized.append(closest)
+            remaining.remove(closest)
+            
+            # Update current point
+            current = {
+                'latitude': closest['latitude'],
+                'longitude': closest['longitude']
+            }
+        
+        # Replace destinations with optimized sequence
+        mission['destinations'] = optimized
+        return mission
 
     def create_single_mission_from_ai(self, mission_index):
         """Create a single transport mission from AI optimization results"""

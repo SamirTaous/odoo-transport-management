@@ -613,7 +613,7 @@ For additional support or customization requests, please refer to the module's i
 
 ---
 
-**Version**: 16.0.2.0.0  
+**Version**: 16.0.3.0.0  
 **Author**: Samir Taous  
 **License**: LGPL-3  
 **Last Updated**: 2024

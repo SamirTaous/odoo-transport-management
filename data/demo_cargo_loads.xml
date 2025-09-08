@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Realistic Moroccan Cargo Loads for AI Testing -->
+        
+        <!-- Heavy Industrial Loads -->
+        <record id="cargo_phosphate_ocp_001" model="transport.destination">
+            <field name="name">Phosphate Fertilizer - OCP Jorf Lasfar to Port</field>
+            <field name="location">Port de Jorf Lasfar, El Jadida</field>
+            <field name="latitude">33.0731</field>
+            <field name="longitude">-8.6364</field>
+            <field name="mission_type">delivery</field>
+            <field name="total_weight">24500</field>
+            <field name="total_volume">45</field>
+            <field name="package_type">bulk</field>
+            <field name="requires_signature">True</field>
+            <field name="special_instructions">Chemical fertilizer - requires protective equipment. Export cargo for international shipping.</field>
+            <field name="service_duration">120</field>
+        </record>
+
+        <record id="cargo_steel_sidmar_002" model="transport.destination">
+            <field name="name">Steel Coils - Sidmar Casablanca to Construction Site</field>
+            <field name="location">Zone Industrielle Ain Sebaa, Casablanca</field>
+            <field name="latitude">33.6178</field>
+            <field name="longitude">-7.5266</field>
+            <field name="mission_type">delivery</field>
+            <field name="total_weight">22000</field>
+            <field name="total_volume">35</field>
+            <field name="package_type">individual</field>
+            <field name="requires_signature">True</field>
+            <field name="special_instructions">Heavy steel coils - requires crane for loading/unloading. Secure with chains.</field>
+            <field name="service_duration">150</field>
+        </record>
+
+        <!-- Agricultural Products -->
+        <record id="cargo_citrus_agadir_003" model="transport.destination">
+            <field name="name">Citrus Export - Agadir Farms to Casablanca Port</field>
+            <field name="location">Port de Casablanca, Casablanca</field>
+            <field name="latitude">33.6062</field>
+            <field name="longitude">-7.6217</field>
+            <field name="mission_type">delivery</field>
+            <field name="total_weight">18000</field>
+            <field name="total_volume">85</field>
+            <field name="package_type">palletized</field>
+            <field name="requires_signature">True</field>
+            <field name="special_instructions">Fresh citrus fruits for export. Temperature controlled 2-4°C. Priority delivery.</field>
+            <field name="service_duration">90</field>
+        </record>
+
+        <record id="cargo_vegetables_larache_004" model="transport.destination">
+            <field name="name">Fresh Vegetables - Larache to Marché Central Rabat</field>
+            <field name="location">Marché Central, Rabat</field>
+            <field name="latitude">34.0209</field>
+            <field name="longitude">-6.8417</field>
+            <field name="mission_type">delivery</field>
+            <field name="total_weight">8500</field>
+            <field name="total_volume">65</field>
+            <field name="package_type">individual</field>
+            <field name="requires_signature">False</field>
+            <field name="special_instructions">Fresh vegetables - early morning delivery required. Keep cool and ventilated.</field>
+            <field name="service_duration">45</field>
+        </record>
+
+        <!-- Automotive Industry -->
+        <record id="cargo_renault_parts_005" model="transport.destination">
+            <field name="name">Auto Parts - Renault Tangier to Dealers Network</field>
+            <field name="location">Renault Tanger Med, Tangier</field>
+            <field name="latitude">35.7595</field>
+            <field name="longitude">-5.8330</field>
+            <field name="mission_type">pickup</field>
+            <field name="total_weight">12500</field>
+            <field name="total_volume">70</field>
+            <field name="package_type">crated</field>
+            <field name="requires_signature">True</field>
+            <field name="special_instructions">Automotive spare parts - fragile components. No stacking above 2 levels.</field>
+            <field name="service_duration">75</field>
+        </record>
+
+        <record id="cargo_psa_engines_006" model="transport.destination">
+            <field name="name">Car Engines - PSA Kenitra to Assembly Plant</field>
+            <field name="location">Zone Industrielle Kenitra, Kenitra</field>
+            <field name="latitude">34.2610</field>
+            <field name="longitude">-6.5802</field>
+            <field name="mission_type">delivery</field>
+            <field name="total_weight">15000</field>
+            <field name="total_volume">40</field>
+            <field name="package_type">crated</field>
+            <field name="requires_signature">True</field>
+            <field name="special_instructions">Car engines in protective crates. Handle with extreme care. Requires forklift.</field>
+            <field name="service_duration">90</field>
+        </record>
+
+        <!-- Textile Industry -->
+        <record id="cargo_textiles_casa_007" model="transport.destination">
+            <field name="name">Textile Products - Casablanca Garments to Europe</field>
+            <field name="location">Zone Franche Tanger, Tangier</field>
+            <field name="latitude">35.7473</field>
+            <field name="longitude">-5.9175</field>
+            <field name="mission_type">delivery</field>
+            <field name="total_weight">6500</field>
+            <field name="total_volume">95</field>
+            <field name="package_type">individual</field>
+            <field name="requires_signature">True</field>
+            <field name="special_instructions">Ready-made garments for export. Keep dry and protect from moisture.</field>
+            <field name="service_duration">60</field>
+        </record>
+
+        <!-- Construction Materials -->
+        <record id="cargo_cement_lafarge_008" model="transport.destination">
+            <field name="name">Cement Bags - LafargeHolcim to Construction Sites</field>
+            <field name="location">Chantier Hassan II, Rabat</field>
+            <field name="latitude">34.0181</field>
+            <field name="longitude">-6.8286</field>
+            <field name="mission_type">delivery</field>
+            <field name="total_weight">25000</field>
+            <field name="total_volume">50</field>
+            <field name="package_type">palletized</field>
+            <field name="requires_signature">True</field>
+            <field name="special_instructions">Cement bags on pallets. Protect from rain. Requires crane for unloading.</field>
+            <field name="service_duration">120</field>
+        </record>
+
+        <!-- Electronics & Technology -->
+        <record id="cargo_electronics_samsung_009" model="transport.destination">
+            <field name="name">Electronics - Samsung Distribution Casablanca</field>
+            <field name="location">Marjane Hay Riad, Rabat</field>
+            <field name="latitude">33.9716</field>
+            <field name="longitude">-6.8498</field>
+            <field name="mission_type">delivery</field>
+            <field name="total_weight">3200</field>
+            <field name="total_volume">25</field>
+            <field name="package_type">individual</field>
+            <field name="requires_signature">True</field>
+            <field name="special_instructions">High-value electronics. GPS tracking required. Security escort recommended.</field>
+            <field name="service_duration">45</field>
+        </record>
+
+        <!-- Food & Beverages -->
+        <record id="cargo_coca_cola_010" model="transport.destination">
+            <field name="name">Beverages - Coca-Cola Casablanca to Retailers</field>
+            <field name="location">Carrefour Maarif, Casablanca</field>
+            <field name="latitude">33.5731</field>
+            <field name="longitude">-7.6298</field>
+            <field name="mission_type">delivery</field>
+            <field name="total_weight">14000</field>
+            <field name="total_volume">55</field>
+            <field name="package_type">palletized</field>
+            <field name="requires_signature">False</field>
+            <field name="special_instructions">Soft drinks on pallets. Standard retail delivery. Use tailgate lift.</field>
+            <field name="service_duration">60</field>
+        </record>
+
+        <!-- Pharmaceutical -->
+        <record id="cargo_sanofi_medical_011" model="transport.destination">
+            <field name="name">Medical Supplies - Sanofi to Hospital Mohammed V</field>
+            <field name="location">Hôpital Mohammed V, Rabat</field>
+            <field name="latitude">34.0209</field>
+            <field name="longitude">-6.8344</field>
+            <field name="mission_type">delivery</field>
+            <field name="total_weight">950</field>
+            <field name="total_volume">8</field>
+            <field name="package_type">individual</field>
+            <field name="requires_signature">True</field>
+            <field name="special_instructions">Pharmaceutical products. Cold chain 2-8°C required. Priority urgent delivery.</field>
+            <field name="service_duration">30</field>
+        </record>
+
+        <!-- Argan Oil (Moroccan Specialty) -->
+        <record id="cargo_argan_essaouira_012" model="transport.destination">
+            <field name="name">Argan Oil Products - Essaouira Cooperative</field>
+            <field name="location">Coopérative Argan, Essaouira</field>
+            <field name="latitude">31.5085</field>
+            <field name="longitude">-9.7595</field>
+            <field name="mission_type">pickup</field>
+            <field name="total_weight">1800</field>
+            <field name="total_volume">15</field>
+            <field name="package_type">individual</field>
+            <field name="requires_signature">True</field>
+            <field name="special_instructions">Organic certified argan oil. Temperature sensitive - avoid direct sunlight and heat.</field>
+            <field name="service_duration">40</field>
+        </record>
+
+        <!-- Mining Equipment -->
+        <record id="cargo_mining_khouribga_013" model="transport.destination">
+            <field name="name">Mining Equipment - Khouribga Phosphate Mines</field>
+            <field name="location">Mines de Phosphate, Khouribga</field>
+            <field name="latitude">32.8811</field>
+            <field name="longitude">-6.9063</field>
+            <field name="mission_type">delivery</field>
+            <field name="total_weight">28000</field>
+            <field name="total_volume">60</field>
+            <field name="package_type">individual</field>
+            <field name="requires_signature">True</field>
+            <field name="special_instructions">Heavy mining machinery parts. Requires special permits and escort. Oversized load.</field>
+            <field name="service_duration">180</field>
+        </record>
+
+        <!-- Furniture -->
+        <record id="cargo_furniture_sale_014" model="transport.destination">
+            <field name="name">Furniture - Salé Workshops to Showrooms</field>
+            <field name="location">Meuble Salé, Salé</field>
+            <field name="latitude">34.0531</field>
+            <field name="longitude">-6.7985</field>
+            <field name="mission_type">pickup</field>
+            <field name="total_weight">5500</field>
+            <field name="total_volume">80</field>
+            <field name="package_type">individual</field>
+            <field name="requires_signature">True</field>
+            <field name="special_instructions">Handcrafted furniture. Wrap carefully to prevent scratches. Fragile items.</field>
+            <field name="service_duration">90</field>
+        </record>
+
+        <!-- Olive Oil -->
+        <record id="cargo_olive_meknes_015" model="transport.destination">
+            <field name="name">Olive Oil - Meknes Cooperatives to Export</field>
+            <field name="location">Coopérative Olive, Meknès</field>
+            <field name="latitude">33.8935</field>
+            <field name="longitude">-5.5473</field>
+            <field name="mission_type">pickup</field>
+            <field name="total_weight">4200</field>
+            <field name="total_volume">22</field>
+            <field name="package_type">individual</field>
+            <field name="requires_signature">True</field>
+            <field name="special_instructions">Extra virgin olive oil in glass bottles. Handle with care - fragile packaging.</field>
+            <field name="service_duration">50</field>
+        </record>
+
+    </data>
+</odoo>

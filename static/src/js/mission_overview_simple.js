@@ -117,7 +117,7 @@ export class MissionOverviewSimple extends Component {
                 "transport.mission",
                 [["state", "in", ["confirmed", "in_progress"]]],
                 [
-                    "name", "state", "mission_type", "priority", "mission_date",
+                    "name", "state", "priority", "mission_date",
                     "source_location", "source_latitude", "source_longitude",
                     "driver_id", "vehicle_id", "total_distance_km", "destination_progress"
                 ]
@@ -128,7 +128,7 @@ export class MissionOverviewSimple extends Component {
                 const destinations = await this.orm.searchRead(
                     "transport.destination",
                     [["mission_id", "=", mission.id]],
-                    ["location", "latitude", "longitude", "sequence", "is_completed"],
+                    ["location", "latitude", "longitude", "sequence", "is_completed", "mission_type"],
                     { order: "sequence asc" }
                 );
                 mission.destinations = destinations;
@@ -313,13 +313,16 @@ export class MissionOverviewSimple extends Component {
         this.missionLayers.push(clusterMarker);
     }
 
-    getMissionColors(mission) {
+    getMissionColors(mission, destination = null) {
         const baseColors = {
             pickup: { primary: '#17a2b8', secondary: '#138496' },
             delivery: { primary: '#28a745', secondary: '#1e7e34' }
         };
 
-        const typeColors = baseColors[mission.mission_type] || baseColors.delivery;
+        // If a specific destination is provided, use its type, otherwise use the first destination's type
+        const missionType = destination ? destination.mission_type : 
+            (mission.destinations.length > 0 ? mission.destinations[0].mission_type : 'delivery');
+        const typeColors = baseColors[missionType] || baseColors.delivery;
         const opacity = mission.state === 'in_progress' ? 1.0 : 0.7;
 
         return {
@@ -331,7 +334,8 @@ export class MissionOverviewSimple extends Component {
 
     createSourceIcon(mission) {
         const colors = this.getMissionColors(mission);
-        const typeIcon = mission.mission_type === 'pickup' ? '🏭' : '📦';
+        // Use a box icon for source as it's neutral
+        const typeIcon = '📦';
         const stateClass = mission.state === 'in_progress' ? 'active' : 'confirmed';
 
         const html = `
@@ -382,8 +386,8 @@ export class MissionOverviewSimple extends Component {
     }
 
     createDestinationIcon(mission, destination, sequence) {
-        const colors = this.getMissionColors(mission);
-        const typeIcon = mission.mission_type === 'pickup' ? '📤' : '📥';
+        const colors = this.getMissionColors(mission, destination);
+        const typeIcon = destination.mission_type === 'pickup' ? '📤' : '📥';
         const completedStyle = destination.is_completed ? 'opacity: 0.7;' : '';
 
         const html = `
@@ -460,8 +464,8 @@ export class MissionOverviewSimple extends Component {
     createClusterIcon(missions) {
         const confirmedCount = missions.filter(m => m.state === 'confirmed').length;
         const inProgressCount = missions.filter(m => m.state === 'in_progress').length;
-        const pickupCount = missions.filter(m => m.mission_type === 'pickup').length;
-        const deliveryCount = missions.filter(m => m.mission_type === 'delivery').length;
+        const pickupCount = missions.filter(m => m.destinations.some(d => d.mission_type === 'pickup')).length;
+        const deliveryCount = missions.filter(m => m.destinations.some(d => d.mission_type === 'delivery')).length;
 
         const html = `
             <div class="tm-cluster-marker" style="
@@ -522,7 +526,7 @@ export class MissionOverviewSimple extends Component {
         return `
             <div style="min-width: 200px;">
                 <h5>${mission.name}</h5>
-                <p><strong>Type:</strong> ${mission.mission_type === 'pickup' ? '📤 Pickup' : '📥 Delivery'}</p>
+                <p><strong>Types:</strong> ${mission.destinations.some(d => d.mission_type === 'pickup') ? '📤 Pickup ' : ''}${mission.destinations.some(d => d.mission_type === 'delivery') ? '📥 Delivery' : ''}</p>
                 <p><strong>Status:</strong> ${stateLabel}</p>
                 <p><strong>Date:</strong> ${mission.mission_date}</p>
                 <p><strong>Driver:</strong> ${mission.driver_id ? mission.driver_id[1] : 'Not assigned'}</p>

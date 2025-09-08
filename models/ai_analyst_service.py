@@ -539,39 +539,83 @@ NOW OPTIMIZE THE PROVIDED DATA:
                 _logger.error(f"Full response data: {json.dumps(response_data, indent=2)}")
             raise UserError(f"AI service returned invalid response: {e}")
     
-    def calculate_transport_cost(self, distance_km, duration_hours, vehicle_capacity_used=1.0):
-        """Calculate realistic transport cost based on Moroccan standards"""
+    def calculate_transport_cost(self, distance_km, duration_hours, vehicle_data=None):
+        """
+        Calculate realistic transport cost based on Moroccan standards using cost parameters
+        from the database and vehicle-specific information
+        """
+        # Get cost parameters from database
+        cost_params = self.env['transport.cost.parameters'].get_default_parameters()
         
-        # Fuel cost
-        fuel_needed = (distance_km / 100) * self.fuel_consumption
-        fuel_cost = fuel_needed * self.base_fuel_price
+        # Base mission cost
+        base_mission_cost = cost_params.base_mission_cost
+        
+        # Fuel cost calculation
+        # If vehicle fuel consumption is provided, use it, otherwise use default
+        fuel_consumption = vehicle_data.get('fuel_consumption_per_100km', 30.0) if vehicle_data else 30.0  # L/100km
+        fuel_needed = (distance_km / 100) * fuel_consumption
+        fuel_cost = fuel_needed * cost_params.fuel_price_per_liter
         
         # Driver cost
-        driver_cost = duration_hours * self.driver_cost_per_hour
+        driver_cost = duration_hours * cost_params.driver_cost_per_hour
         
-        # Vehicle maintenance
-        maintenance_cost = distance_km * self.vehicle_maintenance_per_km
+        # Distance-based costs
+        distance_cost = distance_km * cost_params.cost_per_km
+        maintenance_cost = distance_km * cost_params.maintenance_cost_per_km
+        toll_cost = distance_km * cost_params.toll_cost_per_km
         
-        # Toll costs
-        toll_cost = (distance_km / 100) * self.toll_cost_per_100km
+        # Time-based costs
+        time_cost = duration_hours * cost_params.cost_per_hour
         
-        # Insurance (daily rate)
-        insurance_cost = self.insurance_daily
+        # Insurance cost
+        insurance_cost = cost_params.insurance_cost_per_mission
         
-        # Base cost
-        base_cost = fuel_cost + driver_cost + maintenance_cost + toll_cost + insurance_cost
+        # Calculate vehicle-specific adjustments
+        if vehicle_data:
+            # Adjust fuel cost based on vehicle type and condition
+            vehicle_age = vehicle_data.get('age_years', 0)
+            if vehicle_age > 5:
+                fuel_cost *= 1.15  # 15% more fuel consumption for older vehicles
+            
+            # Adjust maintenance cost based on vehicle age
+            maintenance_multiplier = 1.0 + (vehicle_age * 0.1)  # 10% increase per year
+            maintenance_cost *= maintenance_multiplier
         
-        # Overhead
-        total_cost = base_cost * (1 + self.overhead_percentage)
+        # Calculate base cost
+        base_cost = (
+            base_mission_cost +
+            fuel_cost +
+            driver_cost +
+            distance_cost +
+            maintenance_cost +
+            toll_cost +
+            time_cost +
+            insurance_cost
+        )
         
+        # Add overhead (15%)
+        overhead_cost = base_cost * 0.15
+        total_cost = base_cost + overhead_cost
+        
+        # Return detailed cost breakdown
         return {
-            'fuel_cost': fuel_cost,
-            'driver_cost': driver_cost,
-            'maintenance_cost': maintenance_cost,
-            'toll_cost': toll_cost,
-            'insurance_cost': insurance_cost,
-            'overhead_cost': total_cost - base_cost,
-            'total_cost': total_cost
+            'base_mission_cost': round(base_mission_cost, 2),
+            'fuel_cost': round(fuel_cost, 2),
+            'driver_cost': round(driver_cost, 2),
+            'distance_cost': round(distance_cost, 2),
+            'maintenance_cost': round(maintenance_cost, 2),
+            'toll_cost': round(toll_cost, 2),
+            'time_cost': round(time_cost, 2),
+            'insurance_cost': round(insurance_cost, 2),
+            'overhead_cost': round(overhead_cost, 2),
+            'total_cost': round(total_cost, 2),
+            'cost_details': {
+                'fuel_consumption_liters': round(fuel_needed, 2),
+                'fuel_price_per_liter': cost_params.fuel_price_per_liter,
+                'distance_km': distance_km,
+                'duration_hours': duration_hours,
+                'vehicle_age_factor': vehicle_data.get('age_years', 0) if vehicle_data else 0
+            }
         }
     
     def _calculate_distance_matrix(self, sources, destinations):
@@ -1586,11 +1630,20 @@ NOW OPTIMIZE THE PROVIDED DATA:
             # Find best driver
             best_driver = available_drivers.pop(0) if available_drivers else None
             
-            # Calculate realistic costs using Moroccan standards
+            # Calculate realistic costs using Moroccan standards and vehicle data
+            vehicle_data = {
+                'fuel_consumption_per_100km': best_vehicle.get('fuel_consumption_per_100km', 30.0),
+                'age_years': best_vehicle.get('age_years', 0),
+                'vehicle_type': best_vehicle.get('vehicle_type', 'truck'),
+                'max_payload': best_vehicle.get('max_payload', 25000),
+                'cargo_volume': best_vehicle.get('cargo_volume', 90)
+            }
+            
+            # Calculate realistic costs with vehicle-specific data
             cost_breakdown = self.calculate_transport_cost(
                 route['total_distance'], 
                 route['total_duration'],
-                min(total_weight / (best_vehicle.get('max_payload', 25000) if best_vehicle else 25000), 1.0)
+                vehicle_data
             )
             
             # Create mission with enhanced data

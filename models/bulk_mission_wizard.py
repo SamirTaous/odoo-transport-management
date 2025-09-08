@@ -1111,6 +1111,33 @@ You are an expert logistics AI that creates optimized transport missions. Your t
 
         # Add the JSON format example as a separate string to avoid f-string issues
         json_format = '''
+## COST CALCULATION RULES
+- Use realistic Moroccan costs:
+  - Diesel price: 12.5 MAD/L
+  - Driver salary: ~20 MAD/hour
+  - Maintenance: ~0.5 MAD/km
+- Calculate actual fuel consumption based on:
+  - Vehicle's specific fuel consumption (L/100km)
+  - Total distance of route
+  - Vehicle load impact on consumption
+- Include all cost components:
+  - Fuel costs
+  - Driver wages
+  - Vehicle maintenance
+  - Toll roads if applicable
+  - Additional expenses
+
+## ROUTE NOTES REQUIREMENTS
+- Include detailed information for drivers:
+  - Clear stop sequence with addresses
+  - Specific loading/unloading instructions
+  - Contact information for each stop
+  - Time windows and constraints
+  - Road conditions and warnings
+  - Rest stop recommendations
+  - Special cargo handling notes
+  - Emergency contact information
+
 ## MISSION CREATION STRATEGY
 - **Create optimal number of missions** - could be 1, could be 100+ depending on efficiency
 - **Match vehicles to cargo requirements** - weight, volume, special equipment
@@ -1127,10 +1154,26 @@ Return ONLY valid JSON with this structure:
     "total_missions_created": <number>,
     "total_vehicles_used": <number>,
     "total_estimated_distance_km": <number>,
-    "total_estimated_cost": <number>,
     "total_estimated_time_hours": <number>,
     "optimization_score": <0-100>,
-    "cost_savings_percentage": <number>,
+    "costs": {
+      "total_cost_mad": <number>,
+      "total_fuel_cost_mad": <number>,
+      "total_driver_cost_mad": <number>,
+      "total_maintenance_cost_mad": <number>,
+      "cost_per_km_mad": <number>,
+      "cost_savings_percentage": <number>
+    },
+    "efficiency_metrics": {
+      "average_vehicle_utilization": <0-100>,
+      "route_efficiency_score": <0-100>,
+      "fuel_efficiency_score": <0-100>
+    },
+    "cost_parameters": {
+      "fuel_price_per_liter_mad": 12.5,
+      "driver_rate_per_hour_mad": 20.0,
+      "maintenance_rate_per_km_mad": 0.5
+    },
     "efficiency_improvements": ["improvement1", "improvement2"]
   },
   "created_missions": [
@@ -1344,6 +1387,51 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
             _logger.error(f"Failed to create missions from AI results: {e}")
             raise UserError(_("Failed to create missions: %s") % str(e))
 
+    def _calculate_costs(self, distance_km, duration_hours, vehicle_data, with_details=False):
+        """
+        Calculate realistic costs for a mission based on Moroccan prices and actual vehicle data
+        Current Moroccan prices (as of 2024):
+        - Diesel: ~12.5 MAD/L
+        - Driver salary: ~3000-4000 MAD/month (about 20 MAD/hour)
+        - Maintenance: ~0.5 MAD/km
+        """
+        # Base calculations
+        fuel_price_per_liter = 12.5  # MAD
+        driver_cost_per_hour = 20  # MAD
+        maintenance_cost_per_km = 0.5  # MAD
+        
+        # Get vehicle fuel consumption (L/100km) or use default
+        fuel_consumption = vehicle_data.get('fuel_consumption', 30)  # Default 30L/100km if not specified
+        
+        # Calculate fuel cost
+        fuel_used_liters = (distance_km * fuel_consumption) / 100
+        fuel_cost = fuel_used_liters * fuel_price_per_liter
+        
+        # Calculate driver cost
+        driver_cost = duration_hours * driver_cost_per_hour
+        
+        # Calculate maintenance cost
+        maintenance_cost = distance_km * maintenance_cost_per_km
+        
+        # Calculate total cost
+        total_cost = fuel_cost + driver_cost + maintenance_cost
+        
+        if with_details:
+            return {
+                'total_cost': round(total_cost, 2),
+                'fuel_cost': round(fuel_cost, 2),
+                'driver_cost': round(driver_cost, 2),
+                'maintenance_cost': round(maintenance_cost, 2),
+                'fuel_used_liters': round(fuel_used_liters, 2),
+                'details': {
+                    'fuel_consumption_per_100km': fuel_consumption,
+                    'fuel_price_per_liter': fuel_price_per_liter,
+                    'driver_rate_per_hour': driver_cost_per_hour,
+                    'maintenance_rate_per_km': maintenance_cost_per_km
+                }
+            }
+        return round(total_cost, 2)
+
     def _calculate_distance(self, point1, point2):
         """Calculate distance between two points using Haversine formula"""
         from math import radians, sin, cos, sqrt, atan2
@@ -1359,6 +1447,67 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
         c = 2 * atan2(sqrt(a), sqrt(1-a))
         R = 6371  # Earth's radius in km
         return R * c
+
+    def _generate_route_notes(self, source, destinations, route_info):
+        """Generate detailed route notes for drivers"""
+        notes = []
+        
+        # Add source information
+        notes.append(f"📍 Starting Point: {source['location']}")
+        
+        # Add key route information
+        total_distance = route_info.get('total_distance_km', 0)
+        notes.append(f"🛣️ Total Route Distance: {total_distance:.1f} km")
+        
+        # Generate detailed stop information
+        for i, dest in enumerate(destinations, 1):
+            stop_type = "🔵 Pickup" if dest.get('mission_type') == 'pickup' else "🟢 Delivery"
+            notes.append(f"\nStop {i}: {stop_type}")
+            notes.append(f"📍 Location: {dest.get('location')}")
+            
+            # Add cargo details
+            cargo_details = []
+            if dest.get('total_weight'):
+                cargo_details.append(f"{dest.get('total_weight')}kg")
+            if dest.get('total_volume'):
+                cargo_details.append(f"{dest.get('total_volume')}m³")
+            if dest.get('package_type'):
+                cargo_details.append(dest.get('package_type').title())
+            if cargo_details:
+                notes.append(f"📦 Cargo: {' | '.join(cargo_details)}")
+            
+            # Add time constraints if any
+            if dest.get('expected_arrival_time'):
+                notes.append(f"⏰ Expected Arrival: {dest.get('expected_arrival_time')}")
+            if dest.get('service_duration'):
+                notes.append(f"⏱️ Service Time: {dest.get('service_duration')} minutes")
+            
+            # Add special instructions if any
+            if dest.get('special_instructions'):
+                notes.append(f"ℹ️ Note: {dest.get('special_instructions')}")
+            
+            # Add contact information if available
+            if dest.get('contact_name') or dest.get('contact_phone'):
+                contact_info = []
+                if dest.get('contact_name'):
+                    contact_info.append(dest.get('contact_name'))
+                if dest.get('contact_phone'):
+                    contact_info.append(dest.get('contact_phone'))
+                notes.append(f"👤 Contact: {' - '.join(contact_info)}")
+        
+        # Add general route advice based on the path
+        notes.append("\n🚦 Route Advice:")
+        if len(destinations) > 3:
+            notes.append("- Plan for fuel stops along the route")
+            notes.append("- Take regular rest breaks every 4 hours")
+        
+        # Add weather warning if available (placeholder)
+        notes.append("\n⚠️ Important Notes:")
+        notes.append("- Verify all delivery documentation before departure")
+        notes.append("- Check vehicle condition before starting")
+        notes.append("- Keep this route plan accessible during the mission")
+        
+        return "\n".join(notes)
 
     def _verify_and_fix_sequence(self, mission):
         """Verify and fix destination sequences based on proximity"""

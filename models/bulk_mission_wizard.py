@@ -1111,15 +1111,17 @@ You are an expert logistics AI that creates optimized transport missions. Your t
 
         # Add the JSON format example as a separate string to avoid f-string issues
         json_format = '''
+    
 ## COST CALCULATION RULES
 - Use realistic Moroccan costs:
   - Diesel price: 12.5 MAD/L
-  - Driver salary: ~20 MAD/hour
+  - Driver salary: ~20 MAD/hour (adjust based on actual driver assigned)
   - Maintenance: ~0.5 MAD/km
 - Calculate actual fuel consumption based on:
-  - Vehicle's specific fuel consumption (L/100km)
+  - **The 'fuel_consumption' value provided in the assigned vehicle's data (L/100km)**
   - Total distance of route
   - Vehicle load impact on consumption
+
 - Include all cost components:
   - Fuel costs
   - Driver wages
@@ -1145,6 +1147,10 @@ You are an expert logistics AI that creates optimized transport missions. Your t
 - **Sequence stops optimally** within each mission
 - **Balance workload** across available vehicles and drivers
 - **Consider pickup-before-delivery** constraints for same cargo
+- **Pay attention to fuel prices, consumption, and driver costs** to minimize total expenses
+- **Provide important information relevant to a driver** for each mission
+- **Use the fuel consumption data provided in the vehicle information** to calculate fuel costs accurately
+- **Use the orsm distance matrix API** to get realistic distances and times between points
 
 ## REQUIRED JSON OUTPUT FORMAT
 Return ONLY valid JSON with this structure:
@@ -1156,14 +1162,6 @@ Return ONLY valid JSON with this structure:
     "total_estimated_distance_km": <number>,
     "total_estimated_time_hours": <number>,
     "optimization_score": <0-100>,
-    "costs": {
-      "total_cost_mad": <number>,
-      "total_fuel_cost_mad": <number>,
-      "total_driver_cost_mad": <number>,
-      "total_maintenance_cost_mad": <number>,
-      "cost_per_km_mad": <number>,
-      "cost_savings_percentage": <number>
-    },
     "efficiency_metrics": {
       "average_vehicle_utilization": <0-100>,
       "route_efficiency_score": <0-100>,
@@ -1223,8 +1221,10 @@ Return ONLY valid JSON with this structure:
       "route_optimization": {
         "total_distance_km": <calculated_distance>,
         "estimated_duration_hours": <calculated_time>,
-        "estimated_fuel_cost": <calculated_fuel_cost>,
+        "estimated_fuel_consumption_liters": <specific_vehicle_consumption>,
+        "estimated_fuel_cost": <calculated_fuel_cost_from_estimated_fuel_consumption_liters>,
         "estimated_total_cost": <calculated_total_cost>,
+        "estimated_driver_wages": <calculated_driver_wages_based_on_hourly_rate>,
         "optimization_notes": "Brief explanation of route logic"
       },
       "capacity_utilization": {
@@ -1236,6 +1236,7 @@ Return ONLY valid JSON with this structure:
   ],
   "optimization_insights": {
     "key_decisions": [
+      "Exact Cost Breakdown",
       "Why this number of missions was chosen",
       "How vehicles were matched to routes",
       "Geographic clustering strategy used"

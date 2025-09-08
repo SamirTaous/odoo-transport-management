@@ -277,6 +277,7 @@ You are an expert transport logistics optimizer. Analyze the provided data and c
 5. Optimize pickup/delivery sequences logically
 6. Consider service durations and time windows
 7. Minimize environmental impact
+8. Calculate realistic fuel consumption based on vehicle data and Moroccan standards
 
 ## CONSTRAINTS
 - Vehicle weight limits (max_payload)
@@ -348,6 +349,7 @@ You MUST return ONLY a valid JSON object. Do not include any text before or afte
       "route_optimization": {{
         "total_distance_km": <number>,
         "estimated_duration_hours": <number>,
+        "estimated_fuel_consumption_liters": <number>,
         "estimated_fuel_cost": <number>,
         "estimated_total_cost": <number>,
         "optimization_notes": "Why this route is optimal"

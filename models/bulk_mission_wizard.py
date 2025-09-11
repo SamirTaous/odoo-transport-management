@@ -153,6 +153,8 @@ class BulkMissionWizard(models.TransientModel):
                 # Create destinations with optimized sequence
                 destinations = template.get('destinations', [])
                 for index, dest_data in enumerate(destinations, start=1):
+                    package_type = dest_data.get('package_type', 'individual')
+                    total_weight = dest_data.get('total_weight') or 0
                     dest_vals = {
                         'mission_id': mission.id,
                         'location': dest_data.get('location'),
@@ -162,12 +164,53 @@ class BulkMissionWizard(models.TransientModel):
                         'mission_type': dest_data.get('mission_type', 'delivery'),
                         'expected_arrival_time': self._normalize_datetime_string(dest_data.get('expected_arrival_time')),
                         'service_duration': dest_data.get('service_duration', 0),
-                        'package_type': dest_data.get('package_type', 'individual'),
-                        'total_weight': dest_data.get('total_weight', 0),
-                        'total_volume': dest_data.get('total_volume', 0),
+                        'package_type': package_type,
                         'requires_signature': dest_data.get('requires_signature', False),
                     }
-                    self.env['transport.destination'].create(dest_vals)
+
+                    # For pallet type, map provided total_weight onto pallet_weight so computed total_weight works
+                    if package_type == 'pallet':
+                        # Map explicit pallet fields if provided; fallback to total_weight for weight
+                        if dest_data.get('pallet_width'):
+                            dest_vals['pallet_width'] = dest_data.get('pallet_width')
+                        if dest_data.get('pallet_length'):
+                            dest_vals['pallet_length'] = dest_data.get('pallet_length')
+                        if dest_data.get('pallet_height'):
+                            dest_vals['pallet_height'] = dest_data.get('pallet_height')
+                        if dest_data.get('pallet_weight'):
+                            dest_vals['pallet_weight'] = dest_data.get('pallet_weight')
+                        elif total_weight:
+                            dest_vals['pallet_weight'] = total_weight
+
+                    destination = self.env['transport.destination'].create(dest_vals)
+
+                    # For individual packages, create provided package lines; fallback to a single line if only total_weight given
+                    if package_type == 'individual':
+                        packages = dest_data.get('packages') or []
+                        if packages:
+                            for seq, pkg in enumerate(packages, start=1):
+                                try:
+                                    self.env['transport.package'].create({
+                                        'destination_id': destination.id,
+                                        'sequence': seq,
+                                        'name': pkg.get('name') or 'Package',
+                                        'length': float(pkg.get('length') or 0) or 1.0,
+                                        'width': float(pkg.get('width') or 0) or 1.0,
+                                        'height': float(pkg.get('height') or 0) or 1.0,
+                                        'weight': float(pkg.get('weight') or 0) or 0.01,
+                                    })
+                                except Exception:
+                                    continue
+                        elif total_weight:
+                            # Minimal placeholder if only total provided
+                            self.env['transport.package'].create({
+                                'destination_id': destination.id,
+                                'name': dest_data.get('package_name') or (dest_data.get('name') or destination.location or 'Package'),
+                                'length': 10.0,
+                                'width': 10.0,
+                                'height': 10.0,
+                                'weight': total_weight,
+                            })
                 
                 # Auto-optimize route if requested
                 if self.auto_optimize_routes and len(destinations) > 1:
@@ -283,7 +326,13 @@ class BulkMissionWizard(models.TransientModel):
                         'service_duration': dest.get('service_duration', 0),
                         'requires_signature': dest.get('requires_signature', False),
                         'expected_arrival_time': dest.get('expected_arrival_time'),
-                        'name': dest.get('name', 'Unnamed Destination')
+                        'name': dest.get('name', 'Unnamed Destination'),
+                        # Pallet details if any
+                        'pallet_width': dest.get('pallet_width'),
+                        'pallet_height': dest.get('pallet_height'),
+                        'pallet_weight': dest.get('pallet_weight'),
+                        # Individual packages list
+                        'packages': dest.get('packages', []),
                     }
                     for dest in destinations
                 ],
@@ -1390,7 +1439,8 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                     # Create destinations
                     for seq, dest_data in enumerate(destinations, 1):
                         cargo_details = dest_data.get('cargo_details', {})
-                        
+                        package_type = cargo_details.get('package_type', dest_data.get('package_type', 'individual'))
+
                         dest_vals = {
                             'mission_id': mission.id,
                             'location': dest_data.get('location', ''),
@@ -1400,13 +1450,53 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                             'mission_type': dest_data.get('mission_type', 'delivery'),
                             'expected_arrival_time': self._normalize_datetime_string(dest_data.get('estimated_arrival_time')),
                             'service_duration': dest_data.get('service_duration', 0),
-                            'package_type': cargo_details.get('package_type', 'individual'),
-                            'total_weight': cargo_details.get('total_weight', 0),
-                            'total_volume': cargo_details.get('total_volume', 0),
+                            'package_type': package_type,
                             'requires_signature': cargo_details.get('requires_signature', False),
                             'special_instructions': cargo_details.get('special_instructions', ''),
                         }
-                        self.env['transport.destination'].create(dest_vals)
+
+                        # Pallet details: width/height/weight
+                        if package_type == 'pallet':
+                            if cargo_details.get('pallet_width'):
+                                dest_vals['pallet_width'] = cargo_details.get('pallet_width')
+                            if cargo_details.get('pallet_length'):
+                                dest_vals['pallet_length'] = cargo_details.get('pallet_length')
+                            if cargo_details.get('pallet_height'):
+                                dest_vals['pallet_height'] = cargo_details.get('pallet_height')
+                            if cargo_details.get('pallet_weight'):
+                                dest_vals['pallet_weight'] = cargo_details.get('pallet_weight')
+                            elif cargo_details.get('total_weight'):
+                                dest_vals['pallet_weight'] = cargo_details.get('total_weight')
+
+                        destination = self.env['transport.destination'].create(dest_vals)
+
+                        # Individual packages list
+                        if package_type == 'individual':
+                            packages = cargo_details.get('packages') or []
+                            if packages:
+                                for pseq, pkg in enumerate(packages, start=1):
+                                    try:
+                                        self.env['transport.package'].create({
+                                            'destination_id': destination.id,
+                                            'sequence': pseq,
+                                            'name': pkg.get('name') or 'Package',
+                                            'length': float(pkg.get('length') or 0) or 1.0,
+                                            'width': float(pkg.get('width') or 0) or 1.0,
+                                            'height': float(pkg.get('height') or 0) or 1.0,
+                                            'weight': float(pkg.get('weight') or 0) or 0.01,
+                                        })
+                                    except Exception:
+                                        continue
+                            elif cargo_details.get('total_weight'):
+                                # Fallback single package from total
+                                self.env['transport.package'].create({
+                                    'destination_id': destination.id,
+                                    'name': dest_data.get('name') or destination.location or 'Package',
+                                    'length': 10.0,
+                                    'width': 10.0,
+                                    'height': 10.0,
+                                    'weight': cargo_details.get('total_weight'),
+                                })
                     
                     # Auto-optimize route if requested
                     if self.auto_optimize_routes and len(destinations) > 1:

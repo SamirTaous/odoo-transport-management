@@ -568,21 +568,79 @@ export class BulkMissionWidget extends Component {
                                 <h6 class="mb-3"><i class="fa fa-box me-2"></i>Package Information</h6>
                                 <div class="row mb-3">
                                     <div class="col-md-4">
-                                        <label class="form-label">Weight (kg)</label>
-                                        <input type="number" class="form-control" id="dest_weight"
-                                               value="${destination.total_weight || 0}" step="0.1" min="0"/>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Volume (m³)</label>
-                                        <input type="number" class="form-control" id="dest_volume"
-                                               value="${destination.total_volume || 0}" step="0.01" min="0"/>
-                                    </div>
-                                    <div class="col-md-4">
                                         <label class="form-label">Package Type</label>
                                         <select class="form-select" id="dest_package_type">
                                             <option value="individual" ${destination.package_type === 'individual' ? 'selected' : ''}>Individual</option>
                                             <option value="pallet" ${destination.package_type === 'pallet' ? 'selected' : ''}>Pallet</option>
                                         </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Weight (kg)</label>
+                                        <input type="number" class="form-control" id="dest_weight"
+                                               value="${destination.total_weight || 0}" step="0.1" min="0" disabled/>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Volume (m³)</label>
+                                        <input type="number" class="form-control" id="dest_volume"
+                                               value="${destination.total_volume || 0}" step="0.01" min="0" disabled/>
+                                    </div>
+                                </div>
+
+                                <!-- Pallet Details -->
+                                <div class="mb-3" id="pallet_section" style="display: ${destination.package_type === 'pallet' ? 'block' : 'none'};">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Pallet Width (cm)</label>
+                                            <input type="number" class="form-control" id="pallet_width" value="${destination.pallet_width || ''}" step="0.1" min="0"/>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Pallet Length (cm)</label>
+                                            <input type="number" class="form-control" id="pallet_length" value="${destination.pallet_length || ''}" step="0.1" min="0"/>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Pallet Height (cm)</label>
+                                            <input type="number" class="form-control" id="pallet_height" value="${destination.pallet_height || ''}" step="0.1" min="0"/>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Pallet Weight (kg)</label>
+                                            <input type="number" class="form-control" id="pallet_weight" value="${destination.pallet_weight || destination.total_weight || ''}" step="0.1" min="0"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Individual Packages List -->
+                                <div class="mb-3" id="packages_section" style="display: ${!destination.package_type || destination.package_type === 'individual' ? 'block' : 'none'};">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-0">Packages</h6>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="add_package_btn"><i class="fa fa-plus"></i> Add Package</button>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm align-middle" id="packages_table">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 25%">Name</th>
+                                                    <th style="width: 15%">Length (cm)</th>
+                                                    <th style="width: 15%">Width (cm)</th>
+                                                    <th style="width: 15%">Height (cm)</th>
+                                                    <th style="width: 15%">Weight (kg)</th>
+                                                    <th style="width: 15%"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${(destination.packages || []).map((pkg, idx) => `
+                                                    <tr>
+                                                        <td><input type="text" class="form-control form-control-sm pkg-name" value="${pkg.name || ''}" placeholder="Description"/></td>
+                                                        <td><input type="number" class="form-control form-control-sm pkg-length" value="${pkg.length || ''}" step="0.1" min="0"/></td>
+                                                        <td><input type="number" class="form-control form-control-sm pkg-width" value="${pkg.width || ''}" step="0.1" min="0"/></td>
+                                                        <td><input type="number" class="form-control form-control-sm pkg-height" value="${pkg.height || ''}" step="0.1" min="0"/></td>
+                                                        <td><input type="number" class="form-control form-control-sm pkg-weight" value="${pkg.weight || ''}" step="0.01" min="0"/></td>
+                                                        <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger remove-pkg">Remove</button></td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
 
@@ -686,6 +744,93 @@ export class BulkMissionWidget extends Component {
                 e.target.closest('.tm_type_radio_option').classList.add('active');
             });
         });
+
+        // Toggle sections based on package type
+        const pkgTypeSelect = modal.querySelector('#dest_package_type');
+        const palletSection = modal.querySelector('#pallet_section');
+        const packagesSection = modal.querySelector('#packages_section');
+        const toggleSections = () => {
+            const val = pkgTypeSelect.value;
+            if (val === 'pallet') {
+                palletSection.style.display = 'block';
+                packagesSection.style.display = 'none';
+            } else {
+                palletSection.style.display = 'none';
+                packagesSection.style.display = 'block';
+            }
+        };
+        if (pkgTypeSelect) {
+            pkgTypeSelect.addEventListener('change', toggleSections);
+            toggleSections();
+        }
+
+        // Auto compute totals from pallet dimensions or package rows
+        const volumeInput = modal.querySelector('#dest_volume');
+        const weightInput = modal.querySelector('#dest_weight');
+        const recomputeTotals = () => {
+            if (pkgTypeSelect.value === 'pallet') {
+                const w = parseFloat(modal.querySelector('#pallet_width')?.value) || 0;
+                const l = parseFloat(modal.querySelector('#pallet_length')?.value) || 0;
+                const h = parseFloat(modal.querySelector('#pallet_height')?.value) || 0;
+                const palletW = parseFloat(modal.querySelector('#pallet_weight')?.value) || 0;
+                const m3 = (w * l * h) / 1000000.0;
+                if (volumeInput) volumeInput.value = m3 ? m3.toFixed(3) : 0;
+                if (weightInput) weightInput.value = palletW ? palletW.toFixed(2) : 0;
+            } else {
+                const rows = modal.querySelectorAll('#packages_table tbody tr');
+                let totalV = 0;
+                let totalW = 0;
+                rows.forEach(tr => {
+                    const pl = parseFloat(tr.querySelector('.pkg-length')?.value) || 0;
+                    const pw = parseFloat(tr.querySelector('.pkg-width')?.value) || 0;
+                    const ph = parseFloat(tr.querySelector('.pkg-height')?.value) || 0;
+                    const wt = parseFloat(tr.querySelector('.pkg-weight')?.value) || 0;
+                    if (pl && pw && ph) totalV += (pl * pw * ph) / 1000000.0;
+                    if (wt) totalW += wt;
+                });
+                if (volumeInput) volumeInput.value = totalV ? totalV.toFixed(3) : 0;
+                if (weightInput) weightInput.value = totalW ? totalW.toFixed(2) : 0;
+            }
+        };
+        ['#pallet_width','#pallet_length','#pallet_height'].forEach(sel => {
+            const el = modal.querySelector(sel);
+            if (el) el.addEventListener('input', recomputeTotals);
+        });
+        const palletWeightEl = modal.querySelector('#pallet_weight');
+        if (palletWeightEl) palletWeightEl.addEventListener('input', recomputeTotals);
+        const packagesTableBody2 = modal.querySelector('#packages_table tbody');
+        if (packagesTableBody2) {
+            packagesTableBody2.addEventListener('input', (e) => {
+                if (e.target && (e.target.classList.contains('pkg-length') || e.target.classList.contains('pkg-width') || e.target.classList.contains('pkg-height') || e.target.classList.contains('pkg-weight'))) {
+                    recomputeTotals();
+                }
+            });
+        }
+        // Initial compute
+        recomputeTotals();
+
+        // Add/remove package rows
+        const packagesTableBody = modal.querySelector('#packages_table tbody');
+        const addBtn = modal.querySelector('#add_package_btn');
+        if (addBtn && packagesTableBody) {
+            addBtn.addEventListener('click', () => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="text" class="form-control form-control-sm pkg-name" placeholder="Description"/></td>
+                    <td><input type="number" class="form-control form-control-sm pkg-length" step="0.1" min="0"/></td>
+                    <td><input type="number" class="form-control form-control-sm pkg-width" step="0.1" min="0"/></td>
+                    <td><input type="number" class="form-control form-control-sm pkg-height" step="0.1" min="0"/></td>
+                    <td><input type="number" class="form-control form-control-sm pkg-weight" step="0.01" min="0"/></td>
+                    <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger remove-pkg">Remove</button></td>`;
+                packagesTableBody.appendChild(row);
+            });
+            packagesTableBody.addEventListener('click', (ev) => {
+                if (ev.target && ev.target.classList.contains('remove-pkg')) {
+                    const tr = ev.target.closest('tr');
+                    if (tr) tr.remove();
+                }
+            });
+        }
     }
 
     closeDestinationModal() {
@@ -725,6 +870,31 @@ export class BulkMissionWidget extends Component {
             contact_phone: modal.querySelector('#dest_contact_phone').value,
             special_instructions: modal.querySelector('#dest_special_instructions').value
         };
+
+        // Capture pallet fields
+        if (updatedDestination.package_type === 'pallet') {
+            updatedDestination.pallet_width = parseFloat(modal.querySelector('#pallet_width').value) || null;
+            updatedDestination.pallet_length = parseFloat(modal.querySelector('#pallet_length').value) || null;
+            updatedDestination.pallet_height = parseFloat(modal.querySelector('#pallet_height').value) || null;
+            updatedDestination.pallet_weight = parseFloat(modal.querySelector('#pallet_weight').value) || (updatedDestination.total_weight || null);
+        }
+
+        // Capture individual package rows
+        if (updatedDestination.package_type === 'individual') {
+            const rows = modal.querySelectorAll('#packages_table tbody tr');
+            const packages = [];
+            rows.forEach(tr => {
+                const name = tr.querySelector('.pkg-name').value;
+                const length = parseFloat(tr.querySelector('.pkg-length').value) || null;
+                const width = parseFloat(tr.querySelector('.pkg-width').value) || null;
+                const height = parseFloat(tr.querySelector('.pkg-height').value) || null;
+                const weight = parseFloat(tr.querySelector('.pkg-weight').value) || null;
+                if (weight) {
+                    packages.push({ name, length, width, height, weight });
+                }
+            });
+            updatedDestination.packages = packages;
+        }
 
         // Update the destination
         this.updateDestinationFromPopup(this.currentEditingIndex, updatedDestination);
@@ -766,7 +936,12 @@ export class BulkMissionWidget extends Component {
                     service_duration: dest.service_duration || 0,
                     requires_signature: dest.requires_signature || false,
                     expected_arrival_time: dest.expected_arrival_time || null,
-                    name: dest.name || 'Unnamed Destination'
+                    name: dest.name || 'Unnamed Destination',
+                    pallet_width: dest.pallet_width || null,
+                    pallet_length: dest.pallet_length || null,
+                    pallet_height: dest.pallet_height || null,
+                    pallet_weight: dest.pallet_weight || null,
+                    packages: dest.packages || []
                 })),
                 available_vehicles: this.state.vehicles.map(vehicle => ({
                     ...vehicle,

@@ -47,6 +47,7 @@ class TransportDestination(models.Model):
     
     # Pallet information (when package_type = 'pallet')
     pallet_width = fields.Float(string='Pallet Width (cm)', digits=(8, 2))
+    pallet_length = fields.Float(string='Pallet Length (cm)', digits=(8, 2))
     pallet_height = fields.Float(string='Pallet Height (cm)', digits=(8, 2))
     pallet_weight = fields.Float(string='Pallet Weight (kg)', digits=(8, 2))
     
@@ -57,15 +58,17 @@ class TransportDestination(models.Model):
     total_volume = fields.Float(string='Total Volume (m³)', compute='_compute_totals', store=True, digits=(8, 3))
     total_weight = fields.Float(string='Total Weight (kg)', compute='_compute_totals', store=True, digits=(8, 2))
     
-    @api.depends('package_type', 'pallet_width', 'pallet_height', 'pallet_weight', 'package_ids.volume', 'package_ids.weight')
+    @api.depends('package_type', 'pallet_width', 'pallet_length', 'pallet_height', 'pallet_weight', 'package_ids.volume', 'package_ids.weight')
     def _compute_totals(self):
         for destination in self:
             if destination.package_type == 'pallet':
-                # Calculate pallet volume: width * height * depth (assuming standard depth)
-                if destination.pallet_width and destination.pallet_height:
-                    # Convert cm to m and assume 120cm depth for standard pallet
-                    volume = (destination.pallet_width / 100) * (destination.pallet_height / 100) * 1.2
-                    destination.total_volume = volume
+                # Calculate pallet volume: width * length * height (cm -> m³)
+                if destination.pallet_width and destination.pallet_length and destination.pallet_height:
+                    destination.total_volume = (
+                        (destination.pallet_width / 100.0)
+                        * (destination.pallet_length / 100.0)
+                        * (destination.pallet_height / 100.0)
+                    )
                 else:
                     destination.total_volume = 0.0
                 destination.total_weight = destination.pallet_weight or 0.0

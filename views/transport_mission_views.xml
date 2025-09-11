@@ -99,6 +99,7 @@
                     <group string="Pallet Information" attrs="{'invisible': [('package_type', '!=', 'pallet')]}">
                         <group>
                             <field name="pallet_width" attrs="{'required': [('package_type', '=', 'pallet')]}"/>
+                            <field name="pallet_length" attrs="{'required': [('package_type', '=', 'pallet')]}"/>
                             <field name="pallet_height" attrs="{'required': [('package_type', '=', 'pallet')]}"/>
                         </group>
                         <group>

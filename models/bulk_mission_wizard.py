@@ -1404,6 +1404,26 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                 raise UserError(_("No missions found in AI results."))
             
             created_missions = []
+
+            # Build a lookup from original wizard destinations to preserve package data if AI omitted it
+            original_lookup = {}
+            try:
+                raw_templates = json.loads(self.mission_templates or '{}')
+                if isinstance(raw_templates, dict):
+                    original_dests = raw_templates.get('destinations', [])
+                elif isinstance(raw_templates, list):
+                    original_dests = raw_templates
+                else:
+                    original_dests = []
+                for od in original_dests:
+                    key = (
+                        round(float(od.get('latitude') or 0), 5),
+                        round(float(od.get('longitude') or 0), 5),
+                        (od.get('location') or '').strip().lower(),
+                    )
+                    original_lookup[key] = od
+            except Exception:
+                original_lookup = {}
             
             for mission_data in missions_data:
                 try:
@@ -1456,7 +1476,22 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                     
                     # Create destinations
                     for seq, dest_data in enumerate(destinations, 1):
-                        cargo_details = dest_data.get('cargo_details', {})
+                        cargo_details = dict(dest_data.get('cargo_details', {}) or {})
+
+                        # Merge with original destination (if AI didn't include all details)
+                        key = (
+                            round(float(dest_data.get('latitude') or 0), 5),
+                            round(float(dest_data.get('longitude') or 0), 5),
+                            (dest_data.get('location') or '').strip().lower(),
+                        )
+                        orig = original_lookup.get(key)
+                        if orig:
+                            cargo_details.setdefault('package_type', orig.get('package_type'))
+                            for fld in ['pallet_width', 'pallet_length', 'pallet_height', 'pallet_weight']:
+                                if cargo_details.get(fld) is None and orig.get(fld) is not None:
+                                    cargo_details[fld] = orig.get(fld)
+                            if not cargo_details.get('packages') and orig.get('packages'):
+                                cargo_details['packages'] = orig.get('packages')
                         package_type = cargo_details.get('package_type', dest_data.get('package_type', 'individual'))
 
                         dest_vals = {

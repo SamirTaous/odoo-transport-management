@@ -2,6 +2,8 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
+import { Dialog } from "@web/core/dialog/dialog";
 
 
 const { Component, onMounted, onWillUnmount, onPatched, onWillUpdateProps, useRef, useState } = owl;
@@ -43,6 +45,7 @@ export class MissionMapPlannerWidget extends Component {
         this.mapContainer = useRef("mapContainer");
         this.notification = useService("notification");
         this.orm = useService("orm");
+        this.dialog = useService("dialog");
 
         this.map = null;
         this.sourceMarker = null;
@@ -1263,7 +1266,88 @@ export class MissionMapPlannerWidget extends Component {
             this.notification.add("Failed to update mission date", { type: "danger" });
         }
     }
+
+    // Opens the destination record in a dialog, supporting unsaved records
+    openDestinationDialog(localId) {
+        try {
+            const list = this.props.record.data.destination_ids;
+            if (!list || !list.records) {
+                this.notification.add("No destination list found", { type: "danger" });
+                return;
+            }
+
+            const record = list.records.find((rec) => rec && rec.id === localId);
+            if (!record) {
+                this.notification.add("Destination not found", { type: "warning" });
+                return;
+            }
+
+            const hasRealId = typeof record.resId === "number" && record.resId > 0;
+            if (hasRealId) {
+                // For saved records, the standard form dialog is fine
+                this.dialog.add(FormViewDialog, {
+                    resModel: "transport.destination",
+                    resId: record.resId,
+                    title: "Edit Destination",
+                    context: this.props.record.model.orm.context || {},
+                });
+            } else {
+                // For virtual/unsaved records, open our lightweight edit dialog
+                this.dialog.add(DestinationEditDialog, {
+                    destinationRecord: record,
+                    title: "Edit Destination",
+                });
+            }
+        } catch (error) {
+            console.error("Failed to open destination dialog:", error);
+            this.notification.add("Could not open destination dialog", { type: "danger" });
+        }
+    }
 }
+
+// Lightweight dialog to edit virtual x2many destination records
+class DestinationEditDialog extends Component {
+    static components = { Dialog };
+
+    setup() {
+        const rec = this.props.destinationRecord;
+        this.state = useState({
+            location: rec.data.location || "",
+            latitude: rec.data.latitude || 0,
+            longitude: rec.data.longitude || 0,
+            mission_type: rec.data.mission_type || "delivery",
+            expected_arrival_time: rec.data.expected_arrival_time || "",
+            service_duration: rec.data.service_duration || 0,
+            package_type: rec.data.package_type || "",
+            total_weight: rec.data.total_weight || 0,
+            total_volume: rec.data.total_volume || 0,
+            requires_signature: !!rec.data.requires_signature,
+        });
+    }
+
+    async save() {
+        try {
+            await this.props.destinationRecord.update({
+                location: this.state.location,
+                latitude: parseFloat(this.state.latitude) || 0,
+                longitude: parseFloat(this.state.longitude) || 0,
+                mission_type: this.state.mission_type || "delivery",
+                expected_arrival_time: this.state.expected_arrival_time || false,
+                service_duration: parseInt(this.state.service_duration) || 0,
+                package_type: this.state.package_type || false,
+                total_weight: parseFloat(this.state.total_weight) || 0,
+                total_volume: parseFloat(this.state.total_volume) || 0,
+                requires_signature: !!this.state.requires_signature,
+            });
+            if (this.props.close) this.props.close();
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error("Failed to save destination:", error);
+        }
+    }
+}
+
+DestinationEditDialog.template = "transport_management.DestinationEditDialog";
 
 MissionMapPlannerWidget.template = "transport_management.MissionMapPlannerWidget";
 registry.category("view_widgets").add("mission_map_planner", MissionMapPlannerWidget);

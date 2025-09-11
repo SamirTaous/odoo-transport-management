@@ -1037,8 +1037,8 @@ JSON has been logged to server console. Check the logs for complete data.
             # Call AI service
             _logger.info("Calling Gemini API for optimization...")
             optimized_missions = self._call_gemini_api(prompt)
-            # Recalculate costs locally using configured parameters and vehicle data
-            optimized_missions = self._recalculate_costs_in_ai_response(optimized_missions)
+            # Compute route distances/durations using OSRM and overwrite route metrics
+            optimized_missions = self._compute_routes_and_costs_post_ai(optimized_missions)
             
             # Validate the response
             if not optimized_missions:
@@ -1048,7 +1048,7 @@ JSON has been logged to server console. Check the logs for complete data.
                 raise ValueError("AI response is not a dictionary")
             
             # Log the complete AI response for analysis
-            _logger.info("=== AI MISSION OPTIMIZATION RESPONSE (POST-COSTS) ===")
+            _logger.info("=== AI MISSION OPTIMIZATION RESPONSE (POST-ROUTE/COST COMPUTE) ===")
             _logger.info("FULL AI RESPONSE:")
             _logger.info(json.dumps(optimized_missions, indent=2, default=str))
             _logger.info("=== END AI RESPONSE ===")
@@ -1148,6 +1148,11 @@ You are an expert logistics AI that creates optimized transport missions. Your t
 4. Update destination sequence numbers to match the optimized order
 5. The response JSON must list destinations in this optimized order
 
+## IMPORTANT CALCULATION POLICY
+1. DO NOT calculate distances, durations, or costs.
+2. Only assign vehicles and drivers, group destinations into missions, and order the stops.
+3. Leave any route fields that involve time, distance or money empty. The system will use OSRM and internal parameters to compute them.
+
 ## INPUT DATA ANALYSIS
 - **Sources Available**: {sources_count} pickup locations
 - **Destinations**: {destinations_count} total - {pickup_count} pickups, {delivery_count} deliveries
@@ -1203,7 +1208,7 @@ You are an expert logistics AI that creates optimized transport missions. Your t
 - **Use the orsm distance matrix API** to get realistic distances and times between points
 
 ## REQUIRED JSON OUTPUT FORMAT
-Return ONLY valid JSON with this structure:
+Return ONLY valid JSON with this structure (omit/leave empty any distance/time/cost fields):
 
 {
   "optimization_summary": {
@@ -1269,14 +1274,11 @@ Return ONLY valid JSON with this structure:
         }
       ],
       "route_optimization": {
-        "total_distance_km": <calculated_distance>,
-        "estimated_duration_hours": <calculated_time>,
-        "estimated_fuel_consumption_liters": <specific_vehicle_consumption>,
-        "estimated_fuel_cost": <calculated_fuel_cost_from_estimated_fuel_consumption_liters>,
-        "estimated_total_cost": <calculated_total_cost>,
-        "estimated_driver_wages": <calculated_driver_wages_based_on_hourly_rate>,
+        "total_distance_km": null,
+        "estimated_duration_hours": null,
+        "estimated_fuel_cost": null,
+        "estimated_total_cost": null,
         "optimization_notes": "Brief explanation of route logic"
-        "detailed_route_notes": "<comprehensive_instructions_for_driver>"
       },
       "capacity_utilization": {
         "weight_utilization_percentage": <0-100>,
@@ -1315,7 +1317,7 @@ Return ONLY valid JSON with this structure:
 5. **No trailing commas** before closing brackets or braces
 6. **Use actual IDs from input data** - vehicle IDs, driver IDs, source IDs, destination IDs must match exactly
 7. **Respect vehicle constraints** - never exceed max_payload or cargo_volume
-8. **Create realistic missions** - consider actual distances and time requirements
+8. **Do NOT include distance/time/cost numbers** - those are computed by the system after your response
 
 ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
 '''
@@ -1544,6 +1546,78 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
         }
         optimized_missions['optimization_summary'] = summary
         return optimized_missions
+
+    def _compute_routes_and_costs_post_ai(self, optimized_missions):
+        """After AI returns missions, compute distances with OSRM and then costs via parameters.
+        Ensures unified calculations with the transport mission model logic.
+        """
+        try:
+            if not optimized_missions or not isinstance(optimized_missions, dict):
+                return optimized_missions
+            missions = optimized_missions.get('created_missions', [])
+            if not missions:
+                return optimized_missions
+
+            total_distance = 0.0
+            total_duration_hours = 0.0
+
+            for mission in missions:
+                source = mission.get('source_location') or {}
+                destinations = mission.get('destinations') or []
+                if not source or not destinations:
+                    continue
+
+                # Build waypoints [ [lat, lon], ... ]
+                waypoints = []
+                if source.get('latitude') and source.get('longitude'):
+                    waypoints.append([source['latitude'], source['longitude']])
+                for dest in destinations:
+                    if dest.get('latitude') and dest.get('longitude'):
+                        waypoints.append([dest['latitude'], dest['longitude']])
+
+                # Use the same route calculator as model to keep consistency
+                route_data = self.env['transport.mission']._calculate_and_cache_route(waypoints) if len(waypoints) >= 2 else None
+                distance_km = (route_data or {}).get('distance', 0.0)
+                duration_min = (route_data or {}).get('duration', 0.0)
+                duration_hours = (duration_min or 0.0) / 60.0
+
+                # Overwrite route fields
+                mission.setdefault('route_optimization', {})
+                mission['route_optimization']['total_distance_km'] = distance_km
+                mission['route_optimization']['estimated_duration_hours'] = duration_hours
+
+                # Compute costs using selected vehicle and configured parameters
+                vehicle = mission.get('assigned_vehicle') or {}
+                costs = self._calculate_costs(distance_km, duration_hours, vehicle, with_details=True)
+                mission['route_optimization']['estimated_fuel_cost'] = costs['fuel_cost']
+                mission['route_optimization']['estimated_total_cost'] = costs['total_cost']
+                mission['route_optimization']['estimated_driver_wages'] = costs['driver_cost']
+                mission['route_optimization']['cost_breakdown'] = {
+                    'base_cost': costs['base_cost'],
+                    'fuel_cost': costs['fuel_cost'],
+                    'driver_cost': costs['driver_cost'],
+                    'maintenance_cost': costs['maintenance_cost'],
+                    'toll_cost': costs['toll_cost'],
+                    'fuel_used_liters': costs['fuel_used_liters']
+                }
+
+                total_distance += distance_km
+                total_duration_hours += duration_hours
+
+            # Update summary
+            summary = optimized_missions.setdefault('optimization_summary', {})
+            summary['total_estimated_distance_km'] = round(total_distance, 2)
+            summary['total_estimated_time_hours'] = round(total_duration_hours, 2)
+            # total_estimated_cost recomputed via loop
+            summary['total_estimated_cost'] = sum(
+                (m.get('route_optimization', {}) or {}).get('estimated_total_cost', 0.0)
+                for m in missions
+            )
+            optimized_missions['optimization_summary'] = summary
+            return optimized_missions
+        except Exception as e:
+            _logger.warning(f"Post-AI route/cost compute failed, returning original AI data: {e}")
+            return optimized_missions
 
     def _calculate_distance(self, point1, point2):
         """Calculate distance between two points using Haversine formula"""

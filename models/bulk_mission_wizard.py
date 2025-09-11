@@ -1148,10 +1148,19 @@ You are an expert logistics AI that creates optimized transport missions. Your t
 4. Update destination sequence numbers to match the optimized order
 5. The response JSON must list destinations in this optimized order
 
-## IMPORTANT CALCULATION POLICY
+## IMPORTANT PLANNING & CALCULATION POLICY
 1. DO NOT calculate distances, durations, or costs.
 2. Only assign vehicles and drivers, group destinations into missions, and order the stops.
 3. Leave any route fields that involve time, distance or money empty. The system will use OSRM and internal parameters to compute them.
+4. DO NOT mix destinations with different calendar dates in the same mission. Missions must be per-day.
+5. Ensure that each mission is feasible within a normal working day (<= 9 hours including travel and service). If not feasible, split into multiple missions.
+6. Respect time windows: If a destination includes an expected arrival time, you must order stops and split missions so each expected time is realistically reachable (consider typical urban speeds and buffers). Prefer sequencing that meets all provided times; if impossible, move conflicting stops to another mission on the same date.
+
+## TIME WINDOW CONSTRAINTS (MUST COMPLY)
+1. For any destination with `expected_arrival_time`, the plan MUST guarantee arrival on or before that time.
+2. Use realistic feasibility checks based on geography (e.g., typical speeds: urban ~35-50 km/h, highway ~80-100 km/h) when deciding order and grouping.
+3. If two time windows are incompatible (insufficient travel time between them), split into separate missions on the same date.
+4. Keep a small buffer between stops (>=10 minutes) to account for parking and handling.
 
 ## INPUT DATA ANALYSIS
 - **Sources Available**: {sources_count} pickup locations
@@ -1355,6 +1364,13 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                     assigned_driver = mission_data.get('assigned_driver', {})
                     destinations = mission_data.get('destinations', [])
                     
+                    # Calculate starting weight as sum of delivery weights
+                    starting_weight = 0.0
+                    for d in destinations:
+                        if (d.get('mission_type') or 'delivery') == 'delivery':
+                            cargo_details = d.get('cargo_details', {})
+                            starting_weight += float(cargo_details.get('total_weight', 0) or 0)
+                    
                     # Create mission
                     mission_vals = {
                         'mission_date': self.mission_date,
@@ -1366,6 +1382,7 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                         'source_longitude': source_location.get('longitude'),
                         'notes': f"AI Generated Mission: {mission_data.get('mission_name', 'Unnamed Mission')}",
                         'state': 'draft',
+                        'starting_weight': starting_weight,
                     }
                     
                     mission = self.env['transport.mission'].create(mission_vals)
@@ -1561,6 +1578,8 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
             total_distance = 0.0
             total_duration_hours = 0.0
 
+            WORKING_DAY_HOURS = 9.0
+            missions_to_add = []
             for mission in missions:
                 source = mission.get('source_location') or {}
                 destinations = mission.get('destinations') or []
@@ -1580,6 +1599,68 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                 distance_km = (route_data or {}).get('distance', 0.0)
                 duration_min = (route_data or {}).get('duration', 0.0)
                 duration_hours = (duration_min or 0.0) / 60.0
+
+                # Add service times
+                total_service_minutes = sum((d.get('service_duration') or 0) for d in destinations)
+                total_hours_including_service = duration_hours + (total_service_minutes / 60.0)
+                
+                # Split mission if exceeds working day OR violates time windows
+                if len(destinations) > 1:
+                    running_minutes = 0
+                    current_chunk = []
+                    chunks = []
+                    per_stop_travel_min = (duration_min / max(1, len(destinations)))
+                    BUFFER_MIN = 10
+                    # Mission start at 08:00 of wizard's mission_date
+                    from datetime import datetime
+                    mission_date_str = str(self.mission_date)
+                    # Build base start datetime
+                    try:
+                        mission_start_dt = datetime.strptime(mission_date_str, '%Y-%m-%d').replace(hour=8, minute=0, second=0)
+                    except Exception:
+                        mission_start_dt = None
+                    for d in destinations:
+                        d_service = d.get('service_duration') or 0
+                        est_minutes = per_stop_travel_min + d_service
+                        # Predict arrival at this stop
+                        predicted_arrival = None
+                        if mission_start_dt:
+                            from datetime import timedelta
+                            predicted_arrival = mission_start_dt + timedelta(minutes=running_minutes + per_stop_travel_min)
+                        # Parse expected arrival if provided
+                        expected_ok = True
+                        expected_str = d.get('expected_arrival_time') or d.get('estimated_arrival_time')
+                        if expected_str and mission_start_dt:
+                            try:
+                                expected_norm = self._normalize_datetime_string(expected_str)
+                                expected_dt = datetime.strptime(expected_norm, '%Y-%m-%d %H:%M:%S')
+                                # If predicted arrives after expected + buffer, force split before this dest
+                                if predicted_arrival and predicted_arrival > expected_dt.replace(second=0) + timedelta(minutes=BUFFER_MIN):
+                                    expected_ok = False
+                            except Exception:
+                                expected_ok = True
+                        # If adding this stop breaks working hours or violates expected time, start new chunk
+                        if (((running_minutes + est_minutes) / 60.0) > WORKING_DAY_HOURS or not expected_ok) and current_chunk:
+                            chunks.append(current_chunk)
+                            current_chunk = []
+                            running_minutes = 0
+                        current_chunk.append(d)
+                        running_minutes += est_minutes
+                    if current_chunk:
+                        chunks.append(current_chunk)
+
+                    # Create additional missions for chunks beyond the first
+                    if chunks and (len(chunks) > 1):
+                        # Replace current mission destinations with first chunk
+                        mission['destinations'] = chunks[0]
+                        # For each remaining chunk, clone mission shell
+                        for idx in range(1, len(chunks)):
+                            new_mission = {
+                                **mission,
+                                'mission_id': f"{mission.get('mission_id', 'M')}_SPLIT_{idx+1}",
+                                'destinations': chunks[idx]
+                            }
+                            missions_to_add.append(new_mission)
 
                 # Overwrite route fields
                 mission.setdefault('route_optimization', {})
@@ -1606,6 +1687,10 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
 
             # Update summary
             summary = optimized_missions.setdefault('optimization_summary', {})
+            # Append any split missions
+            if missions_to_add:
+                missions.extend(missions_to_add)
+                optimized_missions['created_missions'] = missions
             summary['total_estimated_distance_km'] = round(total_distance, 2)
             summary['total_estimated_time_hours'] = round(total_duration_hours, 2)
             # total_estimated_cost recomputed via loop
@@ -1754,6 +1839,13 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
             assigned_driver = mission_data.get('assigned_driver', {})
             destinations = mission_data.get('destinations', [])
             
+            # Calculate starting weight as sum of delivery weights
+            starting_weight = 0.0
+            for d in destinations:
+                if (d.get('mission_type') or 'delivery') == 'delivery':
+                    cargo_details = d.get('cargo_details', {})
+                    starting_weight += float(cargo_details.get('total_weight', 0) or 0)
+            
             # Create mission
             mission_vals = {
                 'mission_date': self.mission_date,
@@ -1765,6 +1857,7 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                 'source_longitude': source_location.get('longitude'),
                 'notes': f"AI Generated Mission: {mission_data.get('mission_name', 'Unnamed Mission')}",
                 'state': 'draft',
+                'starting_weight': starting_weight,
             }
             
             mission = self.env['transport.mission'].create(mission_vals)

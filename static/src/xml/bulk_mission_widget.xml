@@ -364,6 +364,19 @@
                                             <i class="fa fa-save me-1"/>Save This Mission
                                         </button>
                                     </div>
+
+                                    <!-- AI Explanation Section -->
+                                    <div class="tm_form_section" t-if="mission._explanation">
+                                        <h6><i class="fa fa-lightbulb me-2 text-warning"/>Why this plan</h6>
+                                        <ul class="tm_reason_list">
+                                            <t t-foreach="mission._explanation.bullets" t-as="reason" t-key="reason_index">
+                                                <li class="tm_reason_item">
+                                                    <i class="fa fa-check-circle text-muted me-1"/>
+                                                    <t t-esc="reason"/>
+                                                </li>
+                                            </t>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </t>

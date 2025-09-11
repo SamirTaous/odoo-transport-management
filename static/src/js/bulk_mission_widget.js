@@ -705,7 +705,7 @@ export class BulkMissionWidget extends Component {
         document.body.classList.remove('modal-open');
     }
 
-    async saveDestinationModal() {
+    saveDestinationModal() {
         const modal = document.getElementById('destinationModal');
         if (!modal) return;
 
@@ -727,17 +727,17 @@ export class BulkMissionWidget extends Component {
         };
 
         // Update the destination
-        await this.updateDestinationFromPopup(this.currentEditingIndex, updatedDestination);
+        this.updateDestinationFromPopup(this.currentEditingIndex, updatedDestination);
 
         // Close modal
         this.closeDestinationModal();
     }
 
-    async updateDestinationFromPopup(destIndex, updatedDestination) {
+    updateDestinationFromPopup(destIndex, updatedDestination) {
         if (this.state.destinations[destIndex]) {
             // Update the destination with all the new data
             Object.assign(this.state.destinations[destIndex], updatedDestination);
-            await this.saveData();
+            this.saveData();
             this.updateMapDisplay();
             this.notification.add("Destination updated", { type: "success" });
         }

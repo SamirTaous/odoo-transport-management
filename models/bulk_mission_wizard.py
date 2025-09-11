@@ -32,6 +32,54 @@ class BulkMissionWizard(models.TransientModel):
     auto_optimize_routes = fields.Boolean(string='Auto-optimize Routes', default=True)
     create_confirmed = fields.Boolean(string='Create as Confirmed', default=False)
     
+    def _normalize_datetime_string(self, value):
+        """Normalize various incoming datetime string formats to Odoo's '%Y-%m-%d %H:%M:%S'.
+        Accepts ISO 8601 like '2025-09-11T10:00:00', with optional milliseconds and timezone.
+        Returns a string or None.
+        """
+        if not value:
+            return None
+        from datetime import datetime
+        if isinstance(value, datetime):
+            return fields.Datetime.to_string(value)
+        if isinstance(value, str):
+            s = value.strip()
+            if (s.startswith('"') and s.endswith('"')) or (s.startswith("'") and s.endswith("'")):
+                s = s[1:-1]
+            s = s.replace('T', ' ')
+            if s.endswith('Z'):
+                s = s[:-1].strip()
+            if '.' in s:
+                left, right = s.split('.', 1)
+                for sep in ['+', '-', 'Z']:
+                    if sep in right:
+                        right = ''
+                        break
+                s = left
+            for tz_sep in ['+', '-']:
+                if tz_sep in s and len(s) >= 6:
+                    parts = s.rsplit(tz_sep, 1)
+                    if len(parts) == 2 and (':' in parts[1] or parts[1].isdigit()):
+                        s = parts[0].strip()
+                        break
+            if len(s) == 10 and s.count('-') == 2:
+                s = s + ' 00:00:00'
+            if len(s) == 16 and s.count(':') == 1:
+                s = s + ':00'
+            for fmt in ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M']:
+                try:
+                    dt = datetime.strptime(s, fmt)
+                    return dt.strftime('%Y-%m-%d %H:%M:%S')
+                except Exception:
+                    continue
+            try:
+                iso_candidate = value.replace('T', ' ').rstrip('Z')
+                dt = datetime.fromisoformat(iso_candidate)
+                return dt.strftime('%Y-%m-%d %H:%M:%S')
+            except Exception:
+                pass
+        return value
+    
     def get_mission_templates(self):
         """Return parsed mission templates"""
         try:
@@ -112,7 +160,7 @@ class BulkMissionWizard(models.TransientModel):
                         'longitude': dest_data.get('longitude'),
                         'sequence': index,  # Use the optimized order index
                         'mission_type': dest_data.get('mission_type', 'delivery'),
-                        'expected_arrival_time': dest_data.get('expected_arrival_time'),
+                        'expected_arrival_time': self._normalize_datetime_string(dest_data.get('expected_arrival_time')),
                         'service_duration': dest_data.get('service_duration', 0),
                         'package_type': dest_data.get('package_type', 'individual'),
                         'total_weight': dest_data.get('total_weight', 0),
@@ -1226,6 +1274,7 @@ Return ONLY valid JSON with this structure:
         "estimated_total_cost": <calculated_total_cost>,
         "estimated_driver_wages": <calculated_driver_wages_based_on_hourly_rate>,
         "optimization_notes": "Brief explanation of route logic"
+        "detailed_route_notes": "<comprehensive_instructions_for_driver>"
       },
       "capacity_utilization": {
         "weight_utilization_percentage": <0-100>,
@@ -1328,7 +1377,7 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                             'longitude': dest_data.get('longitude'),
                             'sequence': seq,
                             'mission_type': dest_data.get('mission_type', 'delivery'),
-                            'expected_arrival_time': dest_data.get('estimated_arrival_time'),
+                            'expected_arrival_time': self._normalize_datetime_string(dest_data.get('estimated_arrival_time')),
                             'service_duration': dest_data.get('service_duration', 0),
                             'package_type': cargo_details.get('package_type', 'individual'),
                             'total_weight': cargo_details.get('total_weight', 0),
@@ -1600,7 +1649,7 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                     'latitude': dest_data.get('latitude'),
                     'longitude': dest_data.get('longitude'),
                     'mission_type': dest_data.get('mission_type', 'delivery'),
-                    'expected_arrival_time': dest_data.get('estimated_arrival_time'),
+                    'expected_arrival_time': self._normalize_datetime_string(dest_data.get('estimated_arrival_time')),
                     'service_duration': dest_data.get('service_duration', 0),
                     'package_type': cargo_details.get('package_type', 'individual'),
                     'total_weight': cargo_details.get('total_weight', 0),

@@ -488,7 +488,10 @@
                                             </div>
                                         </div>
                                         <div class="tm_location_actions">
-                                            <button type="button" class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeDestinationByLocalId(dest.localId)">
+                                            <button type="button" class="btn btn-sm btn-outline-primary me-2" t-on-click.stop="() => this.openDestinationDialog(dest.localId)">
+                                                <i class="fa fa-edit"/>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" t-on-click.stop="() => this.removeDestinationByLocalId(dest.localId)">
                                                 <i class="fa fa-trash"/>
                                             </button>
                                         </div>

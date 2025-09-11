@@ -27,6 +27,7 @@ class TransportDestination(models.Model):
     # Time constraints - simplified
     expected_arrival_time = fields.Datetime(string='Expected Arrival Time')
     service_duration = fields.Float(string='Service Duration (minutes)', default=15.0, help="Time needed to complete service at this destination")
+    expected_departure_time = fields.Datetime(string='Expected Departure Time', compute='_compute_expected_departure', store=True)
     
     # Computed time fields
     estimated_arrival_time = fields.Datetime(string='Estimated Arrival Time', compute='_compute_estimated_times', store=True, help="Calculated arrival time based on route and previous stops")
@@ -121,6 +122,18 @@ class TransportDestination(models.Model):
             # Calculate estimated arrival and departure times
             destination.estimated_arrival_time = mission_datetime + timedelta(minutes=cumulative_minutes)
             destination.estimated_departure_time = destination.estimated_arrival_time + timedelta(minutes=destination.service_duration or 0)
+
+    @api.depends('expected_arrival_time', 'service_duration')
+    def _compute_expected_departure(self):
+        for destination in self:
+            if destination.expected_arrival_time:
+                try:
+                    from datetime import timedelta
+                    destination.expected_departure_time = destination.expected_arrival_time + timedelta(minutes=destination.service_duration or 0)
+                except Exception:
+                    destination.expected_departure_time = False
+            else:
+                destination.expected_departure_time = False
     
     @api.constrains('expected_arrival_time')
     def _check_future_time(self):

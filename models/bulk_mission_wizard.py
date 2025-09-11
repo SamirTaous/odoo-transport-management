@@ -1494,6 +1494,9 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                                 cargo_details['packages'] = orig.get('packages')
                         package_type = cargo_details.get('package_type', dest_data.get('package_type', 'individual'))
 
+                        # Prefer an explicit expected time from AI; fallback to its estimated time
+                        expected_time = dest_data.get('expected_arrival_time') or dest_data.get('estimated_arrival_time')
+
                         dest_vals = {
                             'mission_id': mission.id,
                             'location': dest_data.get('location', ''),
@@ -1501,7 +1504,7 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                             'longitude': dest_data.get('longitude'),
                             'sequence': seq,
                             'mission_type': dest_data.get('mission_type', 'delivery'),
-                            'expected_arrival_time': self._normalize_datetime_string(dest_data.get('estimated_arrival_time')),
+                            'expected_arrival_time': self._normalize_datetime_string(expected_time),
                             'service_duration': dest_data.get('service_duration', 0),
                             'package_type': package_type,
                             'requires_signature': cargo_details.get('requires_signature', False),

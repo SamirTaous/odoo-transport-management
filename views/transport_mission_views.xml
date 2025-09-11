@@ -66,10 +66,9 @@
                             <field name="is_completed" string="Mark as Completed"/>
                         </group>
                         <group string="Time &amp; Service">
-                            <field name="estimated_arrival_time" readonly="1" string="Estimated Arrival (Auto)"/>
                             <field name="expected_arrival_time" widget="datetime"/>
                             <field name="service_duration"/>
-                            <field name="estimated_departure_time" readonly="1" string="Estimated Departure (Auto)"/>
+                            <field name="expected_departure_time" readonly="1"/>
                             <field name="requires_signature"/>
                         </group>
                     </group>
@@ -163,8 +162,8 @@
                     </group>
                 </div>
                 
-                <!-- Destinations Section -->
-                <div class="o_form_sheet_bg">
+                <!-- Destinations Section (hidden table; edited via map widget list) -->
+                <div class="o_form_sheet_bg oe_hidden">
                     <separator string="Destinations"/>
                     <field name="destination_ids" nolabel="1">
                         <tree string="Destinations" editable="bottom">
@@ -172,9 +171,8 @@
                             <field name="mission_type" widget="badge" decoration-info="mission_type == 'pickup'" decoration-success="mission_type == 'delivery'"/>
                             <field name="location"/>
                             <field name="expected_arrival_time" widget="datetime"/>
-                            <field name="estimated_arrival_time" readonly="1"/>
-                            <field name="estimated_departure_time" readonly="1"/>
                             <field name="service_duration"/>
+                            <field name="expected_departure_time" readonly="1"/>
                             <field name="package_type"/>
                             <field name="total_weight"/>
                             <field name="total_volume"/>
@@ -200,8 +198,6 @@
                             <field name="location"/>
                             <field name="expected_arrival_time"/>
                             <field name="mission_type"/>
-                            <field name="estimated_arrival_time"/>
-                            <field name="estimated_departure_time"/>
                             <field name="service_duration"/>
                             <field name="package_type"/>
                             <field name="total_weight"/>

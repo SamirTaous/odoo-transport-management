@@ -1413,16 +1413,34 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                     assigned_driver = mission_data.get('assigned_driver', {})
                     destinations = mission_data.get('destinations', [])
                     
-                    # Calculate starting weight as sum of delivery weights
+                    # Calculate starting weight as sum of delivery weights (prefer packages sum)
                     starting_weight = 0.0
                     for d in destinations:
                         if (d.get('mission_type') or 'delivery') == 'delivery':
                             cargo_details = d.get('cargo_details', {})
-                            starting_weight += float(cargo_details.get('total_weight', 0) or 0)
-                    
+                            pkg_list = cargo_details.get('packages') or []
+                            if pkg_list:
+                                starting_weight += sum(float(p.get('weight') or 0) for p in pkg_list)
+                            else:
+                                starting_weight += float(cargo_details.get('total_weight', 0) or 0)
+
+                    # Determine mission date from destinations (earliest expected/estimated)
+                    earliest_dt = None
+                    for d in destinations:
+                        dt_raw = d.get('estimated_arrival_time') or d.get('expected_arrival_time')
+                        norm = self._normalize_datetime_string(dt_raw)
+                        if norm:
+                            try:
+                                from datetime import datetime
+                                dt = datetime.strptime(norm, '%Y-%m-%d %H:%M:%S')
+                                if earliest_dt is None or dt < earliest_dt:
+                                    earliest_dt = dt
+                            except Exception:
+                                pass
+
                     # Create mission
                     mission_vals = {
-                        'mission_date': self.mission_date,
+                        'mission_date': earliest_dt.date() if earliest_dt else self.mission_date,
                         'driver_id': assigned_driver.get('driver_id') or self.driver_id.id,
                         'vehicle_id': assigned_vehicle.get('vehicle_id') or self.vehicle_id.id,
                         'priority': self.priority,
@@ -1497,6 +1515,13 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
                                     'height': 10.0,
                                     'weight': cargo_details.get('total_weight'),
                                 })
+                    
+                    # After destinations created, recompute starting_weight from created records
+                    try:
+                        delivery_dests = mission.destination_ids.filtered(lambda d: d.mission_type == 'delivery')
+                        mission.write({'starting_weight': sum(delivery_dests.mapped('total_weight'))})
+                    except Exception:
+                        pass
                     
                     # Auto-optimize route if requested
                     if self.auto_optimize_routes and len(destinations) > 1:

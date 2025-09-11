@@ -47,6 +47,13 @@ class TransportCostParameters(models.Model):
     def _get_mad_currency(self):
         """Get MAD currency or fallback to company currency"""
         mad_currency = self.env['res.currency'].search([('name', '=', 'MAD')], limit=1)
+        # Ensure symbol is displayed as DH for Moroccan Dirham
+        if mad_currency and getattr(mad_currency, 'symbol', None) != 'DH':
+            try:
+                mad_currency.sudo().write({'symbol': 'DH'})
+            except Exception:
+                # If we cannot write (e.g., access rights), just proceed with existing symbol
+                pass
         return mad_currency if mad_currency else self.env.company.currency_id
 
     @api.model
@@ -60,10 +67,19 @@ class TransportCostParameters(models.Model):
                 'base_mission_cost': 50.0,
                 'cost_per_km': 1.2,
                 'cost_per_hour': 25.0,
-                'fuel_price_per_liter': 13.2,
-                'driver_cost_per_hour': 15.0,
+                'fuel_price_per_liter': 12.0,
+                'driver_cost_per_hour': 20.0,
                 'toll_cost_per_km': 0.3,
                 'insurance_cost_per_mission': 20.0,
                 'maintenance_cost_per_km': 0.4,
+                'currency_id': self._get_mad_currency().id,
             })
+        else:
+            # Ensure currency is MAD (DH) for the active parameter set
+            mad = self._get_mad_currency()
+            try:
+                if params.currency_id != mad:
+                    params.sudo().write({'currency_id': mad.id})
+            except Exception:
+                pass
         return params

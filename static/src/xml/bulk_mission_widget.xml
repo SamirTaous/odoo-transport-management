@@ -286,6 +286,61 @@
                                                     <t t-esc="mission.route_optimization.estimated_fuel_cost.toFixed(2)"/> DH
                                                 </div>
                                             </div>
+
+                                            <!-- Driver Cost -->
+                                            <div class="tm_cost_row" t-if="mission.route_optimization?.cost_breakdown?.driver_cost">
+                                                <div class="tm_cost_icon">
+                                                    <i class="fa fa-id-card"/>
+                                                </div>
+                                                <div class="tm_cost_label">Driver</div>
+                                                <div class="tm_cost_amount">
+                                                    <t t-esc="mission.route_optimization.cost_breakdown.driver_cost.toFixed(2)"/> DH
+                                                </div>
+                                            </div>
+
+        									<!-- Maintenance Cost -->
+                                            <div class="tm_cost_row" t-if="mission.route_optimization?.cost_breakdown?.maintenance_cost">
+                                                <div class="tm_cost_icon">
+                                                    <i class="fa fa-wrench"/>
+                                                </div>
+                                                <div class="tm_cost_label">Maintenance</div>
+                                                <div class="tm_cost_amount">
+                                                    <t t-esc="mission.route_optimization.cost_breakdown.maintenance_cost.toFixed(2)"/> DH
+                                                </div>
+                                            </div>
+
+                                            <!-- Toll Cost -->
+                                            <div class="tm_cost_row" t-if="mission.route_optimization?.cost_breakdown?.toll_cost">
+                                                <div class="tm_cost_icon">
+                                                    <i class="fa fa-road"/>
+                                                </div>
+                                                <div class="tm_cost_label">Tolls</div>
+                                                <div class="tm_cost_amount">
+                                                    <t t-esc="mission.route_optimization.cost_breakdown.toll_cost.toFixed(2)"/> DH
+                                                </div>
+                                            </div>
+
+                                            <!-- Base Cost -->
+                                            <div class="tm_cost_row" t-if="mission.route_optimization?.cost_breakdown?.base_cost">
+                                                <div class="tm_cost_icon">
+                                                    <i class="fa fa-coins"/>
+                                                </div>
+                                                <div class="tm_cost_label">Base</div>
+                                                <div class="tm_cost_amount">
+                                                    <t t-esc="mission.route_optimization.cost_breakdown.base_cost.toFixed(2)"/> DH
+                                                </div>
+                                            </div>
+
+                                            <!-- Fuel Used Liters -->
+                                            <div class="tm_cost_row" t-if="mission.route_optimization?.cost_breakdown?.fuel_used_liters">
+                                                <div class="tm_cost_icon">
+                                                    <i class="fa fa-tachometer-alt"/>
+                                                </div>
+                                                <div class="tm_cost_label">Fuel Used</div>
+                                                <div class="tm_cost_amount">
+                                                    <t t-esc="mission.route_optimization.cost_breakdown.fuel_used_liters.toFixed(2)"/> L
+                                                </div>
+                                            </div>
                                             
                                             <!-- Total Cost -->
                                             <div class="tm_cost_row tm_cost_total_row" t-if="mission.route_optimization?.estimated_total_cost">

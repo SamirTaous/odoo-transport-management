@@ -89,6 +89,11 @@ class TransportMission(models.Model):
     def _get_mad_currency(self):
         """Get MAD currency or fallback to company currency"""
         mad_currency = self.env['res.currency'].search([('name', '=', 'MAD')], limit=1)
+        if mad_currency and getattr(mad_currency, 'symbol', None) != 'DH':
+            try:
+                mad_currency.sudo().write({'symbol': 'DH'})
+            except Exception:
+                pass
         return mad_currency if mad_currency else self.env.company.currency_id
 
     # --- All standard methods are correct ---

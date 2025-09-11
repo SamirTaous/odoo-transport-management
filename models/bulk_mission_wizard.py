@@ -1037,6 +1037,8 @@ JSON has been logged to server console. Check the logs for complete data.
             # Call AI service
             _logger.info("Calling Gemini API for optimization...")
             optimized_missions = self._call_gemini_api(prompt)
+            # Recalculate costs locally using configured parameters and vehicle data
+            optimized_missions = self._recalculate_costs_in_ai_response(optimized_missions)
             
             # Validate the response
             if not optimized_missions:
@@ -1046,7 +1048,7 @@ JSON has been logged to server console. Check the logs for complete data.
                 raise ValueError("AI response is not a dictionary")
             
             # Log the complete AI response for analysis
-            _logger.info("=== AI MISSION OPTIMIZATION RESPONSE ===")
+            _logger.info("=== AI MISSION OPTIMIZATION RESPONSE (POST-COSTS) ===")
             _logger.info("FULL AI RESPONSE:")
             _logger.info(json.dumps(optimized_missions, indent=2, default=str))
             _logger.info("=== END AI RESPONSE ===")
@@ -1439,48 +1441,109 @@ ANALYZE THE DATA AND CREATE THE OPTIMAL MISSION PLAN AS VALID JSON:
 
     def _calculate_costs(self, distance_km, duration_hours, vehicle_data, with_details=False):
         """
-        Calculate realistic costs for a mission based on Moroccan prices and actual vehicle data
-        Current Moroccan prices (as of 2024):
-        - Diesel: ~12.5 MAD/L
-        - Driver salary: ~3000-4000 MAD/month (about 20 MAD/hour)
-        - Maintenance: ~0.5 MAD/km
+        Calculate mission costs using configured Moroccan parameters and actual vehicle data.
+        - Reads defaults from `transport.cost.parameters`.
+        - Uses `truck.vehicle.fuel_consumption` (L/100km) if available.
         """
-        # Base calculations
-        fuel_price_per_liter = 12.5  # MAD
-        driver_cost_per_hour = 20  # MAD
-        maintenance_cost_per_km = 0.5  # MAD
+        params = self.env['transport.cost.parameters'].get_default_parameters()
         
-        # Get vehicle fuel consumption (L/100km) or use default
-        fuel_consumption = vehicle_data.get('fuel_consumption', 30)  # Default 30L/100km if not specified
+        # Parameters
+        fuel_price_per_liter = params.fuel_price_per_liter or 12.5
+        driver_cost_per_hour = params.driver_cost_per_hour or 20.0
+        maintenance_cost_per_km = params.maintenance_cost_per_km or 0.5
+        toll_cost_per_km = params.toll_cost_per_km or 0.0
+        base_mission_cost = params.base_mission_cost or 0.0
         
-        # Calculate fuel cost
-        fuel_used_liters = (distance_km * fuel_consumption) / 100
+        # Vehicle data
+        fuel_consumption = 0
+        if vehicle_data:
+            fuel_consumption = vehicle_data.get('fuel_consumption') or 0
+            if not fuel_consumption and vehicle_data.get('vehicle_id'):
+                try:
+                    v = self.env['truck.vehicle'].browse(vehicle_data['vehicle_id'])
+                    fuel_consumption = v.fuel_consumption or 0
+                except Exception:
+                    fuel_consumption = 0
+        if not fuel_consumption:
+            fuel_consumption = 25.0  # sensible default L/100km
+        
+        # Fuel used and cost
+        fuel_used_liters = (distance_km or 0) * (fuel_consumption / 100.0)
         fuel_cost = fuel_used_liters * fuel_price_per_liter
         
-        # Calculate driver cost
-        driver_cost = duration_hours * driver_cost_per_hour
+        # Other components
+        driver_cost = (duration_hours or 0) * driver_cost_per_hour
+        maintenance_cost = (distance_km or 0) * maintenance_cost_per_km
+        toll_cost = (distance_km or 0) * toll_cost_per_km
         
-        # Calculate maintenance cost
-        maintenance_cost = distance_km * maintenance_cost_per_km
-        
-        # Calculate total cost
-        total_cost = fuel_cost + driver_cost + maintenance_cost
+        total_cost = base_mission_cost + fuel_cost + driver_cost + maintenance_cost + toll_cost
         
         if with_details:
             return {
                 'total_cost': round(total_cost, 2),
+                'base_cost': round(base_mission_cost, 2),
                 'fuel_cost': round(fuel_cost, 2),
                 'driver_cost': round(driver_cost, 2),
                 'maintenance_cost': round(maintenance_cost, 2),
+                'toll_cost': round(toll_cost, 2),
                 'fuel_used_liters': round(fuel_used_liters, 2),
                 'details': {
                     'fuel_consumption_per_100km': fuel_consumption,
                     'fuel_price_per_liter': fuel_price_per_liter,
                     'driver_rate_per_hour': driver_cost_per_hour,
-                    'maintenance_rate_per_km': maintenance_cost_per_km
+                    'maintenance_rate_per_km': maintenance_cost_per_km,
+                    'toll_cost_per_km': toll_cost_per_km
                 }
             }
         return round(total_cost, 2)
+
+    def _recalculate_costs_in_ai_response(self, optimized_missions):
+        """Recalculate and inject costs into AI response using real parameters and vehicle data."""
+        if not optimized_missions or not isinstance(optimized_missions, dict):
+            return optimized_missions
+        
+        missions = optimized_missions.get('created_missions', [])
+        if not missions:
+            return optimized_missions
+        
+        total_cost = 0.0
+        total_fuel_cost = 0.0
+        params = self.env['transport.cost.parameters'].get_default_parameters()
+        
+        for mission in missions:
+            vehicle = mission.get('assigned_vehicle', {}) or {}
+            route = mission.get('route_optimization', {}) or {}
+            distance_km = route.get('total_distance_km') or 0
+            duration_hours = route.get('estimated_duration_hours') or 0
+            
+            costs = self._calculate_costs(distance_km, duration_hours, vehicle, with_details=True)
+            route['estimated_fuel_cost'] = costs['fuel_cost']
+            route['estimated_driver_wages'] = costs['driver_cost']
+            route['estimated_total_cost'] = costs['total_cost']
+            route['cost_breakdown'] = {
+                'base_cost': costs['base_cost'],
+                'fuel_cost': costs['fuel_cost'],
+                'driver_cost': costs['driver_cost'],
+                'maintenance_cost': costs['maintenance_cost'],
+                'toll_cost': costs['toll_cost'],
+                'fuel_used_liters': costs['fuel_used_liters']
+            }
+            mission['route_optimization'] = route
+            total_cost += costs['total_cost']
+            total_fuel_cost += costs['fuel_cost']
+        
+        summary = optimized_missions.setdefault('optimization_summary', {})
+        summary['total_estimated_cost'] = round(total_cost, 2)
+        # Include cost parameters snapshot for transparency
+        summary['cost_parameters'] = {
+            'fuel_price_per_liter_mad': params.fuel_price_per_liter,
+            'driver_rate_per_hour_mad': params.driver_cost_per_hour,
+            'maintenance_rate_per_km_mad': params.maintenance_cost_per_km,
+            'toll_cost_per_km_mad': params.toll_cost_per_km,
+            'base_mission_cost_mad': params.base_mission_cost,
+        }
+        optimized_missions['optimization_summary'] = summary
+        return optimized_missions
 
     def _calculate_distance(self, point1, point2):
         """Calculate distance between two points using Haversine formula"""

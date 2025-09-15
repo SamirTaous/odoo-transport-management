@@ -74,9 +74,6 @@
                             <span t-if="!state.loading">Refresh</span>
                             <span t-else="">Loading...</span>
                         </button>
-                        <button type="button" class="btn btn-secondary btn-sm" t-on-click="openOverviewMap">
-                            <i class="fa fa-map me-1"/>Overview Map
-                        </button>
                     </div>
                 </div>
             </div>
@@ -100,7 +97,7 @@
                     </div>
                     <div class="tm-kpi-card tm-kanban-card tm_cost_card">
                         <div class="tm-kpi-title">Avg Cost</div>
-                        <div class="tm-kpi-value"><t t-esc="state.kpi.costs.avg_cost"/></div>
+                        <div class="tm-kpi-value" style="color: #495057;"><t t-esc="state.kpi.costs.avg_cost"/></div>
                         <div class="tm-kpi-hint">Total: <t t-esc="state.kpi.costs.total_cost"/> • Cost/Km: <t t-esc="state.kpi.costs.cost_per_km"/></div>
                     </div>
                     <div class="tm-kpi-card tm-kanban-card mission-confirmed">

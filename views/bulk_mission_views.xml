@@ -29,7 +29,7 @@
                 </div>
                 
                 <!-- Hidden fields for the widget -->
-                <div class="oe_hide">
+                <div class="oe_hide" invisible="1">
                     <field name="name"/>
                     <field name="mission_date"/>
                     <field name="ai_optimization_result"/>

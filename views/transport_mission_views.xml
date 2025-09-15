@@ -151,7 +151,7 @@
                 </div>
                 
                 <!-- Source Information Section -->
-                <div class="o_form_sheet_bg">
+                <div class="o_form_sheet_bg" invisible="1">
                     <group string="Source Information" class="tm_source_group">
                         <group col="4">
                             <field name="mission_date"/>
@@ -187,7 +187,7 @@
                 </div>
                 
                 <!-- Hidden fields for the widget -->
-                <div class="oe_hide">
+                <div class="oe_hide" invisible="1">
                     <field name="name"/>
                     <field name="source_location"/>
                     <field name="source_latitude"/>

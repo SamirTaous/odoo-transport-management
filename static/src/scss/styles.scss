@@ -5065,3 +5065,24 @@ ission Wizard Styles */
         box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.3);
     }
 }
+
+/* KPI dashboard styles */
+.tm-kpi-container { display: flex; margin: 500px ;flex-direction: column; gap: 16px; }
+.tm-kpi-header { display: flex; justify-content: space-between; align-items: center; }
+.tm-kpi-subtitle { color: #6c757d; font-size: 12px; }
+.tm-kpi-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.tm-kpi-card { background: #fff; border: 1px solid #e9ecef; border-radius: 6px; padding: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+.tm-kpi-title { font-size: 12px; color: #6c757d; }
+.tm-kpi-value { font-size: 22px; font-weight: 600; margin-top: 6px; }
+.tm-kpi-hint { font-size: 12px; color: #6c757d; margin-top: 2px; }
+.tm-kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tm-kpi-panel { background: #fff; border: 1px solid #e9ecef; border-radius: 6px; padding: 12px; }
+.tm-panel-title { font-weight: 600; margin-bottom: 8px; }
+.tm-chart { display: flex; flex-direction: column; gap: 6px; min-height: 180px; }
+.tm-chart-row { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 8px; }
+.tm-chart-label { font-size: 12px; color: #6c757d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tm-chart-bar-wrap { height: 10px; background: #f1f3f5; border-radius: 4px; overflow: hidden; }
+.tm-chart-bar { height: 100%; background: linear-gradient(90deg, #17a2b8, #28a745); }
+.tm-kpi-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tm-breakdown { display: flex; flex-direction: column; gap: 6px; }
+.tm-breakdown-row { display: flex; justify-content: space-between; font-size: 13px; border-bottom: 1px dashed #f1f3f5; padding: 4px 0; }

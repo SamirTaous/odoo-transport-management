@@ -19,6 +19,7 @@ export class MissionKpiDashboard extends Component {
             series_missions: [],
             series_distance: [],
             series_cost: [],
+            series_cost_per_km: [],
             series_on_time: [],
             date_from: null,
             date_to: null,
@@ -29,6 +30,7 @@ export class MissionKpiDashboard extends Component {
         this.distanceChart = useRef("distanceChart");
         this.costChart = useRef("costChart");
         this.onTimeChart = useRef("onTimeChart");
+        this.costPerKmChart = useRef("costPerKmChart"); // Added this ref as it was used in renderCharts but not defined
 
         onMounted(async () => {
             await this.refreshData();
@@ -42,12 +44,13 @@ export class MissionKpiDashboard extends Component {
     async refreshData() {
         try {
             this.state.loading = true;
-            const [summary, tsMissions, tsDistance, tsCost, tsOnTime] = await Promise.all([
+            const [summary, tsMissions, tsDistance, tsCost, tsOnTime, tsCostPerKm] = await Promise.all([
                 this.orm.call("transport.mission", "get_kpi_summary", this.dateRangeArgs),
                 this.orm.call("transport.mission", "get_kpi_timeseries", [], { group_by: this.state.group_by, metric: "missions", date_from: this.state.date_from, date_to: this.state.date_to }),
                 this.orm.call("transport.mission", "get_kpi_timeseries", [], { group_by: this.state.group_by, metric: "distance", date_from: this.state.date_from, date_to: this.state.date_to }),
                 this.orm.call("transport.mission", "get_kpi_timeseries", [], { group_by: this.state.group_by, metric: "cost", date_from: this.state.date_from, date_to: this.state.date_to }),
                 this.orm.call("transport.mission", "get_kpi_timeseries", [], { group_by: this.state.group_by, metric: "on_time_rate", date_from: this.state.date_from, date_to: this.state.date_to }),
+                this.orm.call("transport.mission", "get_kpi_timeseries", [], { group_by: this.state.group_by, metric: "cost_per_km", date_from: this.state.date_from, date_to: this.state.date_to }),
             ]);
 
             this.state.kpi = summary;
@@ -55,6 +58,7 @@ export class MissionKpiDashboard extends Component {
             this.state.series_distance = tsDistance;
             this.state.series_cost = tsCost;
             this.state.series_on_time = tsOnTime;
+            this.state.series_cost_per_km = tsCostPerKm;
 
             this.renderCharts();
         } catch (e) {
@@ -94,14 +98,15 @@ export class MissionKpiDashboard extends Component {
         makeBar(this.distanceChart.el, this.state.series_distance, "Km");
         makeBar(this.costChart.el, this.state.series_cost, "Cost");
         makeBar(this.onTimeChart.el, this.state.series_on_time, "% On-Time");
+        if (this.costPerKmChart && this.costPerKmChart.el) {
+            makeBar(this.costPerKmChart.el, this.state.series_cost_per_km, "Cost/Km");
+        }
     }
 
     async openOverviewMap() {
-        await this.action.doAction({ type: "ir.actions.client", tag: "transport_mission_overview_map", name: "Mission Overview Map" });
+        await this.action.doAction({ type: "ir.actions.client", tag: "transport_mission_mission_overview_simple", name: "Mission Overview Map" });
     }
 }
 
 MissionKpiDashboard.template = "transport_management.MissionKpiDashboard";
 registry.category("actions").add("transport_mission_kpi_dashboard", MissionKpiDashboard);
-
-

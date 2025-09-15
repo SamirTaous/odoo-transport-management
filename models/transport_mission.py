@@ -674,6 +674,7 @@ class TransportMission(models.Model):
             'weight': 0.0,
             'packages': 0,
             'stops': 0,
+            'fuel_liters': 0.0,
         }
 
         # Compute on-time deliveries: destination expected_arrival_time vs estimated/actual proxy
@@ -682,6 +683,8 @@ class TransportMission(models.Model):
         destinations = Destination.search(dest_domain)
         on_time = 0
         with_time_req = 0
+        late_count = 0
+        late_minutes_acc = 0.0
         for dest in destinations:
             if dest.expected_arrival_time:
                 with_time_req += 1
@@ -689,6 +692,13 @@ class TransportMission(models.Model):
                 ref_time = dest.estimated_arrival_time or dest.expected_arrival_time
                 if ref_time and ref_time <= dest.expected_arrival_time:
                     on_time += 1
+                elif ref_time and ref_time > dest.expected_arrival_time:
+                    late_count += 1
+                    try:
+                        delta = ref_time - dest.expected_arrival_time
+                        late_minutes_acc += (delta.total_seconds() / 60.0)
+                    except Exception:
+                        pass
 
         for m in missions:
             by_state[m.state] = by_state.get(m.state, 0) + 1
@@ -705,12 +715,61 @@ class TransportMission(models.Model):
             totals['weight'] += m.total_weight or 0.0
             totals['packages'] += m.total_packages or 0
             totals['stops'] += len(m.destination_ids)
+            try:
+                price = m.cost_parameters_id and m.cost_parameters_id.fuel_price_per_liter or 0
+                if price:
+                    totals['fuel_liters'] += (m.fuel_cost or 0.0) / price
+            except Exception:
+                pass
 
         avg = (lambda v: (v / total_missions) if total_missions else 0.0)
         active_missions = by_state['confirmed'] + by_state['in_progress']
         completed_missions = by_state['done']
         cancelled_missions = by_state['cancelled']
         on_time_rate = (on_time / with_time_req * 100.0) if with_time_req else 0.0
+        avg_late_min = (late_minutes_acc / late_count) if late_count else 0.0
+        cost_per_km = (totals['cost'] / totals['distance_km']) if totals['distance_km'] else 0.0
+        cost_per_stop = (totals['cost'] / totals['stops']) if totals['stops'] else 0.0
+        km_per_liter = (totals['distance_km'] / totals['fuel_liters']) if totals['fuel_liters'] else 0.0
+
+        # Leaderboards
+        driver_stats = {}
+        vehicle_stats = {}
+        weekday_counts = {i: 0 for i in range(7)}
+        for m in missions:
+            if m.driver_id:
+                ds = driver_stats.setdefault(m.driver_id.id, {
+                    'name': m.driver_id.name,
+                    'missions': 0,
+                    'distance_km': 0.0,
+                    'cost': 0.0,
+                })
+                ds['missions'] += 1
+                ds['distance_km'] += m.total_distance_km or 0.0
+                ds['cost'] += m.total_cost or 0.0
+            if m.vehicle_id:
+                vs = vehicle_stats.setdefault(m.vehicle_id.id, {
+                    'name': m.vehicle_id.display_name or m.vehicle_id.name,
+                    'missions': 0,
+                    'distance_km': 0.0,
+                    'cost': 0.0,
+                })
+                vs['missions'] += 1
+                vs['distance_km'] += m.total_distance_km or 0.0
+                vs['cost'] += m.total_cost or 0.0
+            try:
+                d = m.mission_date
+                if isinstance(d, str):
+                    d = fields.Date.from_string(d)
+                if d:
+                    weekday_counts[d.weekday()] += 1
+            except Exception:
+                pass
+
+        def top_n(stats_dict, key, n=5, reverse=True):
+            items = list(stats_dict.values())
+            items.sort(key=lambda x: x.get(key) or 0, reverse=reverse)
+            return items[:n]
 
         return {
             'counts': {
@@ -731,6 +790,8 @@ class TransportMission(models.Model):
             'costs': {
                 'total_cost': round(totals['cost'], 2),
                 'avg_cost': round(avg(totals['cost']), 2),
+                'cost_per_km': round(cost_per_km, 3),
+                'cost_per_stop': round(cost_per_stop, 2),
                 'breakdown': {
                     'base_cost': round(totals['base_cost'], 2),
                     'distance_cost': round(totals['distance_cost'], 2),
@@ -751,7 +812,20 @@ class TransportMission(models.Model):
             'sla': {
                 'on_time_rate': round(on_time_rate, 2),
                 'with_time_requirements': with_time_req,
+                'late_count': late_count,
+                'avg_late_min': round(avg_late_min, 1),
             },
+            'efficiency': {
+                'fuel_liters': round(totals['fuel_liters'], 2),
+                'km_per_liter': round(km_per_liter, 2),
+            },
+            'leaderboards': {
+                'drivers_top_distance': top_n(driver_stats, 'distance_km'),
+                'drivers_top_missions': top_n(driver_stats, 'missions'),
+                'vehicles_top_distance': top_n(vehicle_stats, 'distance_km'),
+                'vehicles_top_missions': top_n(vehicle_stats, 'missions'),
+            },
+            'weekday_distribution': [{'weekday': i, 'count': weekday_counts[i]} for i in range(7)],
         }
 
     @api.model
@@ -798,6 +872,15 @@ class TransportMission(models.Model):
             buckets[key]['distance'] += m.total_distance_km or 0.0
             buckets[key]['cost'] += m.total_cost or 0.0
             buckets[key]['duration'] += m.estimated_duration_minutes or 0.0
+            # accumulate liters to compute cost_per_km proxy if needed
+            try:
+                price = m.cost_parameters_id and m.cost_parameters_id.fuel_price_per_liter or 0
+                if price:
+                    liters = (m.fuel_cost or 0.0) / price
+                else:
+                    liters = 0
+            except Exception:
+                liters = 0
 
         # compute on time per bucket
         Destination = self.env['transport.destination']
@@ -824,6 +907,8 @@ class TransportMission(models.Model):
                 value = round(b['duration'], 1)
             elif metric == 'on_time_rate':
                 value = round((b['on_time_count'] / b['time_requirements'] * 100.0) if b['time_requirements'] else 0.0, 2)
+            elif metric == 'cost_per_km':
+                value = round((b['cost'] / b['distance']) if b['distance'] else 0.0, 3)
             else:
                 value = 0
             series.append({'label': key, 'value': value})

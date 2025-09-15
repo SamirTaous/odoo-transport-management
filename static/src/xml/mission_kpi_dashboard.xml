@@ -2,6 +2,60 @@
 <templates xml:space="preserve">
 
     <t t-name="transport_management.MissionKpiDashboard" owl="1">
+        <style>
+            /* KPI dashboard styles */
+            .tm-kpi-container {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                margin: 50px;
+
+                /* --- ADDED FOR SCROLLING --- */
+                /* Adjust this max-height calculation based on your Odoo header/footer height.
+                   For example, if your Odoo header is ~64px, you might use calc(100vh - 64px);
+                   You may need to inspect the Odoo layout in your browser dev tools to get the precise value. */
+                max-height: calc(100vh - var(--navbar-height, 64px) - var(--footer-height, 0px) - 20px); /* Example: Adjust 64px, 0px, 20px based on actual layout */
+                overflow-y: auto; /* Enable vertical scrolling when content exceeds max-height */
+                /* --- END ADDED FOR SCROLLING --- */
+            }
+            .tm-kpi-header { display: flex; justify-content: space-between; align-items: center; }
+            .tm-kpi-subtitle { color: #6c757d; font-size: 12px; }
+            .tm-kpi-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+            .tm-kpi-card { background: #fff; border: 1px solid #e9ecef; border-radius: 6px; padding: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+            .tm-kpi-title { font-size: 12px; color: #6c757d; }
+            .tm-kpi-value { font-size: 22px; font-weight: 600; margin-top: 6px; }
+            .tm-kpi-hint { font-size: 12px; color: #6c757d; margin-top: 2px; }
+            .tm-kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+            .tm-kpi-panel { background: #fff; border: 1px solid #e9ecef; border-radius: 6px; padding: 12px; }
+            .tm-panel-title { font-weight: 600; margin-bottom: 8px; }
+            .tm-chart { display: flex; flex-direction: column; gap: 6px; min-height: 180px; }
+            .tm-chart-row { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 8px; }
+            .tm-chart-label { font-size: 12px; color: #6c757d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            .tm-chart-bar-wrap { height: 10px; background: #f1f3f5; border-radius: 4px; overflow: hidden; }
+            .tm-chart-bar { height: 100%; background: linear-gradient(90deg, #17a2b8, #28a745); }
+            .tm-kpi-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+            .tm-breakdown { display: flex; flex-direction: column; gap: 6px; }
+            .tm-breakdown-row { display: flex; justify-content: space-between; font-size: 13px; border-bottom: 1px dashed #f1f3f5; padding: 4px 0; }
+
+            /* Loading overlay styles (added for completeness, assuming it might affect layout) */
+            .tm-loading-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(255, 255, 255, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+            .tm-loading-content {
+                text-align: center;
+                color: #555;
+            }
+        </style>
+
         <div class="tm-kpi-container">
             <div class="tm-kpi-header">
                 <div class="tm-header-left">
@@ -29,27 +83,27 @@
 
             <t t-if="state.kpi">
                 <div class="tm-kpi-cards">
-                    <div class="tm-kpi-card">
+                    <div class="tm-kpi-card tm-kanban-card mission-confirmed">
                         <div class="tm-kpi-title">Total Missions</div>
                         <div class="tm-kpi-value" t-esc="state.kpi.counts.total_missions"/>
                         <div class="tm-kpi-hint">Active: <t t-esc="state.kpi.counts.active_missions"/> • Done: <t t-esc="state.kpi.counts.completed_missions"/></div>
                     </div>
-                    <div class="tm-kpi-card">
+                    <div class="tm-kpi-card tm-kanban-card mission-in_progress">
                         <div class="tm-kpi-title">On-Time Rate</div>
                         <div class="tm-kpi-value"><t t-esc="state.kpi.sla.on_time_rate"/>%</div>
-                        <div class="tm-kpi-hint"><t t-esc="state.kpi.sla.with_time_requirements"/> time-constrained stops</div>
+                        <div class="tm-kpi-hint"><t t-esc="state.kpi.sla.with_time_requirements"/> time-constrained stops • Late: <t t-esc="state.kpi.sla.late_count"/> • Avg Late: <t t-esc="state.kpi.sla.avg_late_min"/> min</div>
                     </div>
-                    <div class="tm-kpi-card">
+                    <div class="tm-kpi-card tm-kanban-card mission-done">
                         <div class="tm-kpi-title">Avg Distance</div>
                         <div class="tm-kpi-value"><t t-esc="state.kpi.distance.avg_km"/> km</div>
                         <div class="tm-kpi-hint">Total: <t t-esc="state.kpi.distance.total_km"/> km</div>
                     </div>
-                    <div class="tm-kpi-card">
+                    <div class="tm-kpi-card tm-kanban-card tm_cost_card">
                         <div class="tm-kpi-title">Avg Cost</div>
                         <div class="tm-kpi-value"><t t-esc="state.kpi.costs.avg_cost"/></div>
-                        <div class="tm-kpi-hint">Total: <t t-esc="state.kpi.costs.total_cost"/></div>
+                        <div class="tm-kpi-hint">Total: <t t-esc="state.kpi.costs.total_cost"/> • Cost/Km: <t t-esc="state.kpi.costs.cost_per_km"/></div>
                     </div>
-                    <div class="tm-kpi-card">
+                    <div class="tm-kpi-card tm-kanban-card mission-confirmed">
                         <div class="tm-kpi-title">Avg Stops/Mission</div>
                         <div class="tm-kpi-value" t-esc="state.kpi.payload.avg_stops_per_mission"/>
                         <div class="tm-kpi-hint">Packages: <t t-esc="state.kpi.payload.total_packages"/></div>
@@ -72,6 +126,10 @@
                     <div class="tm-kpi-panel">
                         <div class="tm-panel-title"><i class="fa fa-clock-o me-2"/>On-Time Delivery %</div>
                         <div class="tm-chart" t-ref="onTimeChart"></div>
+                    </div>
+                    <div class="tm-kpi-panel">
+                        <div class="tm-panel-title"><i class="fa fa-balance-scale me-2"/>Cost per Km</div>
+                        <div class="tm-chart" t-ref="costPerKmChart"></div>
                     </div>
                 </div>
 
@@ -100,6 +158,38 @@
                             <div class="tm-breakdown-row"><span>Cancelled</span><span t-esc="s.cancelled"/></div>
                         </div>
                     </div>
+                    <div class="tm-kpi-panel">
+                        <div class="tm-panel-title"><i class="fa fa-tachometer me-2"/>Efficiency</div>
+                        <div class="tm-breakdown">
+                            <div class="tm-breakdown-row"><span>Km per Liter</span><span t-esc="state.kpi.efficiency.km_per_liter"/></div>
+                            <div class="tm-breakdown-row"><span>Total Fuel (L)</span><span t-esc="state.kpi.efficiency.fuel_liters"/></div>
+                            <div class="tm-breakdown-row"><span>Cost per Stop</span><span t-esc="state.kpi.costs.cost_per_stop"/></div>
+                        </div>
+                    </div>
+                    <div class="tm-kpi-panel">
+                        <div class="tm-panel-title"><i class="fa fa-users me-2"/>Top Drivers</div>
+                        <div class="tm-breakdown">
+                            <t t-foreach="state.kpi.leaderboards.drivers_top_distance" t-as="d" t-key="d.name">
+                                <div class="tm-breakdown-row"><span t-esc="d.name"/><span><t t-esc="d.distance_km"/> km • <t t-esc="d.missions"/> missions</span></div>
+                            </t>
+                        </div>
+                    </div>
+                    <div class="tm-kpi-panel">
+                        <div class="tm-panel-title"><i class="fa fa-truck me-2"/>Top Vehicles</div>
+                        <div class="tm-breakdown">
+                            <t t-foreach="state.kpi.leaderboards.vehicles_top_distance" t-as="v" t-key="v.name">
+                                <div class="tm-breakdown-row"><span t-esc="v.name"/><span><t t-esc="v.distance_km"/> km • <t t-esc="v.missions"/> missions</span></div>
+                            </t>
+                        </div>
+                    </div>
+                    <div class="tm-kpi-panel">
+                        <div class="tm-panel-title"><i class="fa fa-calendar me-2"/>Weekday Distribution</div>
+                        <div class="tm-breakdown">
+                            <t t-foreach="state.kpi.weekday_distribution" t-as="w" t-key="w.weekday">
+                                <div class="tm-breakdown-row"><span>Day <t t-esc="w.weekday"/></span><span t-esc="w.count"/></div>
+                            </t>
+                        </div>
+                    </div>
                 </div>
             </t>
 
@@ -113,5 +203,3 @@
     </t>
 
 </templates>
-
-

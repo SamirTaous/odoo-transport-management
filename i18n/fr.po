@@ -1,0 +1,4026 @@
+```po
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* transport_management
+# 	* truck_maintenance
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-11 17:08+0000\n"
+"PO-Revision-Date: 2025-09-11 17:08+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_kanban
+msgid "<i class=\"fa fa-bolt text-danger\" title=\"Emergency\"/>"
+msgstr "<i class=\"fa fa-bolt text-danger\" title=\"Urgence\"/>"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_kanban
+msgid ""
+"<i class=\"fa fa-calendar\"/>\n"
+"                                        Requested:"
+msgstr ""
+"<i class=\"fa fa-calendar\"/>\n"
+"                                        Demandé :"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_kanban
+msgid "<i class=\"fa fa-clock-o text-warning\" title=\"Time Constraints\"/>"
+msgstr "<i class=\"fa fa-clock-o text-warning\" title=\"Contraintes de temps\"/>"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_kanban
+msgid ""
+"<i class=\"fa fa-clock-o text-warning\"/>\n"
+"                                    <span class=\"small text-warning\">Time Constraints</span>"
+msgstr ""
+"<i class=\"fa fa-clock-o text-warning\"/>\n"
+"                                    <span class=\"small text-warning\">Contraintes de temps</span>"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_kanban
+msgid "<i class=\"fa fa-exclamation text-danger\" title=\"Very High Priority\"/>"
+msgstr "<i class=\"fa fa-exclamation text-danger\" title=\"Très haute priorité\"/>"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_kanban
+msgid "<i class=\"fa fa-exclamation text-warning\" title=\"High Priority\"/>"
+msgstr "<i class=\"fa fa-exclamation text-warning\" title=\"Haute priorité\"/>"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_kanban
+msgid "<i class=\"fa fa-exclamation-triangle text-danger\" title=\"Not Available\"/>"
+msgstr "<i class=\"fa fa-exclamation-triangle text-danger\" title=\"Non disponible\"/>"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_kanban
+msgid ""
+"<i class=\"fa fa-exclamation-triangle text-warning\"/>\n"
+"                                    <span class=\"text-warning\">High Priority</span>"
+msgstr ""
+"<i class=\"fa fa-exclamation-triangle text-warning\"/>\n"
+"                                    <span class=\"text-warning\">Haute priorité</span>"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_kanban
+msgid "<i class=\"fa fa-times text-danger\" title=\"Cancelled\"/>"
+msgstr "<i class=\"fa fa-times text-danger\" title=\"Annulé\"/>"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_kanban
+msgid "<i class=\"fa fa-wrench text-danger\" title=\"Critical Maintenance\"/>"
+msgstr "<i class=\"fa fa-wrench text-danger\" title=\"Maintenance critique\"/>"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "<span class=\"o_stat_text\">Odometer</span>"
+msgstr "<span class=\"o_stat_text\">Odomètre</span>"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid ""
+"<span class=\"o_stat_text\">Schedule</span>\n"
+"                                <span class=\"o_stat_text\">Maintenance</span>"
+msgstr ""
+"<span class=\"o_stat_text\">Planification</span>\n"
+"                                <span class=\"o_stat_text\">Maintenance</span>"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid ""
+"<strong>Info:</strong> Please set rental start and end dates for rented "
+"trucks."
+msgstr ""
+"<strong>Info :</strong> Veuillez définir les dates de début et de fin de "
+"location pour les camions loués."
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid ""
+"<strong>Rental Truck:</strong> Please ensure rental dates and costs are "
+"properly configured."
+msgstr ""
+"<strong>Camion loué :</strong> Veuillez vous assurer que les dates et les "
+"coûts de location sont correctement configurés."
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid ""
+"<strong>Subcontracted Truck:</strong> Please specify the subcontractor "
+"company."
+msgstr ""
+"<strong>Camion sous-traité :</strong> Veuillez spécifier l'entreprise "
+"sous-traitante."
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "<strong>Warning:</strong> This truck is currently not available."
+msgstr "<strong>Avertissement :</strong> Ce camion n'est pas disponible actuellement."
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "AI Generated Mission"
+msgstr "Mission générée par l'IA"
+
+#. module: transport_management
+#. odoo-javascript
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "AI Generated Missions"
+msgstr "Missions générées par l'IA"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__ai_optimization_result
+msgid "AI Optimization Result"
+msgstr "Résultat de l'optimisation par l'IA"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__message_needaction
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__message_needaction
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__message_needaction
+msgid "Action Needed"
+msgstr "Action requise"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__active
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_team__active
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__active
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Active"
+msgstr "Actif"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_search
+#, python-format
+msgid "Active Missions"
+msgstr "Missions actives"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Active Rentals"
+msgstr "Locations actives"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__activity_ids
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__activity_ids
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__activity_ids
+msgid "Activities"
+msgstr "Activités"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__activity_exception_decoration
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__activity_exception_decoration
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Décoration d'exception d'activité"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__activity_state
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__activity_state
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__activity_state
+msgid "Activity State"
+msgstr "État de l'activité"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__activity_type_icon
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__activity_type_icon
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Icône de type d'activité"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__actual_cost
+msgid "Actual Cost"
+msgstr "Coût réel"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Add Default Cargo"
+msgstr "Ajouter un chargement par défaut"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Add mission notes and special instructions..."
+msgstr "Ajoutez des notes de mission et des instructions spéciales..."
+
+#. module: truck_maintenance
+#: model_terms:ir.actions.act_window,help:truck_maintenance.action_truck_vehicle_rented
+msgid ""
+"Add rented trucks to track rental periods, costs, and maintenance "
+"responsibilities."
+msgstr ""
+"Ajoutez des camions loués pour suivre les périodes de location, les coûts et "
+"les responsabilités de maintenance."
+
+#. module: truck_maintenance
+#: model_terms:ir.actions.act_window,help:truck_maintenance.action_truck_vehicle_subcontracted
+msgid ""
+"Add trucks from subcontractors to track their vehicles and maintenance "
+"status."
+msgstr ""
+"Ajoutez des camions de sous-traitants pour suivre leurs véhicules et leur "
+"état de maintenance."
+
+#. module: truck_maintenance
+#: model_terms:ir.actions.act_window,help:truck_maintenance.action_truck_vehicle
+msgid ""
+"Add trucks to your fleet with detailed specifications including cargo capacity,\n"
+"                dimensions, maintenance tracking, and ownership information."
+msgstr ""
+"Ajoutez des camions à votre flotte avec des spécifications détaillées, "
+"y compris la capacité de chargement, les dimensions, le suivi de la "
+"maintenance et les informations de propriété."
+
+#. module: truck_maintenance
+#: model_terms:ir.actions.act_window,help:truck_maintenance.action_truck_vehicle_owned
+msgid ""
+"Add your company-owned trucks to the fleet. These are trucks that your "
+"company owns outright."
+msgstr ""
+"Ajoutez les camions appartenant à votre entreprise à la flotte. Ce sont les "
+"camions que votre entreprise possède entièrement."
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_cost_parameters_form
+msgid "Additional Costs"
+msgstr "Coûts additionnels"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Additional Equipment & Notes"
+msgstr "Équipement additionnel & Notes"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__notes
+msgid "Additional Notes"
+msgstr "Notes additionnelles"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Additional notes and comments..."
+msgstr "Notes et commentaires additionnels..."
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Address or coordinates"
+msgstr "Adresse ou coordonnées"
+
+#. module: truck_maintenance
+#: model:ir.ui.menu,name:truck_maintenance.menu_truck_vehicle
+msgid "All Trucks"
+msgstr "Tous les camions"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_destination__special_instructions
+msgid "Any special handling or delivery instructions"
+msgstr "Toutes instructions spéciales de manutention ou de livraison"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Archived"
+msgstr "Archivé"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Articulated"
+msgstr "Articulé"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__truck_type__articulated
+msgid "Articulated (Tractor-Trailer)"
+msgstr "Articulé (Tracteur-semi-remorque)"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__driver_id
+msgid "Assigned Driver"
+msgstr "Chauffeur assigné"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__technician_id
+msgid "Assigned Technician"
+msgstr "Technicien assigné"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Assignment"
+msgstr "Affectation"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__message_attachment_count
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__message_attachment_count
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__message_attachment_count
+msgid "Attachment Count"
+msgstr "Nombre de pièces jointes"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__auto_optimize_routes
+msgid "Auto-optimize Routes"
+msgstr "Optimiser automatiquement les routes"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__is_available
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Available"
+msgstr "Disponible"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Available Drivers"
+msgstr "Chauffeurs disponibles"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Available Vehicles"
+msgstr "Véhicules disponibles"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_cost_parameters__toll_cost_per_km
+msgid "Average toll cost per kilometer"
+msgstr "Coût moyen des péages par kilomètre"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__truck_type__b_double
+msgid "B-Double"
+msgstr "B-Double"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Base"
+msgstr "Base"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__base_cost
+msgid "Base Cost"
+msgstr "Coût de base"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_cost_parameters_form
+msgid "Base Costs"
+msgstr "Coûts de base"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__base_mission_cost
+msgid "Base Mission Cost"
+msgstr "Coût de base de la mission"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Basic Information"
+msgstr "Informations de base"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__name
+msgid "Batch Name"
+msgstr "Nom du lot"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__category__body
+msgid "Body Work"
+msgstr "Carrosserie"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__category__brakes
+msgid "Brakes"
+msgstr "Freins"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__brand
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Brand"
+msgstr "Marque"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_tree_with_bulk
+msgid "Bulk Create Missions"
+msgstr "Création de missions en masse"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Bulk Location Selection"
+msgstr "Sélection de lieux en masse"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Bulk Location Selector"
+msgstr "Sélecteur de lieux en masse"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "Bulk Mission Batch"
+msgstr "Lot de missions en masse"
+
+#. module: transport_management
+#: model:ir.actions.act_window,name:transport_management.action_bulk_mission_wizard
+#: model:ir.ui.menu,name:transport_management.menu_bulk_mission_creation
+#: model_terms:ir.ui.view,arch_db:transport_management.view_bulk_mission_wizard_form
+msgid "Bulk Mission Creation"
+msgstr "Création de missions en masse"
+
+#. module: transport_management
+#: model:ir.model,name:transport_management.model_bulk_mission_wizard
+msgid "Bulk Mission Creation Wizard"
+msgstr "Assistant de création de missions en masse"
+
+#. module: transport_management
+#: model:ir.model,name:transport_management.model_bulk_mission_preview
+msgid "Bulk Mission Preview"
+msgstr "Aperçu de la mission en masse"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__fuel_type__cng
+msgid "CNG (Compressed Natural Gas)"
+msgstr "GNC (Gaz naturel comprimé)"
+
+#. module: transport_management
+#: model:ir.ui.menu,name:transport_management.menu_route_cache_stats
+msgid "Cache Statistics"
+msgstr "Statistiques du cache"
+
+#. module: transport_management
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_mission__distance_calculation_method__cached
+msgid "Cached Route"
+msgstr "Itinéraire en cache"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_destination__estimated_arrival_time
+msgid "Calculated arrival time based on route and previous stops"
+msgstr "Heure d'arrivée calculée en fonction de l'itinéraire et des arrêts précédents"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model_terms:ir.ui.view,arch_db:transport_management.view_bulk_mission_wizard_form
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_form
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+#, python-format
+msgid "Cancel"
+msgstr "Annuler"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_mission__state__cancelled
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__state__cancelled
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_kanban
+#, python-format
+msgid "Cancelled"
+msgstr "Annulé"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Capacity"
+msgstr "Capacité"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Capacity Exceeded"
+msgstr "Capacité dépassée"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Capacity Progression"
+msgstr "Progression de la capacité"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Capacity Status"
+msgstr "Statut de la capacité"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Capacity Utilization"
+msgstr "Utilisation de la capacité"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Cargo Dimensions (meters)"
+msgstr "Dimensions de chargement (mètres)"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__cargo_height
+msgid "Cargo Height (m)"
+msgstr "Hauteur de chargement (m)"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__cargo_length
+msgid "Cargo Length (m)"
+msgstr "Longueur de chargement (m)"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Cargo Specifications"
+msgstr "Spécifications de chargement"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__cargo_volume
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Cargo Volume (m³)"
+msgstr "Volume de chargement (m³)"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__cargo_width
+msgid "Cargo Width (m)"
+msgstr "Largeur de chargement (m)"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__cargo_height
+msgid "Cargo area height in meters"
+msgstr "Hauteur de la zone de chargement en mètres"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__cargo_length
+msgid "Cargo area length in meters"
+msgstr "Longueur de la zone de chargement en mètres"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__cargo_width
+msgid "Cargo area width in meters"
+msgstr "Largeur de la zone de chargement en mètres"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__category
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+msgid "Category"
+msgstr "Catégorie"
+
+#. module: transport_management
+#: model:ir.actions.server,name:transport_management.action_route_cache_cleanup
+#: model:ir.ui.menu,name:transport_management.menu_route_cache_cleanup
+msgid "Cleanup Old Routes"
+msgstr "Nettoyer les anciens itinéraires"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Clear All"
+msgstr "Tout effacer"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Click \"Generate JSON\" to log all data"
+msgstr "Cliquez sur \"Générer JSON\" pour enregistrer toutes les données"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Click markers to delete destinations"
+msgstr "Cliquez sur les marqueurs pour supprimer des destinations"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Click on map to add sources"
+msgstr "Cliquez sur la carte pour ajouter des sources"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Click on map to set source"
+msgstr "Cliquez sur la carte pour définir la source"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Click on the map to add sources."
+msgstr "Cliquez sur la carte pour ajouter des sources."
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Click on the map to set a source."
+msgstr "Cliquez sur la carte pour définir une source."
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_team__color
+msgid "Color Index"
+msgstr "Index de couleur"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__company_id
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__company_id
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__company_id
+msgid "Company"
+msgstr "Société"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__ownership_type__owned
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_kanban
+msgid "Company Owned"
+msgstr "Propriété de l'entreprise"
+
+#. module: truck_maintenance
+#: model:ir.actions.act_window,name:truck_maintenance.action_truck_vehicle_owned
+msgid "Company Trucks"
+msgstr "Camions de l'entreprise"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Complete"
+msgstr "Terminé"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_route_cache__osrm_response
+msgid "Complete OSRM API response for debugging"
+msgstr "Réponse complète de l'API OSRM pour le débogage"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__is_completed
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_kanban
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_search
+#, python-format
+msgid "Completed"
+msgstr "Terminé"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__completion_date
+msgid "Completion Date"
+msgstr "Date d'achèvement"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Compliance & Documentation"
+msgstr "Conformité & Documentation"
+
+#. module: transport_management
+#: model:ir.ui.menu,name:transport_management.menu_transport_config
+msgid "Configuration"
+msgstr "Configuration"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_form
+#, python-format
+msgid "Confirm"
+msgstr "Confirmer"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Confirm Truck"
+msgstr "Confirmer le camion"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_mission__state__confirmed
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_kanban
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_search
+#, python-format
+msgid "Confirmed"
+msgstr "Confirmé"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Confirmed (dashed)"
+msgstr "Confirmé (pointillé)"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Confirmed:"
+msgstr "Confirmé :"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_destination_form
+msgid "Contact Information"
+msgstr "Informations de contact"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__contact_name
+msgid "Contact Name"
+msgstr "Nom du contact"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__contact_phone
+msgid "Contact Phone"
+msgstr "Téléphone du contact"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__maintenance_type__corrective
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_kanban
+msgid "Corrective"
+msgstr "Corrective"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Cost Breakdown"
+msgstr "Répartition des coûts"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Cost Estimation"
+msgstr "Estimation des coûts"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_cost_parameters_form
+msgid "Cost Parameter Set Name"
+msgstr "Nom du jeu de paramètres de coût"
+
+#. module: transport_management
+#: model:ir.actions.act_window,name:transport_management.action_transport_cost_parameters
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__cost_parameters_id
+#: model:ir.ui.menu,name:transport_management.menu_cost_parameters
+msgid "Cost Parameters"
+msgstr "Paramètres de coût"
+
+#. module: transport_management
+#: model_terms:ir.actions.act_window,help:transport_management.action_transport_cost_parameters
+msgid ""
+"Cost parameters define the pricing structure for transport missions,\n"
+"                including fuel costs, driver rates, and other operational expenses."
+msgstr ""
+"Les paramètres de coût définissent la structure tarifaire des missions de "
+"transport, y compris les coûts de carburant, les taux des chauffeurs et "
+"autres dépenses opérationnelles."
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__cost_per_hour
+msgid "Cost per Hour"
+msgstr "Coût par heure"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__cost_per_km
+#, python-format
+msgid "Cost per KM"
+msgstr "Coût par KM"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_cost_parameters__cost_per_hour
+msgid "Cost per hour of mission duration"
+msgstr "Coût par heure de durée de mission"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_bulk_mission_wizard_form
+msgid "Create All Missions"
+msgstr "Créer toutes les missions"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Create Missions"
+msgstr "Créer des missions"
+
+#. module: truck_maintenance
+#: model_terms:ir.actions.act_window,help:truck_maintenance.action_truck_maintenance_requests
+msgid "Create a truck maintenance request!"
+msgstr "Créez une demande de maintenance de camion !"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__create_confirmed
+msgid "Create as Confirmed"
+msgstr "Créer comme confirmé"
+
+#. module: truck_maintenance
+#: model_terms:ir.actions.act_window,help:truck_maintenance.action_truck_maintenance_teams
+msgid "Create maintenance teams!"
+msgstr "Créez des équipes de maintenance !"
+
+#. module: transport_management
+#: model_terms:ir.actions.act_window,help:transport_management.action_transport_cost_parameters
+msgid "Create your first cost parameter set!"
+msgstr "Créez votre premier jeu de paramètres de coût !"
+
+#. module: transport_management
+#: model_terms:ir.actions.act_window,help:transport_management.action_transport_mission
+msgid "Create your first transport mission!"
+msgstr "Créez votre première mission de transport !"
+
+#. module: truck_maintenance
+#: model_terms:ir.actions.act_window,help:truck_maintenance.action_truck_vehicle
+msgid "Create your first truck!"
+msgstr "Créez votre premier camion !"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache__created_date
+#: model_terms:ir.ui.view,arch_db:transport_management.view_route_cache_search
+msgid "Created Date"
+msgstr "Date de création"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "Created Mission"
+msgstr "Mission créée"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "Created Missions"
+msgstr "Missions créées"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_preview__create_uid
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__create_uid
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__create_uid
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__create_uid
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__create_uid
+#: model:ir.model.fields,field_description:transport_management.field_transport_package__create_uid
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache__create_uid
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__create_uid
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_team__create_uid
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__create_uid
+msgid "Created by"
+msgstr "Créé par"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_preview__create_date
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__create_date
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__create_date
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__create_date
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__create_date
+#: model:ir.model.fields,field_description:transport_management.field_transport_package__create_date
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache__create_date
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__create_date
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_team__create_date
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__create_date
+msgid "Created on"
+msgstr "Créé le"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__maintenance_status__critical
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_kanban
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Critical"
+msgstr "Critique"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__currency_id
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__currency_id
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__currency_id
+msgid "Currency"
+msgstr "Devise"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Current Estimated Value"
+msgstr "Valeur estimée actuelle"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__current_value
+msgid "Current Value"
+msgstr "Valeur actuelle"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_cost_parameters__fuel_price_per_liter
+msgid "Current fuel price per liter"
+msgstr "Prix actuel du carburant par litre"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__odometer
+msgid "Current odometer reading"
+msgstr "Lecture actuelle de l'odomètre"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,help:truck_maintenance.field_truck_maintenance_request__odometer_reading
+msgid "Current odometer reading when maintenance is requested"
+msgstr "Lecture actuelle de l'odomètre lors de la demande de maintenance"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__daf
+msgid "DAF"
+msgstr "DAF"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "DH"
+msgstr "DH"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__rental_cost_per_day
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Daily Rental Cost"
+msgstr "Coût de location journalier"
+
+#. module: truck_maintenance
+#: model:ir.ui.menu,name:truck_maintenance.menu_maintenance_dashboard
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__mission_date
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_search
+#, python-format
+msgid "Date"
+msgstr "Date"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__driver_id
+msgid "Default Driver"
+msgstr "Chauffeur par défaut"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__priority
+msgid "Default Priority"
+msgstr "Priorité par défaut"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__vehicle_id
+msgid "Default Vehicle"
+msgstr "Véhicule par défaut"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Deliver"
+msgstr "Livrer"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_tree
+msgid "Deliveries"
+msgstr "Livraisons"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_destination__mission_type__delivery
+#, python-format
+msgid "Delivery"
+msgstr "Livraison"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Delivery Destination"
+msgstr "Destination de livraison"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__delivery_count
+msgid "Delivery Destinations"
+msgstr "Destinations de livraison"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Delivery Mission"
+msgstr "Mission de livraison"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Delivery Source"
+msgstr "Source de livraison"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Depot"
+msgstr "Dépôt"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid ""
+"Describe any special equipment, modifications, or additional notes about "
+"this truck..."
+msgstr ""
+"Décrivez tout équipement spécial, modifications ou notes "
+"supplémentaires concernant ce camion..."
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Describe the maintenance issue or work to be performed..."
+msgstr "Décrivez le problème de maintenance ou le travail à effectuer..."
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Describe work performed..."
+msgstr "Décrivez le travail effectué..."
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__description
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Description"
+msgstr "Description"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_package__destination_id
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_destination_form
+msgid "Destination"
+msgstr "Destination"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__location
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_destination_form
+msgid "Destination Address"
+msgstr "Adresse de destination"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_destination_form
+msgid "Destination Details"
+msgstr "Détails de la destination"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__destination_progress
+msgid "Destination Progress"
+msgstr "Progression de la destination"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Destination Status"
+msgstr "Statut de la destination"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_preview__destination_count
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__destination_ids
+#: model_terms:ir.ui.view,arch_db:transport_management.view_bulk_mission_preview_tree
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_destination_tree
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_form
+#, python-format
+msgid "Destinations"
+msgstr "Destinations"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__fuel_type__diesel
+msgid "Diesel"
+msgstr "Diesel"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_package_form
+msgid "Dimensions (cm)"
+msgstr "Dimensions (cm)"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Discard"
+msgstr "Annuler"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_preview__display_name
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__display_name
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__display_name
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__display_name
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__display_name
+#: model:ir.model.fields,field_description:transport_management.field_transport_package__display_name
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache__display_name
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__display_name
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_team__display_name
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__display_name
+msgid "Display Name"
+msgstr "Nom d'affichage"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Distance"
+msgstr "Distance"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__distance_calculation_method
+msgid "Distance Calculation Method"
+msgstr "Méthode de calcul de la distance"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__distance_cost
+msgid "Distance Cost"
+msgstr "Coût de la distance"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/transport_mission.py:0
+#, python-format
+msgid "Distance Recalculation Complete"
+msgstr "Recalcul de la distance terminé"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/transport_mission.py:0
+#, python-format
+msgid "Distance Updated"
+msgstr "Distance mise à jour"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/transport_mission.py:0
+#, python-format
+msgid "Distance updated from %.2f km to %.2f km using %s"
+msgstr "Distance mise à jour de %.2f km à %.2f km en utilisant %s"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_mission__state__done
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__state__done
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+#, python-format
+msgid "Done"
+msgstr "Terminé"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_mission__state__draft
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__state__draft
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_kanban
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+#, python-format
+msgid "Draft"
+msgstr "Brouillon"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Drag markers to adjust positions"
+msgstr "Faites glisser les marqueurs pour ajuster les positions"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_preview__driver
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__driver_id
+#: model_terms:ir.ui.view,arch_db:transport_management.view_bulk_mission_preview_tree
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_search
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+#, python-format
+msgid "Driver"
+msgstr "Chauffeur"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__driver_cost
+#, python-format
+msgid "Driver Cost"
+msgstr "Coût du chauffeur"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__driver_cost_per_hour
+msgid "Driver Cost per Hour"
+msgstr "Coût chauffeur par heure"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_cost_parameters_form
+msgid "Driver Costs"
+msgstr "Coûts du chauffeur"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_cost_parameters__driver_cost_per_hour
+msgid "Driver hourly rate including benefits"
+msgstr "Taux horaire du chauffeur, avantages compris"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Duration"
+msgstr "Durée"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__earliest_delivery
+msgid "Earliest Delivery"
+msgstr "Première livraison"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Edit destination details"
+msgstr "Modifier les détails de la destination"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Efficiency:"
+msgstr "Efficacité :"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__fuel_type__electric
+msgid "Electric"
+msgstr "Électrique"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__category__electrical
+msgid "Electrical"
+msgstr "Électrique"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__maintenance_type__emergency
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_kanban
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+msgid "Emergency"
+msgstr "Urgence"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__category__engine
+msgid "Engine"
+msgstr "Moteur"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Engine & Performance"
+msgstr "Moteur et performances"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__engine_power
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Engine Power (HP)"
+msgstr "Puissance moteur (CV)"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Engine Specifications"
+msgstr "Spécifications du moteur"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Enter source name"
+msgstr "Entrez le nom de la source"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Enter starting weight"
+msgstr "Entrez le poids de départ"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Equipped with Crane"
+msgstr "Équipé d'une grue"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_tree
+msgid "Est. Duration (min)"
+msgstr "Durée estimée (min)"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Est:"
+msgstr "Est :"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__estimated_arrival_time
+msgid "Estimated Arrival Time"
+msgstr "Heure d'arrivée estimée"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__estimated_cost
+msgid "Estimated Cost"
+msgstr "Coût estimé"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__estimated_departure_time
+msgid "Estimated Departure Time"
+msgstr "Heure de départ estimée"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__estimated_duration_minutes
+msgid "Estimated Duration (min)"
+msgstr "Durée estimée (min)"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Estimated Time"
+msgstr "Heure estimée"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_destination__estimated_departure_time
+msgid "Estimated departure time after service"
+msgstr "Heure de départ estimée après le service"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_mission__total_distance_km
+msgid "Estimated total travel distance for the mission."
+msgstr "Distance totale estimée du trajet pour la mission."
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_mission__estimated_duration_minutes
+msgid "Estimated total travel time for the mission in minutes."
+msgstr "Temps total estimé du trajet pour la mission en minutes."
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Expected Arrival"
+msgstr "Arrivée prévue"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__expected_arrival_time
+msgid "Expected Arrival Time"
+msgstr "Heure d'arrivée prévue"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__expected_departure_time
+msgid "Expected Departure Time"
+msgstr "Heure de départ prévue"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Factory"
+msgstr "Usine"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "Failed to create any missions from AI results."
+msgstr "Échec de la création de missions à partir des résultats de l'IA."
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "Failed to create mission: %s"
+msgstr "Échec de la création de la mission : %s"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "Failed to create missions: %s"
+msgstr "Échec de la création des missions : %s"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_route_cache_search
+msgid "Fallback Routes"
+msgstr "Itinéraires de repli"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Financial Information"
+msgstr "Informations financières"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Fit to View"
+msgstr "Ajuster à la vue"
+
+#. module: transport_management
+#: model:ir.actions.server,name:transport_management.action_fix_all_distances
+msgid "Fix All Mission Distances"
+msgstr "Corriger toutes les distances de mission"
+
+#. module: transport_management
+#: model:ir.ui.menu,name:transport_management.menu_fix_distances
+msgid "Fix Mission Distances"
+msgstr "Corriger les distances de mission"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_cost_parameters__base_mission_cost
+msgid "Fixed cost per mission regardless of distance"
+msgstr "Coût fixe par mission quelle que soit la distance"
+
+#. module: truck_maintenance
+#: model:ir.actions.act_window,name:truck_maintenance.action_truck_fleet_dashboard
+msgid "Fleet Dashboard"
+msgstr "Tableau de bord de la flotte"
+
+#. module: truck_maintenance
+#: model:ir.ui.menu,name:truck_maintenance.menu_truck_fleet
+msgid "Fleet Management"
+msgstr "Gestion de flotte"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__message_follower_ids
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__message_follower_ids
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__message_follower_ids
+msgid "Followers"
+msgstr "Abonnés"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__message_partner_ids
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__message_partner_ids
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Abonnés (Partenaires)"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,help:transport_management.field_transport_mission__activity_type_icon
+#: model:ir.model.fields,help:truck_maintenance.field_truck_maintenance_request__activity_type_icon
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Icône Font awesome ex. fa-tasks"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__freightliner
+msgid "Freightliner"
+msgstr "Freightliner"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_route_cache_search
+msgid "Frequently Used"
+msgstr "Fréquemment utilisé"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_cost_parameters_form
+msgid "Fuel & Driver"
+msgstr "Carburant & Chauffeur"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__fuel_consumption
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Fuel Consumption (L/100km)"
+msgstr "Consommation de carburant (L/100km)"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__fuel_cost
+#, python-format
+msgid "Fuel Cost"
+msgstr "Coût du carburant"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_cost_parameters_form
+msgid "Fuel Costs"
+msgstr "Coûts de carburant"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__fuel_price_per_liter
+msgid "Fuel Price per Liter"
+msgstr "Prix du carburant par litre"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__fuel_capacity
+msgid "Fuel Tank Capacity (L)"
+msgstr "Capacité du réservoir (L)"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Fuel Tank Capacity (Liters)"
+msgstr "Capacité du réservoir de carburant (litres)"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__fuel_type
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Fuel Type"
+msgstr "Type de carburant"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Fuel Used"
+msgstr "Carburant utilisé"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache__osrm_response
+msgid "Full OSRM Response"
+msgstr "Réponse OSRM complète"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__fuso
+msgid "Fuso"
+msgstr "Fuso"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__has_gps
+msgid "GPS Tracking"
+msgstr "Suivi GPS"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "GPS Tracking System"
+msgstr "Système de suivi GPS"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__gross_vehicle_weight
+msgid "GVW (kg)"
+msgstr "PTAC (kg)"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_cost_parameters_form
+msgid "General Settings"
+msgstr "Paramètres généraux"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Generate JSON"
+msgstr "Générer JSON"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__maintenance_status__good
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_kanban
+msgid "Good"
+msgstr "Bon"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Good Condition"
+msgstr "Bon état"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Gross Vehicle Weight (kg)"
+msgstr "Poids total en charge (kg)"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__gross_vehicle_weight
+msgid "Gross Vehicle Weight in kg"
+msgstr "Poids total en charge en kg"
+
+#. modules: transport_management, truck_maintenance
+#: model_terms:ir.ui.view,arch_db:transport_management.view_route_cache_search
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_search
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Group By"
+msgstr "Regrouper par"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__has_crane
+msgid "Has Crane"
+msgstr "Avec grue"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__has_message
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__has_message
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__has_message
+msgid "Has Message"
+msgstr "A un message"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__has_tailgate
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Has Tailgate Lift"
+msgstr "Avec hayon élévateur"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__has_time_constraints
+msgid "Has Time Constraints"
+msgstr "A des contraintes de temps"
+
+#. module: transport_management
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_mission__distance_calculation_method__haversine
+msgid "Haversine (Straight Line)"
+msgstr "Haversine (Ligne droite)"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_package__height
+msgid "Height (cm)"
+msgstr "Hauteur (cm)"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Height (m)"
+msgstr "Hauteur (m)"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields.selection,name:transport_management.selection__bulk_mission_wizard__priority__2
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_mission__priority__2
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__priority__3
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_kanban
+#, python-format
+msgid "High"
+msgstr "Élevée"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+msgid "High Priority"
+msgstr "Haute priorité"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__hino
+msgid "Hino"
+msgstr "Hino"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__fuel_type__hybrid
+msgid "Hybrid"
+msgstr "Hybride"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__category__hydraulic
+msgid "Hydraulic"
+msgstr "Hydraulique"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_preview__id
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__id
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__id
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__id
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__id
+#: model:ir.model.fields,field_description:transport_management.field_transport_package__id
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache__id
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__id
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_team__id
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__id
+msgid "ID"
+msgstr "ID"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__activity_exception_icon
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__activity_exception_icon
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__activity_exception_icon
+msgid "Icon"
+msgstr "Icône"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,help:transport_management.field_transport_mission__activity_exception_icon
+#: model:ir.model.fields,help:truck_maintenance.field_truck_maintenance_request__activity_exception_icon
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Icône pour indiquer une activité d'exception."
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,help:transport_management.field_transport_mission__message_needaction
+#: model:ir.model.fields,help:truck_maintenance.field_truck_maintenance_request__message_needaction
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Si coché, les nouveaux messages requièrent votre attention."
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,help:transport_management.field_transport_mission__message_has_error
+#: model:ir.model.fields,help:transport_management.field_transport_mission__message_has_sms_error
+#: model:ir.model.fields,help:truck_maintenance.field_truck_maintenance_request__message_has_error
+#: model:ir.model.fields,help:truck_maintenance.field_truck_maintenance_request__message_has_sms_error
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__message_has_error
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Si coché, certains messages ont une erreur de livraison."
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/test_overview_map.xml:0
+#, python-format
+msgid "If you can see this, the client action registration is working!"
+msgstr "Si vous pouvez voir ceci, l'enregistrement de l'action client fonctionne !"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Important Expiry Dates"
+msgstr "Dates d'expiration importantes"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_mission__state__in_progress
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__state__in_progress
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_kanban
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_search
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+#, python-format
+msgid "In Progress"
+msgstr "En cours"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "In Progress (solid)"
+msgstr "En cours (solide)"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "In Progress:"
+msgstr "En cours :"
+
+#. module: transport_management
+#: model:ir.model,name:transport_management.model_transport_package
+msgid "Individual Package"
+msgstr "Colis individuel"
+
+#. module: transport_management
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_destination__package_type__individual
+msgid "Individual Packages"
+msgstr "Colis individuels"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_mission__starting_weight
+msgid "Initial weight of the truck before loading any cargo"
+msgstr "Poids initial du camion avant le chargement de toute cargaison"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__maintenance_type__inspection
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_kanban
+msgid "Inspection"
+msgstr "Inspection"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__insurance_cost_per_mission
+msgid "Insurance Cost per Mission"
+msgstr "Coût de l'assurance par mission"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Insurance Expires"
+msgstr "Expiration de l'assurance"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__insurance_expiry
+msgid "Insurance Expiry"
+msgstr "Expiration de l'assurance"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_cost_parameters__insurance_cost_per_mission
+msgid "Insurance cost allocated per mission"
+msgstr "Coût d'assurance alloué par mission"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__notes
+msgid "Internal Notes"
+msgstr "Notes internes"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__international
+msgid "International"
+msgstr "International"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "Invalid AI optimization data format."
+msgstr "Format de données d'optimisation IA invalide."
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "Invalid location data format."
+msgstr "Format de données de localisation invalide."
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "Invalid location data structure."
+msgstr "Structure de données de localisation invalide."
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache__is_fallback
+msgid "Is Fallback Route"
+msgstr "Est un itinéraire de repli"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__message_is_follower
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__message_is_follower
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__message_is_follower
+msgid "Is Follower"
+msgstr "Est abonné"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__isuzu
+msgid "Isuzu"
+msgstr "Isuzu"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__iveco
+msgid "Iveco"
+msgstr "Iveco"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_route_cache__waypoints
+msgid "JSON array of [lat, lng] coordinates"
+msgstr "Tableau JSON de coordonnées [lat, lng]"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__km_until_service
+msgid "KM Until Service"
+msgstr "KM avant le service"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__kenworth
+msgid "Kenworth"
+msgstr "Kenworth"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__fuel_type__lng
+msgid "LNG (Liquefied Natural Gas)"
+msgstr "GNL (Gaz naturel liquéfié)"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__labor_hours
+msgid "Labor Hours"
+msgstr "Heures de main-d'œuvre"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__last_maintenance_date
+msgid "Last Maintenance"
+msgstr "Dernière maintenance"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_preview____last_update
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard____last_update
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters____last_update
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination____last_update
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission____last_update
+#: model:ir.model.fields,field_description:transport_management.field_transport_package____last_update
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache____last_update
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request____last_update
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_team____last_update
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle____last_update
+msgid "Last Modified on"
+msgstr "Dernière modification le"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__last_service_odometer
+msgid "Last Service Odometer (km)"
+msgstr "Dernier kilométrage de service (km)"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_preview__write_uid
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__write_uid
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__write_uid
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__write_uid
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__write_uid
+#: model:ir.model.fields,field_description:transport_management.field_transport_package__write_uid
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache__write_uid
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__write_uid
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_team__write_uid
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__write_uid
+msgid "Last Updated by"
+msgstr "Dernière mise à jour par"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_preview__write_date
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__write_date
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__write_date
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__write_date
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__write_date
+#: model:ir.model.fields,field_description:transport_management.field_transport_package__write_date
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache__write_date
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__write_date
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_team__write_date
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__write_date
+msgid "Last Updated on"
+msgstr "Dernière mise à jour le"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache__last_used
+msgid "Last Used"
+msgstr "Dernière utilisation"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Last updated:"
+msgstr "Dernière mise à jour :"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__latest_delivery
+msgid "Latest Delivery"
+msgstr "Dernière livraison"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__latitude
+#, python-format
+msgid "Latitude"
+msgstr "Latitude"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_package__length
+msgid "Length (cm)"
+msgstr "Longueur (cm)"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Length (m)"
+msgstr "Longueur (m)"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__license_plate
+msgid "License Plate"
+msgstr "Plaque d'immatriculation"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "License Plate Number"
+msgstr "Numéro de plaque d'immatriculation"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "List parts needed for this maintenance..."
+msgstr "Liste des pièces nécessaires pour cette maintenance..."
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Load:"
+msgstr "Charge :"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Loading missions..."
+msgstr "Chargement des missions..."
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Loading..."
+msgstr "Chargement..."
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Location"
+msgstr "Localisation"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "Location Preview"
+msgstr "Aperçu de la localisation"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__longitude
+#, python-format
+msgid "Longitude"
+msgstr "Longitude"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields.selection,name:transport_management.selection__bulk_mission_wizard__priority__0
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_mission__priority__0
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__priority__1
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_kanban
+#, python-format
+msgid "Low"
+msgstr "Faible"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__man
+msgid "MAN"
+msgstr "MAN"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__mack
+msgid "Mack"
+msgstr "Mack"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__message_main_attachment_id
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__message_main_attachment_id
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "Pièce jointe principale"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: model:ir.ui.menu,name:truck_maintenance.menu_truck_maintenance
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_cost_parameters_form
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+#, python-format
+msgid "Maintenance"
+msgstr "Maintenance"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Maintenance & Tolls"
+msgstr "Maintenance et péages"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__maintenance_cost_per_km
+msgid "Maintenance Cost per KM"
+msgstr "Coût de maintenance par KM"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__maintenance_count
+msgid "Maintenance Count"
+msgstr "Nombre de maintenances"
+
+#. module: truck_maintenance
+#: model:ir.actions.act_window,name:truck_maintenance.action_truck_maintenance_dashboard
+msgid "Maintenance Dashboard"
+msgstr "Tableau de bord de maintenance"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Maintenance Request Subject"
+msgstr "Objet de la demande de maintenance"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__maintenance_request_ids
+#: model:ir.ui.menu,name:truck_maintenance.menu_maintenance_requests
+msgid "Maintenance Requests"
+msgstr "Demandes de maintenance"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_calendar
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Maintenance Schedule"
+msgstr "Programme de maintenance"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__maintenance_status
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Maintenance Status"
+msgstr "Statut de maintenance"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__maintenance_team_id
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_team_form
+msgid "Maintenance Team"
+msgstr "Équipe de maintenance"
+
+#. module: truck_maintenance
+#: model:ir.actions.act_window,name:truck_maintenance.action_truck_maintenance_teams
+msgid "Maintenance Teams"
+msgstr "Équipes de maintenance"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__maintenance_type
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+msgid "Maintenance Type"
+msgstr "Type de maintenance"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_cost_parameters__maintenance_cost_per_km
+msgid "Maintenance cost per kilometer"
+msgstr "Coût de maintenance par kilomètre"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Mark Done"
+msgstr "Marquer comme fait"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_destination_form
+msgid "Mark as Completed"
+msgstr "Marquer comme terminé"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_form
+msgid "Mark as Done"
+msgstr "Marquer comme fait"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_destination__priority_delivery
+msgid "Mark if this delivery has high priority"
+msgstr "Cochez si cette livraison est hautement prioritaire"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__max_payload
+msgid "Max Payload (kg)"
+msgstr "Charge utile maximale (kg)"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Max Volume:"
+msgstr "Volume max :"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Max Weight:"
+msgstr "Poids max :"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Maximum Payload (kg)"
+msgstr "Charge utile maximale (kg)"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__cargo_volume
+msgid "Maximum cargo volume in cubic meters"
+msgstr "Volume maximal de chargement en mètres cubes"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__max_payload
+msgid "Maximum weight capacity in kilograms"
+msgstr "Capacité de poids maximale en kilogrammes"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__mercedes
+msgid "Mercedes-Benz"
+msgstr "Mercedes-Benz"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__message_has_error
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__message_has_error
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__message_has_error
+msgid "Message Delivery error"
+msgstr "Erreur de livraison du message"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__message_ids
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__message_ids
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__message_ids
+msgid "Messages"
+msgstr "Messages"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_mission__distance_calculation_method
+msgid "Method used to calculate the total distance"
+msgstr "Méthode utilisée pour calculer la distance totale"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__mission_id
+msgid "Mission"
+msgstr "Mission"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_preview__mission_number
+#: model_terms:ir.ui.view,arch_db:transport_management.view_bulk_mission_preview_tree
+msgid "Mission #"
+msgstr "Mission n°"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Mission Configuration"
+msgstr "Configuration de la mission"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_cost_parameters_form
+msgid "Mission Costs"
+msgstr "Coûts de la mission"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__mission_date
+#, python-format
+msgid "Mission Date"
+msgstr "Date de la mission"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Mission Details"
+msgstr "Détails de la mission"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Mission Information"
+msgstr "Informations de la mission"
+
+#. module: transport_management
+#. odoo-javascript
+#. odoo-python
+#: code:addons/transport_management/models/transport_mission.py:0
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#: model:ir.actions.client,name:transport_management.action_transport_mission_overview_simple
+#, python-format
+msgid "Mission Overview Map"
+msgstr "Carte de l'aperçu des missions"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_bulk_mission_preview_tree
+msgid "Mission Preview"
+msgstr "Aperçu de la mission"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Mission Route Planner"
+msgstr "Planificateur d'itinéraire de mission"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Mission Status"
+msgstr "Statut de la mission"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Mission Summary"
+msgstr "Résumé de la mission"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_wizard__mission_templates
+msgid "Mission Templates"
+msgstr "Modèles de mission"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Mission Type"
+msgstr "Type de mission"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__mission_type_summary
+msgid "Mission Type Summary"
+msgstr "Résumé du type de mission"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Mission Types"
+msgstr "Types de mission"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "Mission not found in AI results."
+msgstr "Mission non trouvée dans les résultats de l'IA."
+
+#. module: transport_management
+#: model:ir.ui.menu,name:transport_management.menu_transport_mission_action
+msgid "Missions"
+msgstr "Missions"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__model_name
+msgid "Model"
+msgstr "Modèle"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Model Name"
+msgstr "Nom du modèle"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__my_activity_date_deadline
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__my_activity_date_deadline
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Date limite de mon activité"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+msgid "My Requests"
+msgstr "Mes demandes"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_destination__contact_name
+msgid "Name of the contact person at destination"
+msgstr "Nom de la personne de contact à destination"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__maintenance_status__needs_attention
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_kanban
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Needs Attention"
+msgstr "Nécessite une attention"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-python
+#: code:addons/transport_management/models/transport_mission.py:0
+#: code:addons/transport_management/models/transport_mission.py:0
+#: code:addons/transport_management/models/transport_mission.py:0
+#: code:addons/transport_management/models/transport_mission.py:0
+#: code:addons/truck_maintenance/models/maintenance_request.py:0
+#: code:addons/truck_maintenance/models/maintenance_request.py:0
+#: code:addons/truck_maintenance/models/maintenance_request.py:0
+#, python-format
+msgid "New"
+msgstr "Nouveau"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__activity_date_deadline
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__activity_date_deadline
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Date limite de la prochaine activité"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__activity_summary
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__activity_summary
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__activity_summary
+msgid "Next Activity Summary"
+msgstr "Résumé de la prochaine activité"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__activity_type_id
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__activity_type_id
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__activity_type_id
+msgid "Next Activity Type"
+msgstr "Type de prochaine activité"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__inspection_due
+msgid "Next Inspection Due"
+msgstr "Prochaine inspection due"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__next_maintenance_due
+msgid "Next Maintenance Due"
+msgstr "Prochaine maintenance due"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Next Technical Inspection"
+msgstr "Prochaine inspection technique"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "No AI optimization results found. Please run AI optimization first."
+msgstr "Aucun résultat d'optimisation AI trouvé. Veuillez d'abord exécuter l'optimisation AI."
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "No Active Missions"
+msgstr "Pas de missions actives"
+
+#. module: truck_maintenance
+#: model_terms:ir.actions.act_window,help:truck_maintenance.action_truck_vehicle_owned
+msgid "No company-owned trucks yet!"
+msgstr "Aucun camion appartenant à l'entreprise pour l'instant !"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "No destinations configured"
+msgstr "Aucune destination configurée"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "No destinations selected yet."
+msgstr "Aucune destination sélectionnée pour l'instant."
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "No drivers found"
+msgstr "Aucun chauffeur trouvé"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "No locations found. Please add sources and destinations first."
+msgstr "Aucun emplacement trouvé. Veuillez d'abord ajouter des sources et des destinations."
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "No locations selected."
+msgstr "Aucun emplacement sélectionné."
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "No locations selected. Please add sources and destinations first."
+msgstr "Aucun emplacement sélectionné. Veuillez d'abord ajouter des sources et des destinations."
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid ""
+"No locations selected. Please add sources and destinations using the map "
+"interface first."
+msgstr ""
+"Aucun emplacement sélectionné. Veuillez d'abord ajouter des sources et des "
+"destinations en utilisant l'interface cartographique."
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "No mission templates defined. Please add at least one mission."
+msgstr "Aucun modèle de mission défini. Veuillez ajouter au moins une mission."
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/bulk_mission_wizard.py:0
+#, python-format
+msgid "No missions found in AI results."
+msgstr "Aucune mission trouvée dans les résultats de l'IA."
+
+#. module: truck_maintenance
+#: model_terms:ir.actions.act_window,help:truck_maintenance.action_truck_vehicle_rented
+msgid "No rented trucks yet!"
+msgstr "Aucun camion loué pour l'instant !"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "No sources selected yet."
+msgstr "Aucune source sélectionnée pour l'instant."
+
+#. module: truck_maintenance
+#: model_terms:ir.actions.act_window,help:truck_maintenance.action_truck_vehicle_subcontracted
+msgid "No subcontracted trucks yet!"
+msgstr "Aucun camion sous-traité pour l'instant !"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "No vehicles found"
+msgstr "Aucun véhicule trouvé"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields.selection,name:transport_management.selection__bulk_mission_wizard__priority__1
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_mission__priority__1
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__priority__2
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_kanban
+#, python-format
+msgid "Normal"
+msgstr "Normale"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Not Available"
+msgstr "Non disponible"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Notes"
+msgstr "Notes"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__message_needaction_counter
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__message_needaction_counter
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Nombre d'actions"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__message_has_error_counter
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__message_has_error_counter
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__message_has_error_counter
+msgid "Number of errors"
+msgstr "Nombre d'erreurs"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,help:transport_management.field_transport_mission__message_needaction_counter
+#: model:ir.model.fields,help:truck_maintenance.field_truck_maintenance_request__message_needaction_counter
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Nombre de messages nécessitant une action"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,help:transport_management.field_transport_mission__message_has_error_counter
+#: model:ir.model.fields,help:truck_maintenance.field_truck_maintenance_request__message_has_error_counter
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Nombre de messages avec erreur de livraison"
+
+#. module: transport_management
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_mission__distance_calculation_method__osrm
+msgid "OSRM (Road Distance)"
+msgstr "OSRM (Distance routière)"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_route_cache_form
+msgid "OSRM Response"
+msgstr "Réponse OSRM"
+
+#. module: transport_management
+#: model:ir.model,name:transport_management.model_transport_route_cache
+msgid "OSRM Route Cache"
+msgstr "Cache d'itinéraire OSRM"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_route_cache_search
+msgid "OSRM Routes"
+msgstr "Itinéraires OSRM"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_route_cache__route_geometry
+msgid "OSRM polyline geometry"
+msgstr "Géométrie de polyligne OSRM"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Odometer"
+msgstr "Odomètre"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__odometer
+msgid "Odometer (km)"
+msgstr "Odomètre (km)"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__odometer_reading
+msgid "Odometer Reading (km)"
+msgstr "Lecture de l'odomètre (km)"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+msgid "Open Requests"
+msgstr "Demandes ouvertes"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Operational Notes"
+msgstr "Notes opérationnelles"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_form
+#, python-format
+msgid "Optimize Route"
+msgstr "Optimiser l'itinéraire"
+
+#. module: truck_maintenance
+#: model_terms:ir.actions.act_window,help:truck_maintenance.action_truck_maintenance_teams
+msgid ""
+"Organize your maintenance staff into teams to efficiently handle truck "
+"maintenance requests."
+msgstr ""
+"Organisez votre personnel de maintenance en équipes pour gérer efficacement "
+"les demandes de maintenance des camions."
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__category__other
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__other
+msgid "Other"
+msgstr "Autre"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__other_costs
+msgid "Other Costs"
+msgstr "Autres coûts"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__overall_height
+msgid "Overall Height (m)"
+msgstr "Hauteur totale (m)"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__overall_length
+msgid "Overall Length (m)"
+msgstr "Longueur totale (m)"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Overall Truck Dimensions (meters)"
+msgstr "Dimensions totales du camion (mètres)"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__overall_width
+msgid "Overall Width (m)"
+msgstr "Largeur totale (m)"
+
+#. module: transport_management
+#: model:ir.ui.menu,name:transport_management.menu_transport_mission_overview
+msgid "Overview Map"
+msgstr "Carte d'aperçu"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Ownership & Rental"
+msgstr "Propriété et location"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__ownership_type
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Ownership Type"
+msgstr "Type de propriété"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_package_form
+msgid "Package"
+msgstr "Colis"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_package__name
+msgid "Package Description"
+msgstr "Description du colis"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_package_form
+msgid "Package Details"
+msgstr "Détails du colis"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__package_type
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_destination_form
+#, python-format
+msgid "Package Type"
+msgstr "Type de colis"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__package_ids
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_destination_form
+msgid "Packages"
+msgstr "Colis"
+
+#. module: transport_management
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_destination__package_type__pallet
+msgid "Pallet"
+msgstr "Palette"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__pallet_height
+msgid "Pallet Height (cm)"
+msgstr "Hauteur de la palette (cm)"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_destination_form
+msgid "Pallet Information"
+msgstr "Informations sur la palette"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__pallet_length
+msgid "Pallet Length (cm)"
+msgstr "Longueur de la palette (cm)"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__pallet_weight
+msgid "Pallet Weight (kg)"
+msgstr "Poids de la palette (kg)"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__pallet_width
+msgid "Pallet Width (cm)"
+msgstr "Largeur de la palette (cm)"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__name
+msgid "Parameter Set Name"
+msgstr "Nom du jeu de paramètres"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Parts & Work"
+msgstr "Pièces et travail"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__parts_needed
+msgid "Parts Needed"
+msgstr "Pièces nécessaires"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_tree
+msgid "Payload (kg)"
+msgstr "Charge utile (kg)"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Pending"
+msgstr "En attente"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__peterbilt
+msgid "Peterbilt"
+msgstr "Peterbilt"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__fuel_type__petrol
+msgid "Petrol"
+msgstr "Essence"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_destination__contact_phone
+msgid "Phone number of the contact person"
+msgstr "Numéro de téléphone de la personne de contact"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields.selection,name:transport_management.selection__transport_destination__mission_type__pickup
+#, python-format
+msgid "Pickup"
+msgstr "Ramassage"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Pickup Destination"
+msgstr "Destination de ramassage"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__pickup_count
+msgid "Pickup Destinations"
+msgstr "Destinations de ramassage"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Pickup Mission"
+msgstr "Mission de ramassage"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Pickup Source"
+msgstr "Source de ramassage"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_tree
+msgid "Pickups"
+msgstr "Ramassages"
+
+#. module: transport_management
+#: model_terms:ir.actions.act_window,help:transport_management.action_transport_mission
+msgid "Plan and manage your transport operations efficiently:"
+msgstr "Planifiez et gérez vos opérations de transport efficacement :"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__maintenance_type__preventive
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_kanban
+msgid "Preventive"
+msgstr "Préventive"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_preview__preview_data
+msgid "Preview Data"
+msgstr "Données d'aperçu"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__priority
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__priority
+#, python-format
+msgid "Priority"
+msgstr "Priorité"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__priority_delivery
+msgid "Priority Delivery"
+msgstr "Livraison prioritaire"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Progress"
+msgstr "Progression"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_mission__destination_progress
+msgid "Progress of completed destinations for this mission."
+msgstr "Progression des destinations terminées pour cette mission."
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Progress:"
+msgstr "Progression :"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__purchase_price
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Purchase Price"
+msgstr "Prix d'achat"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__name
+msgid "Reference"
+msgstr "Référence"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Refresh"
+msgstr "Actualiser"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#, python-format
+msgid "Refresh Data"
+msgstr "Actualiser les données"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__has_refrigeration
+msgid "Refrigerated"
+msgstr "Réfrigéré"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Refrigerated Unit"
+msgstr "Unité réfrigérée"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Registration Expires"
+msgstr "Expiration de l'immatriculation"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__registration_expiry
+msgid "Registration Expiry"
+msgstr "Expiration de l'immatriculation"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Remaining:"
+msgstr "Restant :"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Remove destination"
+msgstr "Supprimer la destination"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.xml:0
+#, python-format
+msgid "Remove source"
+msgstr "Supprimer la source"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__renault
+msgid "Renault Trucks"
+msgstr "Renault Trucks"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__rental_end_date
+msgid "Rental End Date"
+msgstr "Date de fin de location"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Rental Expiring Soon"
+msgstr "Location expirant bientôt"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Rental Information"
+msgstr "Informations de location"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__rental_start_date
+msgid "Rental Start Date"
+msgstr "Date de début de location"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__rental_status
+msgid "Rental Status"
+msgstr "Statut de la location"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Rental Summary"
+msgstr "Résumé de la location"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__ownership_type__rented
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_kanban
+msgid "Rented"
+msgstr "Loué"
+
+#. module: truck_maintenance
+#: model:ir.actions.act_window,name:truck_maintenance.action_truck_vehicle_rented
+msgid "Rented Trucks"
+msgstr "Camions loués"
+
+#. module: truck_maintenance
+#: model:ir.ui.menu,name:truck_maintenance.menu_truck_reports
+msgid "Reports"
+msgstr "Rapports"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Request"
+msgstr "Demande"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__request_date
+msgid "Request Date"
+msgstr "Date de la demande"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Request Information"
+msgstr "Informations de la demande"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__name
+msgid "Request Subject"
+msgstr "Objet de la demande"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__state__requested
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+msgid "Requested"
+msgstr "Demandé"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__requires_signature
+msgid "Requires Signature"
+msgstr "Requiert une signature"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Requires signature"
+msgstr "Requiert une signature"
+
+#. modules: transport_management, truck_maintenance
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_form
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Reset to Draft"
+msgstr "Réinitialiser en brouillon"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__activity_user_id
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__activity_user_id
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__activity_user_id
+msgid "Responsible User"
+msgstr "Utilisateur responsable"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Right-click on map to add destinations"
+msgstr "Clic droit sur la carte pour ajouter des destinations"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#, python-format
+msgid "Right-click on the map to add destinations."
+msgstr "Cliquez avec le bouton droit sur la carte pour ajouter des destinations."
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Right-click to add destinations"
+msgstr "Clic droit pour ajouter des destinations"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__truck_type__rigid
+msgid "Rigid Truck"
+msgstr "Camion rigide"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Rigid Trucks"
+msgstr "Camions rigides"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_cost_parameters_form
+msgid "Road Costs"
+msgstr "Coûts routiers"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__truck_type__road_train
+msgid "Road Train"
+msgstr "Train routier"
+
+#. module: transport_management
+#: model:ir.actions.act_window,name:transport_management.action_route_cache
+#: model:ir.ui.menu,name:transport_management.menu_route_cache
+#: model_terms:ir.ui.view,arch_db:transport_management.view_route_cache_search
+#: model_terms:ir.ui.view,arch_db:transport_management.view_route_cache_tree
+msgid "Route Cache"
+msgstr "Cache d'itinéraire"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_route_cache_form
+msgid "Route Cache Entry"
+msgstr "Entrée du cache d'itinéraire"
+
+#. module: transport_management
+#: model:ir.actions.server,name:transport_management.action_route_cache_stats
+msgid "Route Cache Statistics"
+msgstr "Statistiques du cache d'itinéraire"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache__route_distance
+msgid "Route Distance (km)"
+msgstr "Distance de l'itinéraire (km)"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache__route_duration
+msgid "Route Duration (min)"
+msgstr "Durée de l'itinéraire (min)"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache__route_geometry
+#: model_terms:ir.ui.view,arch_db:transport_management.view_route_cache_form
+msgid "Route Geometry"
+msgstr "Géométrie de l'itinéraire"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_route_cache__route_hash
+msgid "Route Hash"
+msgstr "Hachage de l'itinéraire"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Route Summary"
+msgstr "Résumé de l'itinéraire"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_route_cache_search
+msgid "Route Type"
+msgstr "Type d'itinéraire"
+
+#. module: transport_management
+#: model:ir.model.constraint,message:transport_management.constraint_transport_route_cache_unique_route_hash
+msgid "Route hash must be unique"
+msgstr "Le hachage de l'itinéraire doit être unique"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__message_has_sms_error
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__message_has_sms_error
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Erreur de livraison SMS"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model_terms:ir.ui.view,arch_db:transport_management.view_bulk_mission_wizard_form
+#, python-format
+msgid "Save"
+msgstr "Enregistrer"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Save & Close"
+msgstr "Enregistrer et fermer"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#, python-format
+msgid "Save This Mission"
+msgstr "Enregistrer cette mission"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__brand__scania
+msgid "Scania"
+msgstr "Scania"
+
+#. module: truck_maintenance
+#: model_terms:ir.actions.act_window,help:truck_maintenance.action_truck_maintenance_requests
+msgid ""
+"Schedule maintenance for your truck fleet. Track repairs, \n"
+"                inspections, and preventive maintenance to keep your trucks running smoothly."
+msgstr ""
+"Planifiez la maintenance de votre flotte de camions. Suivez les réparations, "
+"les inspections et la maintenance préventive pour que vos camions "
+"fonctionnent sans problème."
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__scheduled_date
+msgid "Scheduled Date"
+msgstr "Date prévue"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Search drivers..."
+msgstr "Rechercher des chauffeurs..."
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Search vehicles..."
+msgstr "Rechercher des véhicules..."
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Select Brand"
+msgstr "Sélectionner la marque"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+#, python-format
+msgid "Select Driver"
+msgstr "Sélectionner un chauffeur"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#, python-format
+msgid "Selected Destinations"
+msgstr "Destinations sélectionnées"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#, python-format
+msgid "Selected Sources"
+msgstr "Sources sélectionnées"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#, python-format
+msgid "Selection Mode"
+msgstr "Mode de sélection"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__sequence
+#: model:ir.model.fields,field_description:transport_management.field_transport_package__sequence
+msgid "Sequence"
+msgstr "Séquence"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Service Duration (min)"
+msgstr "Durée du service (min)"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__service_duration
+msgid "Service Duration (minutes)"
+msgstr "Durée du service (minutes)"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__service_interval_km
+msgid "Service Interval (km)"
+msgstr "Intervalle de service (km)"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Signature Required"
+msgstr "Signature requise"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_form
+msgid "Source Information"
+msgstr "Informations sur la source"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__source_latitude
+msgid "Source Latitude"
+msgstr "Latitude de la source"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_preview__source
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__source_location
+#: model_terms:ir.ui.view,arch_db:transport_management.view_bulk_mission_preview_tree
+#, python-format
+msgid "Source Location"
+msgstr "Localisation de la source"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__source_longitude
+msgid "Source Longitude"
+msgstr "Longitude de la source"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#, python-format
+msgid "Source Name"
+msgstr "Nom de la source"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#, python-format
+msgid "Source Type"
+msgstr "Type de source"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#, python-format
+msgid "Sources"
+msgstr "Sources"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__special_equipment
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Special Equipment"
+msgstr "Équipement spécial"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__special_instructions
+msgid "Special Instructions"
+msgstr "Instructions spéciales"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Start"
+msgstr "Démarrer"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_form
+msgid "Start Mission"
+msgstr "Démarrer la mission"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Start Work"
+msgstr "Commencer le travail"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Start:"
+msgstr "Début :"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__starting_weight
+#, python-format
+msgid "Starting Weight (kg)"
+msgstr "Poids de départ (kg)"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__state
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__state
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_search
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+#, python-format
+msgid "Status"
+msgstr "Statut"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Status & Assignment"
+msgstr "Statut et affectation"
+
+#. modules: transport_management, truck_maintenance
+#: model:ir.model.fields,help:transport_management.field_transport_mission__activity_state
+#: model:ir.model.fields,help:truck_maintenance.field_truck_maintenance_request__activity_state
+#: model:ir.model.fields,help:truck_maintenance.field_truck_vehicle__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Statut basé sur les activités\n"
+"En retard : la date d'échéance est déjà passée\n"
+"Aujourd'hui : la date d'activité est aujourd'hui\n"
+"Planifié : activités futures."
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Stop"
+msgstr "Arrêter"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_vehicle__ownership_type__subcontracted
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_kanban
+msgid "Subcontracted"
+msgstr "Sous-traité"
+
+#. module: truck_maintenance
+#: model:ir.actions.act_window,name:truck_maintenance.action_truck_vehicle_subcontracted
+msgid "Subcontracted Trucks"
+msgstr "Camions sous-traités"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__subcontractor_id
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Subcontractor"
+msgstr "Sous-traitant"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Subcontractor Company"
+msgstr "Entreprise sous-traitante"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Subcontractor Information"
+msgstr "Informations sur le sous-traitant"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/transport_mission.py:0
+#, python-format
+msgid "Success"
+msgstr "Succès"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#, python-format
+msgid "Supplier"
+msgstr "Fournisseur"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Target:"
+msgstr "Cible :"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+msgid "Team"
+msgstr "Équipe"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_team__leader_id
+msgid "Team Leader"
+msgstr "Chef d'équipe"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_team__member_ids
+msgid "Team Members"
+msgstr "Membres de l'équipe"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_team__name
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_team_form
+msgid "Team Name"
+msgstr "Nom de l'équipe"
+
+#. module: truck_maintenance
+#: model:ir.ui.menu,name:truck_maintenance.menu_maintenance_teams
+msgid "Teams"
+msgstr "Équipes"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+msgid "Technician"
+msgstr "Technicien"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/test_overview_map.xml:0
+#, python-format
+msgid "Test Overview Map"
+msgstr "Carte d'aperçu de test"
+
+#. module: transport_management
+#. odoo-python
+#: code:addons/transport_management/models/transport_mission.py:0
+#, python-format
+msgid "The route has been optimized successfully."
+msgstr "L'itinéraire a été optimisé avec succès."
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "There are currently no confirmed or in-progress missions to display."
+msgstr "Il n'y a actuellement aucune mission confirmée ou en cours à afficher."
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+msgid "This Week"
+msgstr "Cette semaine"
+
+#. module: truck_maintenance
+#: model_terms:ir.actions.act_window,help:truck_maintenance.action_truck_fleet_dashboard
+msgid ""
+"This dashboard shows an overview of your entire truck fleet organized by ownership type.\n"
+"                Use the filters to view specific categories of trucks."
+msgstr ""
+"Ce tableau de bord présente un aperçu de l'ensemble de votre flotte de camions "
+"organisée par type de propriété. Utilisez les filtres pour afficher des "
+"catégories spécifiques de camions."
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_destination_form
+msgid "Time & Service"
+msgstr "Heure et service"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_tree
+msgid "Time Constraints"
+msgstr "Contraintes de temps"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__time_cost
+msgid "Time Cost"
+msgstr "Coût du temps"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_destination__service_duration
+msgid "Time needed to complete service at this destination"
+msgstr "Temps nécessaire pour effectuer le service à cette destination"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__category__tires
+msgid "Tires"
+msgstr "Pneus"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#, python-format
+msgid "Toggle View"
+msgstr "Basculer la vue"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_cost_parameters__toll_cost_per_km
+msgid "Toll Cost per KM"
+msgstr "Coût de péage par KM"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#, python-format
+msgid "Tolls"
+msgstr "Péages"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_tree
+#, python-format
+msgid "Total Cost"
+msgstr "Coût total"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#: model_terms:ir.ui.view,arch_db:transport_management.view_route_cache_tree
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_tree
+#, python-format
+msgid "Total Distance"
+msgstr "Distance totale"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__total_distance_km
+msgid "Total Distance (km)"
+msgstr "Distance totale (km)"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_route_cache_tree
+msgid "Total Duration"
+msgstr "Durée totale"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Total Height (m)"
+msgstr "Hauteur totale (m)"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Total Length (m)"
+msgstr "Longueur totale (m)"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__total_cost
+msgid "Total Mission Cost"
+msgstr "Coût total de la mission"
+
+#. module: transport_management
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__total_packages
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_tree
+msgid "Total Packages"
+msgstr "Nombre total de colis"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_route_cache_tree
+msgid "Total Uses"
+msgstr "Utilisations totales"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "Total Volume"
+msgstr "Volume total"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__total_volume
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__total_volume
+#, python-format
+msgid "Total Volume (m³)"
+msgstr "Volume total (m³)"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_tree
+#, python-format
+msgid "Total Weight"
+msgstr "Poids total"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model:ir.model.fields,field_description:transport_management.field_bulk_mission_preview__total_weight
+#: model:ir.model.fields,field_description:transport_management.field_transport_destination__total_weight
+#: model:ir.model.fields,field_description:transport_management.field_transport_mission__total_weight
+#: model_terms:ir.ui.view,arch_db:transport_management.view_bulk_mission_preview_tree
+#, python-format
+msgid "Total Weight (kg)"
+msgstr "Poids total (kg)"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "Total Width (m)"
+msgstr "Largeur totale (m)"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_route_cache__route_distance
+msgid "Total route distance in kilometers"
+msgstr "Distance totale de l'itinéraire en kilomètres"
+
+#. module: transport_management
+#: model:ir.model.fields,help:transport_management.field_transport_route_cache__route_duration
+msgid "Total route duration in minutes"
+msgstr "Durée totale de l'itinéraire en minutes"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "Total:"
+msgstr "Total :"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_destination_form
+msgid "Totals"
+msgstr "Totaux"
+
+#. module: truck_maintenance
+#: model:ir.model.fields.selection,name:truck_maintenance.selection__truck_maintenance_request__category__transmission
+msgid "Transmission"
+msgstr "Transmission"
+
+#. module: transport_management
+#: model:ir.ui.menu,name:transport_management.menu_transport_root
+msgid "Transport"
+msgstr "Transport"
+
+#. module: transport_management
+#: model:ir.model,name:transport_management.model_transport_cost_parameters
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_cost_parameters_form
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_cost_parameters_tree
+msgid "Transport Cost Parameters"
+msgstr "Paramètres de coût de transport"
+
+#. module: transport_management
+#: model:ir.model,name:transport_management.model_transport_mission
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_form
+msgid "Transport Mission"
+msgstr "Mission de transport"
+
+#. module: transport_management
+#: model:ir.model,name:transport_management.model_transport_destination
+msgid "Transport Mission Destination"
+msgstr "Destination de la mission de transport"
+
+#. module: transport_management
+#: model:ir.actions.act_window,name:transport_management.action_transport_mission
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_search
+msgid "Transport Missions"
+msgstr "Missions de transport"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_maintenance_request__truck_id
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_search
+msgid "Truck"
+msgstr "Camion"
+
+#. module: truck_maintenance
+#: model:ir.actions.act_window,name:truck_maintenance.action_truck_fleet_dashboard
+msgid "Truck Fleet"
+msgstr "Flotte de camions"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__name
+msgid "Truck ID"
+msgstr "ID du camion"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__image
+msgid "Truck Image"
+msgstr "Image du camion"
+
+#. module: truck_maintenance
+#: model:ir.ui.menu,name:truck_maintenance.menu_truck_maintenance_root
+msgid "Truck Maintenance"
+msgstr "Maintenance des camions"
+
+#. module: truck_maintenance
+#: model:ir.model,name:truck_maintenance.model_truck_maintenance_request
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_form
+msgid "Truck Maintenance Request"
+msgstr "Demande de maintenance de camion"
+
+#. module: truck_maintenance
+#: model:ir.actions.act_window,name:truck_maintenance.action_truck_maintenance_requests
+msgid "Truck Maintenance Requests"
+msgstr "Demandes de maintenance de camions"
+
+#. module: truck_maintenance
+#: model:ir.model,name:truck_maintenance.model_truck_maintenance_team
+msgid "Truck Maintenance Team"
+msgstr "Équipe de maintenance des camions"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__truck_type
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "Truck Type"
+msgstr "Type de camion"
+
+#. module: truck_maintenance
+#: model:ir.model.fields,field_description:truck_maintenance.field_truck_vehicle__year
+msgid "Year"
+msgstr "Année"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#, python-format
+msgid "destinations"
+msgstr "destinations"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_kanban
+msgid "hours"
+msgstr "heures"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "ies"
+msgstr "ies"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_kanban
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_kanban
+#, python-format
+msgid "kg"
+msgstr "kg"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "kg,"
+msgstr "kg,"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_kanban
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_maintenance_request_kanban
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+#, python-format
+msgid "km"
+msgstr "km"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "min"
+msgstr "min"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "min)"
+msgstr "min)"
+
+#. modules: transport_management, truck_maintenance
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_kanban
+#, python-format
+msgid "m³"
+msgstr "m³"
+
+#. module: transport_management
+#: model_terms:ir.ui.view,arch_db:transport_management.view_transport_mission_kanban
+msgid "packages"
+msgstr "colis"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_map_planner_widget.xml:0
+#, python-format
+msgid "packages/pallet"
+msgstr "colis/palette"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "stops"
+msgstr "arrêts"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "✅ Confirmed"
+msgstr "✅ Confirmé"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "🏢 Company Owned"
+msgstr "🏢 Propriété de l'entreprise"
+
+#. module: truck_maintenance
+#: model:ir.ui.menu,name:truck_maintenance.menu_truck_vehicle_owned
+msgid "🏢 Company Trucks"
+msgstr "🏢 Camions de l'entreprise"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_form
+msgid "🏢 Ownership Information"
+msgstr "🏢 Informations sur la propriété"
+
+#. module: truck_maintenance
+#: model:ir.ui.menu,name:truck_maintenance.menu_truck_vehicle_rented
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "📅 Rented Trucks"
+msgstr "📅 Camions loués"
+
+#. module: truck_maintenance
+#: model:ir.ui.menu,name:truck_maintenance.menu_truck_dashboard
+msgid "📊 Fleet Dashboard"
+msgstr "📊 Tableau de bord de la flotte"
+
+#. module: transport_management
+#: model_terms:ir.actions.act_window,help:transport_management.action_transport_mission
+msgid "📊 Track costs, distances, and performance"
+msgstr "📊 Suivre les coûts, les distances et les performances"
+
+#. module: transport_management
+#: model_terms:ir.actions.act_window,help:transport_management.action_transport_mission
+msgid "📋 Create individual missions with the mission planner"
+msgstr "📋 Créez des missions individuelles avec le planificateur de missions"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "📤 Pickup"
+msgstr "📤 Ramassage"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "📥 Delivery"
+msgstr "📥 Livraison"
+
+#. module: transport_management
+#: model_terms:ir.actions.act_window,help:transport_management.action_transport_mission
+msgid "🗺️ Visualize routes and optimize delivery sequences"
+msgstr "🗺️ Visualisez les itinéraires et optimisez les séquences de livraison"
+
+#. module: transport_management
+#: model_terms:ir.actions.act_window,help:transport_management.action_transport_mission
+msgid "🚀 Try AI Bulk Planner"
+msgstr "🚀 Essayez le planificateur de masse IA"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/mission_overview_map.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#: code:addons/transport_management/static/src/xml/mission_overview_simple.xml:0
+#, python-format
+msgid "🚛 In Progress"
+msgstr "🚛 En cours"
+
+#. module: transport_management
+#. odoo-javascript
+#: code:addons/transport_management/static/src/xml/bulk_mission_widget.0
+#, python-format
+msgid "🤖 AI Optimize"
+msgstr "🤖 Optimisation IA"
+
+#. module: transport_management
+#: model_terms:ir.actions.act_window,help:transport_management.action_transport_mission
+msgid "🤖 Use AI Bulk Planner for multiple missions at once"
+msgstr "🤖 Utilisez le planificateur de masse IA pour plusieurs missions à la fois"
+
+#. module: truck_maintenance
+#: model_terms:ir.ui.view,arch_db:truck_maintenance.view_truck_vehicle_search
+msgid "🤝 Subcontracted"
+msgstr "🤝 Sous-traité"
+
+#. module: truck_maintenance
+#: model:ir.ui.menu,name:truck_maintenance.menu_truck_vehicle_subcontracted
+msgid "🤝 Subcontracted Trucks"
+msgstr "🤝 Camions sous-traités"
+```

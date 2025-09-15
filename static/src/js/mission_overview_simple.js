@@ -516,6 +516,36 @@ export class MissionOverviewSimple extends Component {
         });
     }
 
+    createClusterPopup(missions) {
+        const confirmedCount = missions.filter(m => m.state === 'confirmed').length;
+        const inProgressCount = missions.filter(m => m.state === 'in_progress').length;
+
+        const listItems = missions
+            .map(m => {
+                const hasPickup = m.destinations.some(d => d.mission_type === 'pickup');
+                const hasDelivery = m.destinations.some(d => d.mission_type === 'delivery');
+                const types = `${hasPickup ? '📤' : ''}${hasDelivery ? '📥' : ''}`;
+                const state = m.state === 'in_progress' ? '🚛 In Progress' : '✅ Confirmed';
+                return `<li style="margin: 6px 0;">${types} <strong>${m.name}</strong> <span style="color:#666;">(${state})</span></li>`;
+            })
+            .join('');
+
+        return `
+            <div style="min-width: 220px;">
+                <h5 style="margin: 0 0 6px;">${missions.length} missions</h5>
+                <div style="font-size: 0.85rem; color: #555; margin-bottom: 8px;">
+                    ✅ ${confirmedCount} • 🚛 ${inProgressCount}
+                </div>
+                <ul style="padding-left: 18px; margin: 0; max-height: 180px; overflow-y: auto;">
+                    ${listItems}
+                </ul>
+                <div style="margin-top: 8px; font-size: 0.8rem; color:#777;">
+                    Zoom in or select a mission from the side panel to focus.
+                </div>
+            </div>
+        `;
+    }
+
     createMissionPopup(mission) {
         const progressBar = mission.destination_progress || 0;
         const stateLabel = {

@@ -28,6 +28,7 @@
         'views/transport_mission_views.xml',
         'views/transport_cost_parameters_views.xml',
         'views/route_cache_views.xml',
+        'views/transport_kpi_graph_views.xml',
         'views/menus.xml',
     ],
     'demo': [
@@ -55,6 +56,8 @@
             # Overview Map Files
             'transport_management/static/src/js/mission_overview_simple.js',
             'transport_management/static/src/xml/mission_overview_simple.xml',
+            'transport_management/static/src/js/mission_kpi_dashboard.js',
+            'transport_management/static/src/xml/mission_kpi_dashboard.xml',
         ],
     },
     'external_dependencies': {

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="transport_management.MissionKpiDashboard" owl="1">
+        <div class="tm-kpi-container">
+            <div class="tm-kpi-header">
+                <div class="tm-header-left">
+                    <h2><i class="fa fa-tachometer me-2"/>Transport KPIs</h2>
+                    <div class="tm-kpi-subtitle">Operational performance at a glance</div>
+                </div>
+                <div class="tm-header-right">
+                    <div class="tm-controls">
+                        <select class="form-select form-select-sm" t-model="state.group_by" t-on-change="refreshData">
+                            <option value="day">Daily</option>
+                            <option value="week">Weekly</option>
+                            <option value="month">Monthly</option>
+                        </select>
+                        <button type="button" class="btn btn-outline-primary btn-sm" t-on-click="refreshData" t-att-disabled="state.loading">
+                            <i class="fa fa-refresh" t-att-class="{'fa-spin': state.loading}"/>
+                            <span t-if="!state.loading">Refresh</span>
+                            <span t-else="">Loading...</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" t-on-click="openOverviewMap">
+                            <i class="fa fa-map me-1"/>Overview Map
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <t t-if="state.kpi">
+                <div class="tm-kpi-cards">
+                    <div class="tm-kpi-card">
+                        <div class="tm-kpi-title">Total Missions</div>
+                        <div class="tm-kpi-value" t-esc="state.kpi.counts.total_missions"/>
+                        <div class="tm-kpi-hint">Active: <t t-esc="state.kpi.counts.active_missions"/> • Done: <t t-esc="state.kpi.counts.completed_missions"/></div>
+                    </div>
+                    <div class="tm-kpi-card">
+                        <div class="tm-kpi-title">On-Time Rate</div>
+                        <div class="tm-kpi-value"><t t-esc="state.kpi.sla.on_time_rate"/>%</div>
+                        <div class="tm-kpi-hint"><t t-esc="state.kpi.sla.with_time_requirements"/> time-constrained stops</div>
+                    </div>
+                    <div class="tm-kpi-card">
+                        <div class="tm-kpi-title">Avg Distance</div>
+                        <div class="tm-kpi-value"><t t-esc="state.kpi.distance.avg_km"/> km</div>
+                        <div class="tm-kpi-hint">Total: <t t-esc="state.kpi.distance.total_km"/> km</div>
+                    </div>
+                    <div class="tm-kpi-card">
+                        <div class="tm-kpi-title">Avg Cost</div>
+                        <div class="tm-kpi-value"><t t-esc="state.kpi.costs.avg_cost"/></div>
+                        <div class="tm-kpi-hint">Total: <t t-esc="state.kpi.costs.total_cost"/></div>
+                    </div>
+                    <div class="tm-kpi-card">
+                        <div class="tm-kpi-title">Avg Stops/Mission</div>
+                        <div class="tm-kpi-value" t-esc="state.kpi.payload.avg_stops_per_mission"/>
+                        <div class="tm-kpi-hint">Packages: <t t-esc="state.kpi.payload.total_packages"/></div>
+                    </div>
+                </div>
+
+                <div class="tm-kpi-grid">
+                    <div class="tm-kpi-panel">
+                        <div class="tm-panel-title"><i class="fa fa-bar-chart me-2"/>Missions Over Time</div>
+                        <div class="tm-chart" t-ref="missionsChart"></div>
+                    </div>
+                    <div class="tm-kpi-panel">
+                        <div class="tm-panel-title"><i class="fa fa-road me-2"/>Distance Over Time</div>
+                        <div class="tm-chart" t-ref="distanceChart"></div>
+                    </div>
+                    <div class="tm-kpi-panel">
+                        <div class="tm-panel-title"><i class="fa fa-money me-2"/>Cost Over Time</div>
+                        <div class="tm-chart" t-ref="costChart"></div>
+                    </div>
+                    <div class="tm-kpi-panel">
+                        <div class="tm-panel-title"><i class="fa fa-clock-o me-2"/>On-Time Delivery %</div>
+                        <div class="tm-chart" t-ref="onTimeChart"></div>
+                    </div>
+                </div>
+
+                <div class="tm-kpi-breakdown">
+                    <div class="tm-kpi-panel">
+                        <div class="tm-panel-title"><i class="fa fa-pie-chart me-2"/>Cost Breakdown</div>
+                        <div class="tm-breakdown">
+                            <t t-set="b" t-value="state.kpi.costs.breakdown"/>
+                            <div class="tm-breakdown-row"><span>Base</span><span t-esc="b.base_cost"/></div>
+                            <div class="tm-breakdown-row"><span>Distance</span><span t-esc="b.distance_cost"/></div>
+                            <div class="tm-breakdown-row"><span>Time</span><span t-esc="b.time_cost"/></div>
+                            <div class="tm-breakdown-row"><span>Fuel</span><span t-esc="b.fuel_cost"/></div>
+                            <div class="tm-breakdown-row"><span>Driver</span><span t-esc="b.driver_cost"/></div>
+                            <div class="tm-breakdown-row"><span>Vehicle</span><span t-esc="b.vehicle_cost"/></div>
+                            <div class="tm-breakdown-row"><span>Other</span><span t-esc="b.other_costs"/></div>
+                        </div>
+                    </div>
+                    <div class="tm-kpi-panel">
+                        <div class="tm-panel-title"><i class="fa fa-exchange me-2"/>State Distribution</div>
+                        <div class="tm-breakdown">
+                            <t t-set="s" t-value="state.kpi.counts.by_state"/>
+                            <div class="tm-breakdown-row"><span>Draft</span><span t-esc="s.draft"/></div>
+                            <div class="tm-breakdown-row"><span>Confirmed</span><span t-esc="s.confirmed"/></div>
+                            <div class="tm-breakdown-row"><span>In Progress</span><span t-esc="s.in_progress"/></div>
+                            <div class="tm-breakdown-row"><span>Done</span><span t-esc="s.done"/></div>
+                            <div class="tm-breakdown-row"><span>Cancelled</span><span t-esc="s.cancelled"/></div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+            <div class="tm-loading-overlay" t-if="state.loading">
+                <div class="tm-loading-content">
+                    <i class="fa fa-spinner fa-spin fa-2x"/>
+                    <p>Loading KPIs...</p>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>
+
+

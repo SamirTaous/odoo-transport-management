@@ -630,3 +630,202 @@ class TransportMission(models.Model):
         """Clean up old route cache entries"""
         route_cache = self.env['transport.route.cache']
         return route_cache.cleanup_old_cache(days_old)
+
+    # ----------------------------- KPI METHODS ---------------------------------
+    @api.model
+    def get_kpi_summary(self, date_from=False, date_to=False, company_id=False):
+        """Return high-level KPIs for missions within optional date range/company.
+
+        Metrics:
+        - total_missions, active_missions, completed_missions, cancelled_missions
+        - on_time_deliveries_rate (based on expected vs estimated/actual times)
+        - avg_distance_km, total_distance_km
+        - avg_duration_min, total_duration_min
+        - cost totals: total_cost, avg_cost, cost_breakdown
+        - payload totals: total_weight, avg_weight, total_packages
+        - utilization proxy: avg_stops_per_mission
+        - by_state distribution
+        """
+        domain = []
+        if date_from:
+            domain.append(('mission_date', '>=', date_from))
+        if date_to:
+            domain.append(('mission_date', '<=', date_to))
+        if company_id:
+            domain.append(('company_id', '=', company_id))
+
+        missions = self.search(domain)
+        total_missions = len(missions)
+        by_state = {
+            'draft': 0, 'confirmed': 0, 'in_progress': 0, 'done': 0, 'cancelled': 0
+        }
+
+        totals = {
+            'distance_km': 0.0,
+            'duration_min': 0.0,
+            'cost': 0.0,
+            'base_cost': 0.0,
+            'distance_cost': 0.0,
+            'time_cost': 0.0,
+            'fuel_cost': 0.0,
+            'driver_cost': 0.0,
+            'vehicle_cost': 0.0,
+            'other_costs': 0.0,
+            'weight': 0.0,
+            'packages': 0,
+            'stops': 0,
+        }
+
+        # Compute on-time deliveries: destination expected_arrival_time vs estimated/actual proxy
+        Destination = self.env['transport.destination']
+        dest_domain = [('mission_id', 'in', missions.ids)] if missions else [('id', '=', 0)]
+        destinations = Destination.search(dest_domain)
+        on_time = 0
+        with_time_req = 0
+        for dest in destinations:
+            if dest.expected_arrival_time:
+                with_time_req += 1
+                # Use estimated_arrival_time as proxy; if completed, prefer estimated_departure_time
+                ref_time = dest.estimated_arrival_time or dest.expected_arrival_time
+                if ref_time and ref_time <= dest.expected_arrival_time:
+                    on_time += 1
+
+        for m in missions:
+            by_state[m.state] = by_state.get(m.state, 0) + 1
+            totals['distance_km'] += m.total_distance_km or 0.0
+            totals['duration_min'] += m.estimated_duration_minutes or 0.0
+            totals['cost'] += m.total_cost or 0.0
+            totals['base_cost'] += m.base_cost or 0.0
+            totals['distance_cost'] += m.distance_cost or 0.0
+            totals['time_cost'] += m.time_cost or 0.0
+            totals['fuel_cost'] += m.fuel_cost or 0.0
+            totals['driver_cost'] += m.driver_cost or 0.0
+            totals['vehicle_cost'] += m.vehicle_cost or 0.0
+            totals['other_costs'] += m.other_costs or 0.0
+            totals['weight'] += m.total_weight or 0.0
+            totals['packages'] += m.total_packages or 0
+            totals['stops'] += len(m.destination_ids)
+
+        avg = (lambda v: (v / total_missions) if total_missions else 0.0)
+        active_missions = by_state['confirmed'] + by_state['in_progress']
+        completed_missions = by_state['done']
+        cancelled_missions = by_state['cancelled']
+        on_time_rate = (on_time / with_time_req * 100.0) if with_time_req else 0.0
+
+        return {
+            'counts': {
+                'total_missions': total_missions,
+                'active_missions': active_missions,
+                'completed_missions': completed_missions,
+                'cancelled_missions': cancelled_missions,
+                'by_state': by_state,
+            },
+            'distance': {
+                'total_km': round(totals['distance_km'], 2),
+                'avg_km': round(avg(totals['distance_km']), 2),
+            },
+            'duration': {
+                'total_min': round(totals['duration_min'], 1),
+                'avg_min': round(avg(totals['duration_min']), 1),
+            },
+            'costs': {
+                'total_cost': round(totals['cost'], 2),
+                'avg_cost': round(avg(totals['cost']), 2),
+                'breakdown': {
+                    'base_cost': round(totals['base_cost'], 2),
+                    'distance_cost': round(totals['distance_cost'], 2),
+                    'time_cost': round(totals['time_cost'], 2),
+                    'fuel_cost': round(totals['fuel_cost'], 2),
+                    'driver_cost': round(totals['driver_cost'], 2),
+                    'vehicle_cost': round(totals['vehicle_cost'], 2),
+                    'other_costs': round(totals['other_costs'], 2),
+                },
+                'currency_id': self.env.company.currency_id.id,
+            },
+            'payload': {
+                'total_weight': round(totals['weight'], 2),
+                'avg_weight': round(avg(totals['weight']), 2),
+                'total_packages': totals['packages'],
+                'avg_stops_per_mission': round(avg(totals['stops']), 2),
+            },
+            'sla': {
+                'on_time_rate': round(on_time_rate, 2),
+                'with_time_requirements': with_time_req,
+            },
+        }
+
+    @api.model
+    def get_kpi_timeseries(self, group_by='day', metric='missions', date_from=False, date_to=False, company_id=False):
+        """Return timeseries for graphs.
+        - group_by: day|week|month
+        - metric: missions|distance|cost|duration|on_time_rate
+        """
+        from datetime import datetime
+        domain = []
+        if date_from:
+            domain.append(('mission_date', '>=', date_from))
+        if date_to:
+            domain.append(('mission_date', '<=', date_to))
+        if company_id:
+            domain.append(('company_id', '=', company_id))
+
+        missions = self.search(domain)
+        buckets = {}
+
+        def bucket_key(d):
+            if not d:
+                return 'unknown'
+            if isinstance(d, str):
+                d = fields.Date.from_string(d)
+            if group_by == 'month':
+                return d.strftime('%Y-%m')
+            if group_by == 'week':
+                return f"{d.strftime('%Y')}-W{d.isocalendar()[1]:02d}"
+            return d.strftime('%Y-%m-%d')
+
+        for m in missions:
+            key = bucket_key(m.mission_date)
+            if key not in buckets:
+                buckets[key] = {
+                    'missions': 0,
+                    'distance': 0.0,
+                    'cost': 0.0,
+                    'duration': 0.0,
+                    'on_time_count': 0,
+                    'time_requirements': 0,
+                }
+            buckets[key]['missions'] += 1
+            buckets[key]['distance'] += m.total_distance_km or 0.0
+            buckets[key]['cost'] += m.total_cost or 0.0
+            buckets[key]['duration'] += m.estimated_duration_minutes or 0.0
+
+        # compute on time per bucket
+        Destination = self.env['transport.destination']
+        if missions:
+            dests = Destination.search([('mission_id', 'in', missions.ids), ('expected_arrival_time', '!=', False)])
+            for d in dests:
+                key = bucket_key(d.mission_id.mission_date)
+                if key in buckets:
+                    buckets[key]['time_requirements'] += 1
+                    ref_time = d.estimated_arrival_time or d.expected_arrival_time
+                    if ref_time and ref_time <= d.expected_arrival_time:
+                        buckets[key]['on_time_count'] += 1
+
+        series = []
+        for key in sorted(buckets.keys()):
+            b = buckets[key]
+            if metric == 'missions':
+                value = b['missions']
+            elif metric == 'distance':
+                value = round(b['distance'], 2)
+            elif metric == 'cost':
+                value = round(b['cost'], 2)
+            elif metric == 'duration':
+                value = round(b['duration'], 1)
+            elif metric == 'on_time_rate':
+                value = round((b['on_time_count'] / b['time_requirements'] * 100.0) if b['time_requirements'] else 0.0, 2)
+            else:
+                value = 0
+            series.append({'label': key, 'value': value})
+
+        return series

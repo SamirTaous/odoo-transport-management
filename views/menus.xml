@@ -23,6 +23,29 @@
         action="action_transport_mission_overview_simple"
         sequence="15"/>
 
+    <!-- KPIs Dashboard Menu -->
+    <menuitem
+        id="menu_transport_kpi_dashboard"
+        name="KPIs"
+        parent="menu_transport_root"
+        action="action_transport_mission_kpi_dashboard"
+        sequence="20"/>
+
+    <!-- Graph quick links under Transport root -->
+    <menuitem
+        id="menu_transport_mission_graph_cost"
+        name="Cost Graph"
+        parent="menu_transport_root"
+        action="action_transport_mission_graph_cost"
+        sequence="21"/>
+
+    <menuitem
+        id="menu_transport_mission_graph_distance"
+        name="Distance Graph"
+        parent="menu_transport_root"
+        action="action_transport_mission_graph_distance"
+        sequence="22"/>
+
 
 
     <!-- Configuration Submenu -->
